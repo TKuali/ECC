@@ -126,11 +126,11 @@ gh api repos/{owner}/{repo}/dependabot/alerts --jq '.[].security_advisory.summar
 # シークレットスキャンアラートを確認
 gh api repos/{owner}/{repo}/secret-scanning/alerts --jq '.[].state'
 
-# 安全な依存関係のバンプをレビューして自動マージ
+# 依存関係のバンプをレビュー — マージはユーザー承認が必要（提案のみ、自動マージ禁止）
 gh pr list --label "dependencies" --json number,title
 ```
 
-- 安全な依存関係のバンプをレビューして自動マージする
+- 安全な依存関係のバンプをレビューし、ユーザー承認のためにマージを提案する — 自動マージは禁止
 - クリティカル/高深刻度のアラートは即座にフラグを付ける
 - 新しいDependabotアラートを最低週次で確認する
 

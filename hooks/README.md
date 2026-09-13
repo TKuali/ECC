@@ -19,6 +19,10 @@ User request → Claude picks a tool → PreToolUse hook runs → Tool executes 
 Memory persistence lifecycle definitions live in `hooks/memory-persistence/`.
 The executable hook graph remains `hooks/hooks.json`; the memory persistence directory is the stable contract for SessionStart, PreCompact, observation, activity tracking, and SessionEnd behavior.
 
+Stable hook IDs and descriptions live in `hooks/hooks.metadata.json`, aligned by event and index with `hooks/hooks.json`. Claude Code validates a plugin's `hooks.json` against its own schema and reports any other key (`$schema`, `id`, `description`) as unknown at load time, so `hooks.json` carries only what the harness accepts. ECC's installer, validator, and dashboard merge the sidecar back in through `scripts/lib/hooks-config.js`; `node scripts/ci/validate-hooks.js` fails if the two files drift apart.
+
+Each sidecar entry also carries a `fingerprint` of the matcher entry it describes (matcher plus hook commands), so reordering `hooks.json` without reordering the sidecar, or editing a command without updating the sidecar, is caught rather than silently swapping IDs. When reordering hooks, move the matching sidecar entries first. Then run `node scripts/ci/validate-hooks.js --update-fingerprints` to refresh changed commands and commit both files. The updater rejects known fingerprints at different positions and writes only after validation succeeds.
+
 ## Installing These Hooks Manually
 
 For Claude Code manual installs, do not paste the raw repo `hooks.json` into `~/.claude/settings.json` or copy it directly into `~/.claude/hooks/hooks.json`. The checked-in file is plugin/repo-oriented and is meant to be installed through the ECC installer or loaded as a plugin.
@@ -26,14 +30,18 @@ For Claude Code manual installs, do not paste the raw repo `hooks.json` into `~/
 Use the installer instead so hook commands are rewritten against your actual Claude root:
 
 ```bash
-bash ./install.sh --target claude --modules hooks-runtime
+bash ./install.sh --target claude --modules hooks-runtime --enable-hooks
 ```
 
 ```powershell
-pwsh -File .\install.ps1 --target claude --modules hooks-runtime
+pwsh -File .\install.ps1 --target claude --modules hooks-runtime --enable-hooks
 ```
 
-That installs resolved hooks to `~/.claude/hooks/hooks.json`. On Windows, the Claude config root is `%USERPROFILE%\\.claude`.
+That installs the hook scripts under `~/.claude/` and registers the resolved
+hook entries in `~/.claude/settings.json`. Existing user settings and hook
+entries are preserved, while ECC-owned entries are tracked by stable ID for
+idempotent updates and safe uninstall. On Windows, the Claude config root is
+`%USERPROFILE%\.claude`.
 
 ### PreToolUse Hooks
 
@@ -97,6 +105,9 @@ Remove or comment out the hook entry in `hooks.json`. If installed as a plugin, 
 Use environment variables to control hook behavior without editing `hooks.json`:
 
 ```bash
+# Master switch. Explicit environment values override plugin preferences.
+export ECC_HOOKS_ENABLED=true
+
 # minimal | standard | strict (default: standard)
 export ECC_HOOK_PROFILE=standard
 
@@ -122,10 +133,17 @@ Windows PowerShell:
 [Environment]::SetEnvironmentVariable('ECC_CONTEXT_MONITOR_COST_WARNINGS', 'off', 'User')
 ```
 
-Profiles:
+Claude setup-only value:
+- `off` — disables local ECC hook work through `ecc setup`; it is not a runtime hook profile.
+
+Runtime hook profiles:
 - `minimal` — keep essential lifecycle and safety hooks only.
 - `standard` — default; balanced quality + safety checks.
 - `strict` — enables additional reminders and stricter guardrails.
+
+The Claude plugin exposes the same choices as the personal `hooks_enabled` and
+`hook_profile` settings. Run `ecc setup --mode claude-plugin` to install or
+update the plugin and change those preferences.
 
 ### Writing Your Own Hook
 
