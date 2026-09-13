@@ -37,7 +37,7 @@ Phase 3: Delegate + Verify
 ├─ Spawns claude -p subprocess with violations JSON
 ├─ Routes to model tier based on violation complexity:
 │   ├─ Haiku: formatting, imports, style (E/W/F codes) — 120s timeout
-│   ├─ Sonnet: complexity, refactoring (C901, PLR codes) — 300s timeout
+│   ├─ Sonnet: complexity, refactoring (C901, PLR codes, oxlint complexity) — 300s timeout
 │   └─ Opus: type system, deep reasoning (unresolved-attribute) — 600s timeout
 ├─ Re-runs Phase 1+2 to verify fixes
 └─ Exit 0 if clean, Exit 2 if violations remain (reported to main agent)
@@ -102,7 +102,7 @@ To use Plankton hooks in your own project:
 | Language | Required | Optional |
 |----------|----------|----------|
 | Python | `ruff`, `uv` | `ty` (types), `vulture` (dead code), `bandit` (security) |
-| TypeScript/JS | `biome` | `oxlint`, `semgrep`, `knip` (dead exports) |
+| TypeScript/JS | `biome`; `oxlint` (>= 1.37.0) when using `complexity` | `semgrep`, `knip` (dead exports) |
 | Shell | `shellcheck`, `shfmt` | — |
 | YAML | `yamllint` | — |
 | Markdown | `markdownlint-cli2` | — |
@@ -243,27 +243,35 @@ Track:
 Closes the JS/TS gap in the model-routing table above. Python complexity (ruff C901,
 PLR) already routes to Sonnet. JS/TS had no equivalent rule turned on by default.
 
-### Turn on oxlint's `complexity` rule, Required not Optional
+### Turn on oxlint's `complexity` rule when using it
 
 oxlint's `complexity` rule (source: eslint's `complexity` rule, ported) lives in the
 "restriction" category, which oxlint does not enable by default. It must be turned on
 by hand. Verified against https://oxc.rs/docs/guide/usage/linter/rules/eslint/complexity
-(2026-08-27): default option is `max: 20`.
+(2026-08-27): default option is `max: 20`. The rule is available in oxlint >= 1.37.0.
 
-In the skill's Language-Specific Dependencies table, `oxlint` is listed as Optional for
-TypeScript/JS. For the `complexity` rule specifically, that changes to Required. Add to
-`.oxlintrc.json`:
+The skill's Language-Specific Dependencies table keeps `oxlint` optional for TypeScript/JS
+generally. When adopting the `complexity` rule, use oxlint >= 1.37.0 and treat it as a
+required dependency. Add the rule to the supported oxlint configuration the project already
+uses (`.oxlintrc.json`, `.oxlintrc.jsonc`, `oxlint.config.ts`, or `oxlint.config.mts`). If
+none exists, create one; do not create a second configuration file in the same directory.
+
+Measure the codebase's current worst complexity score before choosing the initial enforced
+ceiling. The template below is intentionally incomplete: replace `<MEASURED_CEILING>` with
+that score, optionally plus a small amount of headroom, before committing the `"error"` gate.
+Oxlint's default of 20 is a long-term target, not a safe universal starting ceiling.
 
 ```json
 {
   "rules": {
-    "complexity": ["error", { "max": 20 }]
+    "complexity": ["error", { "max": "<MEASURED_CEILING>" }]
   }
 }
 ```
 
-20 is oxlint's own default and the starting ceiling. See the ratchet section below for
-how the ceiling actually gets set on a real codebase.
+Replace the placeholder before running oxlint; it is not a valid numeric threshold until the
+repository has been measured. See the ratchet section below for how the ceiling gets set on
+a real codebase.
 
 ### Model-routing row
 
@@ -293,9 +301,10 @@ The technique, as actually run in that PR:
 
 1. Measure the current worst complexity score in the codebase (oxlint reports it when
    the rule fires).
-2. Set the ENFORCED ceiling to that worst score, not to oxlint's own default of 20. Add
-   a couple points of headroom if needed so the initial enable does not fail CI on a
-   score you haven't fixed yet (hunk used 80 against a worst of 78).
+2. Set the ENFORCED ceiling to a value at least as high as that worst score, not to
+   oxlint's own default of 20. Add a small amount of headroom if needed so the initial
+   enable does not fail CI on a score you have not fixed yet (hunk used 80 against a
+   worst of 78).
 3. Commit that as `"error"`, wired into the existing lint CI step. This is a real gate
    from the first commit, not a suggestion.
 4. Never grandfather. The ceiling is global. A function sitting at 40 today is not
@@ -303,10 +312,12 @@ The technique, as actually run in that PR:
    growth, not just today's worst offenders.
 5. Never blanket-suppress. No per-file or per-function disable comments to make a
    violation go away. Fix it or leave it under the ceiling.
-6. Each time a flagged hotspot actually gets refactored below the ceiling, lower the
-   ceiling by hand to lock the improvement in. This is a manual step done as its own
-   commit, not automated. It is how the ceiling moves toward the linter's real default
-   of 20 over time instead of sitting at the codebase's worst score forever.
+6. Each time a flagged hotspot is refactored below the ceiling, re-measure the global
+   maximum across the whole codebase. Lower the ceiling by hand only to a value that
+   remains at least as high as every remaining function's score (plus any deliberate
+   headroom). This is a manual step done as its own commit, not automated. It is how the
+   ceiling moves toward the linter's real default of 20 over time instead of sitting at
+   the codebase's worst score forever.
 
 One caveat, stated plainly: the PR itself went straight from "rule off" to `"error"`
 enforcement in one commit. It did not stage through a report-only or warn-only phase
