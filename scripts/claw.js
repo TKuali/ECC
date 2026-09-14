@@ -95,20 +95,28 @@ function askClaude(systemPrompt, history, userMessage, model) {
   }
   args.push('-p');
 
-  // On Windows the `claude` binary installed via npm is `claude.cmd`/`claude.ps1`,
-  // and Node's spawn() cannot resolve those wrappers via PATH without shell: true.
-  // But shell mode concatenates args *unescaped*, so a multi-line prompt passed as
-  // an arg gets mangled (newlines and the `===` section markers truncate it, and
-  // claude receives an empty prompt). Fix: send the prompt over stdin via `input`
-  // and keep only the short, safe flags (`--model`, `-p`) as args.
-  // 'claude' is a hardcoded literal here (not user input), so shell mode is safe.
-  const result = spawnSync('claude', args, {
+  // SECURITY: never use shell:true — on Windows Node concatenates command+args
+  // unquoted (DEP0190), so a model value like `x & calc &` breaks out.
+  // Validate the model token and spawn without a shell; resolve .cmd shim explicitly.
+  if (model && !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$/.test(model)) {
+    return `[Error: invalid model name]`;
+  }
+  let bin = 'claude';
+  if (process.platform === 'win32') {
+    for (const ext of ['.cmd', '.exe', '.ps1']) {
+      try {
+        const found = require('child_process').spawnSync('where', [`claude${ext}`], { encoding: 'utf8' });
+        if (found.status === 0 && found.stdout.trim()) { bin = found.stdout.trim().split(/\r?\n/)[0]; break; }
+      } catch { /* ignore */ }
+    }
+  }
+  const result = spawnSync(bin, args, {
     input: fullPrompt,
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe'],
     env: { ...process.env, CLAUDECODE: '' },
     timeout: 300000,
-    shell: process.platform === 'win32'
+    shell: false
   });
 
   if (result.error) {
