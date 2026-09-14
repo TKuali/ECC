@@ -41,17 +41,6 @@ log "Mode: $MODE"
 log "Source hooks: $SOURCE_DIR"
 log "Global hooks destination: $DEST_DIR"
 
-if [[ -d "$DEST_DIR" ]]; then
-  log "Backing up existing hooks directory to $BACKUP_DIR"
-  run_or_echo mkdir -p "$BACKUP_DIR"
-  run_or_echo cp -R "$DEST_DIR" "$BACKUP_DIR/hooks"
-fi
-
-run_or_echo mkdir -p "$DEST_DIR"
-run_or_echo cp "$SOURCE_DIR/pre-commit" "$DEST_DIR/pre-commit"
-run_or_echo cp "$SOURCE_DIR/pre-push" "$DEST_DIR/pre-push"
-run_or_echo chmod +x "$DEST_DIR/pre-commit" "$DEST_DIR/pre-push"
-
 if [[ "$MODE" == "apply" ]]; then
   prev_hooks_path="$(git config --global core.hooksPath || true)"
   if [[ -n "$prev_hooks_path" && "$prev_hooks_path" != "$DEST_DIR" ]]; then
@@ -70,6 +59,17 @@ if [[ "$MODE" == "apply" ]]; then
     log "Restore with: git config --global core.hooksPath \"$prev_hooks_path\""
   fi
 fi
+
+if [[ -d "$DEST_DIR" ]]; then
+  log "Backing up existing hooks directory to $BACKUP_DIR"
+  run_or_echo mkdir -p "$BACKUP_DIR"
+  run_or_echo cp -R "$DEST_DIR" "$BACKUP_DIR/hooks"
+fi
+
+run_or_echo mkdir -p "$DEST_DIR"
+run_or_echo cp "$SOURCE_DIR/pre-commit" "$DEST_DIR/pre-commit"
+run_or_echo cp "$SOURCE_DIR/pre-push" "$DEST_DIR/pre-push"
+run_or_echo chmod +x "$DEST_DIR/pre-commit" "$DEST_DIR/pre-push"
 run_or_echo git config --global core.hooksPath "$DEST_DIR"
 
 log "Installed ECC global git hooks."

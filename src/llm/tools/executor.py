@@ -78,6 +78,8 @@ class ToolExecutor:
                     "Async tool '%s' called via sync execute(); use execute_async()",
                     tool_call.name,
                 )
+                if inspect.iscoroutine(result):
+                    result.close()
                 return ToolResult(
                     tool_call_id=tool_call.id,
                     content=GENERIC_TOOL_FAILURE.format(name=tool_call.name),

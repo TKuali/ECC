@@ -54,12 +54,15 @@ write_status "running" "- Task file: \`$task_file\`"
 # rm -rf / exfiltration commands without confirmation.
 # Default to the most restrictive approval mode; allow an explicit operator
 # override only via env (e.g. ECC_CODEX_APPROVAL_MODE=on-request for trusted runs).
-APPROVAL_MODE="${ECC_CODEX_APPROVAL_MODE:-never}"
-case "$APPROVAL_MODE" in
+# Codex profiles (-p) and approval policies (--ask-for-approval) are
+# independent concepts. SECURITY: default to never approving untrusted
+# tool execution; operators can override via env.
+APPROVAL_POLICY="${ECC_CODEX_APPROVAL_POLICY:-never}"
+case "$APPROVAL_POLICY" in
   never|on-request|on-failure) ;;
   *)
-    echo "[ECC worker] Refusing to run: unsupported ECC_CODEX_APPROVAL_MODE='$APPROVAL_MODE' (expected never|on-request|on-failure)" >&2
-    write_status "failed" "- Error: unsupported approval mode"
+    echo "[ECC worker] Refusing to run: unsupported ECC_CODEX_APPROVAL_POLICY='$APPROVAL_POLICY' (expected never|on-request|on-failure)" >&2
+    write_status "failed" "- Error: unsupported approval policy"
     exit 1
     ;;
 esac
@@ -106,7 +109,7 @@ Task file: $task_file
 $(cat "$task_file")
 EOF
 
-if codex exec -p "$APPROVAL_MODE" -m gpt-5.4 --color never -C "$(pwd)" -o "$output_file" - < "$prompt_file"; then
+if codex exec --ask-for-approval "$APPROVAL_POLICY" -m gpt-5.4 --color never -C "$(pwd)" -o "$output_file" - < "$prompt_file"; then
   {
     echo "# Handoff"
     echo
