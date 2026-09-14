@@ -1012,6 +1012,7 @@ function isChecked(key) {
 // drift against the CI policy is visible in one place.
 const ASCII_CONTROL_MAX = 0x1f;
 const ASCII_DELETE = 0x7f;
+const C1_CONTROLS = [0x80, 0x9f]; // Unicode C1 control block (U+0080..U+009F)
 const BIDI_MARKS = [0x200e, 0x200f]; // LRM/RLM
 const BIDI_EMBEDDINGS = [0x202a, 0x202e]; // LRE..PDF
 const BIDI_ISOLATES = [0x2066, 0x2069]; // LRI..PDI
@@ -1042,7 +1043,8 @@ function sanitizePath(filePath) {
   let sanitized = '';
   for (const char of String(filePath || '')) {
     const code = char.codePointAt(0);
-    const isAsciiControl = code <= ASCII_CONTROL_MAX || code === ASCII_DELETE;
+    const isAsciiControl =
+      code <= ASCII_CONTROL_MAX || code === ASCII_DELETE || inRange(code, C1_CONTROLS);
     const isBidiOverride =
       inRange(code, BIDI_MARKS) || inRange(code, BIDI_EMBEDDINGS) || inRange(code, BIDI_ISOLATES);
     const isUnicodeSeparator = code === LINE_SEPARATOR || code === PARAGRAPH_SEPARATOR;

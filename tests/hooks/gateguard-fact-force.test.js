@@ -3118,7 +3118,7 @@ function runTests() {
   if (
     test('sanitizePath strips CI-defined dangerous invisible unicode from denial paths', () => {
       const file_path =
-        '/src/eu2028\u2028eu2029\u2029app.js\u200bhidden\u2060name\ufefftail\u3164x.js';
+        '/src/eu2028\u2028eu2029\u2029app.js\u200bhidden\u2060name\ufefftail\u3164x\u0091c1.js';
       const input = {
         tool_name: 'Edit',
         tool_input: { file_path, old_string: 'foo', new_string: 'bar' }
@@ -3130,7 +3130,7 @@ function runTests() {
           ? output.hookSpecificOutput.permissionDecisionReason
           : ''
       );
-      for (const bad of ['\u2028', '\u2029', '\u200b', '\u2060', '\ufeff', '\u3164']) {
+      for (const bad of ['\u2028', '\u2029', '\u200b', '\u2060', '\ufeff', '\u3164', '\u0091']) {
         assert.ok(!reason.includes(bad), `denial reason must not carry U+${bad.codePointAt(0).toString(16)} (${bad})`);
       }
       assert.ok(reason.includes('app.js'), 'visible path text must remain');
