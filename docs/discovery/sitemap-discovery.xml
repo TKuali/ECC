@@ -296,6 +296,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://ecc.tools/skills/counterparty-channel-discipline</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://ecc.tools/skills/cpp-coding-standards</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -467,6 +472,11 @@
   </url>
   <url>
     <loc>https://ecc.tools/skills/error-handling</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ecc.tools/skills/esign-field-placement</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -841,6 +851,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://ecc.tools/skills/master-agreement-generator</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://ecc.tools/skills/mcp-server-patterns</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -872,11 +887,6 @@
   </url>
   <url>
     <loc>https://ecc.tools/skills/motion-patterns</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ecc.tools/skills/motion-ui</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -947,6 +957,11 @@
   </url>
   <url>
     <loc>https://ecc.tools/skills/opensource-pipeline</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ecc.tools/skills/operator-approval-loop</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1102,6 +1117,11 @@
   </url>
   <url>
     <loc>https://ecc.tools/skills/quarkus-verification</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ecc.tools/skills/rails-patterns</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1317,6 +1337,16 @@
   </url>
   <url>
     <loc>https://ecc.tools/skills/taste</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ecc.tools/skills/taste-application</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ecc.tools/skills/taste-distillation</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

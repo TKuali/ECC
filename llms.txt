@@ -9,7 +9,7 @@ Install: `npx ecc-universal setup`
 
 ## Overview
 
-- [Repository](https://github.com/affaan-m/ECC): source, 286 skills, 68 agents, 94 commands.
+- [Repository](https://github.com/affaan-m/ECC): source, 292 skills, 68 agents, 94 commands.
 - [Website](https://ecc.tools): install paths, pricing, and platform support.
 - [Full catalog](https://ecc.tools/llms-full.txt): every skill, agent, and command with a one-line summary.
 - [Machine index](https://github.com/affaan-m/ECC/blob/main/docs/DISCOVERY-INDEX.json): the same catalog as JSON.
@@ -23,7 +23,7 @@ Install: `npx ecc-universal setup`
 
 ## Surfaces
 
-- Skills (286): Task playbooks the agent loads on demand.
+- Skills (292): Task playbooks the agent loads on demand.
 - Agents (68): Specialist subagents for delegated work.
 - Commands (94): Slash-command entry points.
 

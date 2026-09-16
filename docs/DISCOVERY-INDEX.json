@@ -2,11 +2,11 @@
   "generator": "scripts/ci/generate-discovery-index.js",
   "origin": "https://ecc.tools",
   "counts": {
-    "skill": 286,
+    "skill": 292,
     "agent": 68,
     "command": 94
   },
-  "total": 448,
+  "total": 454,
   "entries": [
     {
       "type": "skill",
@@ -265,7 +265,7 @@
       "type": "skill",
       "name": "benchmark-methodology",
       "slug": "benchmark-methodology",
-      "summary": ">-",
+      "summary": "Use after competitive-platform-analysis has produced a tiered competitor set. Scores each competitor across nine weighted dimensions (positioning, voice, visual craft, offer packaging, evidence, enterprise-readiness, thought leadership, pricing, client's strategic tension) with explicit 1 to 5 ru...",
       "model": null,
       "tools": null,
       "source": "skills/benchmark-methodology/SKILL.md",
@@ -659,6 +659,17 @@
     },
     {
       "type": "skill",
+      "name": "counterparty-channel-discipline",
+      "slug": "counterparty-channel-discipline",
+      "summary": "Per-channel strict prompts, mention gating, silent observation, and a communication autonomy policy for agents that sit in shared channels with external counterparties. Use when an agent joins group chats, shared channels, or DMs where outsiders can read every message and you need it to speak onl...",
+      "model": null,
+      "tools": null,
+      "source": "skills/counterparty-channel-discipline/SKILL.md",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/counterparty-channel-discipline/SKILL.md",
+      "url": "https://ecc.tools/skills/counterparty-channel-discipline"
+    },
+    {
+      "type": "skill",
       "name": "cpp-coding-standards",
       "slug": "cpp-coding-standards",
       "summary": "C++ coding standards based on the C++ Core Guidelines (isocpp.github.io). Use when writing, reviewing, or refactoring C++ code to enforce modern, safe, and idiomatic practices.",
@@ -1041,6 +1052,17 @@
       "source": "skills/error-handling/SKILL.md",
       "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/error-handling/SKILL.md",
       "url": "https://ecc.tools/skills/error-handling"
+    },
+    {
+      "type": "skill",
+      "name": "esign-field-placement",
+      "slug": "esign-field-placement",
+      "summary": "Deterministic method for placing signature, date, and text fields in a web e-signature composer through a browser automation session, using a fixed signature page, numeric Location panel coordinates instead of drag, and a save-as-draft default. Use when automating envelope preparation for generat...",
+      "model": null,
+      "tools": null,
+      "source": "skills/esign-field-placement/SKILL.md",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/esign-field-placement/SKILL.md",
+      "url": "https://ecc.tools/skills/esign-field-placement"
     },
     {
       "type": "skill",
@@ -1858,6 +1880,17 @@
     },
     {
       "type": "skill",
+      "name": "master-agreement-generator",
+      "slug": "master-agreement-generator",
+      "summary": "Generate review drafts of counterparty master agreements from one template plus a JSON spec, with role-selected clauses and a Schedule A workflow limited to the executed agreement's notice authority. Use when you need reproducible drafting and separately reviewed execution preparation.",
+      "model": null,
+      "tools": null,
+      "source": "skills/master-agreement-generator/SKILL.md",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/master-agreement-generator/SKILL.md",
+      "url": "https://ecc.tools/skills/master-agreement-generator"
+    },
+    {
+      "type": "skill",
       "name": "mcp-server-patterns",
       "slug": "mcp-server-patterns",
       "summary": "Build MCP servers with Node/TypeScript SDK — tools, resources, prompts, Zod validation, stdio vs Streamable HTTP. Use Context7 or official MCP docs for latest API. Use when building or debugging an MCP server — tools, resources, prompts, validation, or transport choice.",
@@ -1932,17 +1965,6 @@
       "source": "skills/motion-patterns/SKILL.md",
       "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/motion-patterns/SKILL.md",
       "url": "https://ecc.tools/skills/motion-patterns"
-    },
-    {
-      "type": "skill",
-      "name": "motion-ui",
-      "slug": "motion-ui",
-      "summary": "Production-ready UI motion system for React/Next.js. Use when implementing animations, transitions, or motion patterns.",
-      "model": null,
-      "tools": null,
-      "source": "skills/motion-ui/SKILL.md",
-      "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/motion-ui/SKILL.md",
-      "url": "https://ecc.tools/skills/motion-ui"
     },
     {
       "type": "skill",
@@ -2097,6 +2119,17 @@
       "source": "skills/opensource-pipeline/SKILL.md",
       "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/opensource-pipeline/SKILL.md",
       "url": "https://ecc.tools/skills/opensource-pipeline"
+    },
+    {
+      "type": "skill",
+      "name": "operator-approval-loop",
+      "slug": "operator-approval-loop",
+      "summary": "Operator approval contract with internal filing notices for agent-drafted outbound messages, hashed drafts, epoch-keyed decisions, durable delivery claims and receipts, and a pre-draft baseline gate. Use when an agent drafts messages to external counterparties and a human operator must approve, r...",
+      "model": null,
+      "tools": null,
+      "source": "skills/operator-approval-loop/SKILL.md",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/operator-approval-loop/SKILL.md",
+      "url": "https://ecc.tools/skills/operator-approval-loop"
     },
     {
       "type": "skill",
@@ -2438,6 +2471,17 @@
       "source": "skills/quarkus-verification/SKILL.md",
       "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/quarkus-verification/SKILL.md",
       "url": "https://ecc.tools/skills/quarkus-verification"
+    },
+    {
+      "type": "skill",
+      "name": "rails-patterns",
+      "slug": "rails-patterns",
+      "summary": "Ruby on Rails framework patterns for Rails 7.1+ and 8.x apps. Covers the directory contract, skinny controllers with service objects, form objects, query objects, idiomatic ActiveRecord, background jobs, ViewComponent, Hotwire, and the Rails 8 Solid stack. Use when building or reviewing Rails app...",
+      "model": null,
+      "tools": null,
+      "source": "skills/rails-patterns/SKILL.md",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/rails-patterns/SKILL.md",
+      "url": "https://ecc.tools/skills/rails-patterns"
     },
     {
       "type": "skill",
@@ -2911,6 +2955,28 @@
       "source": "skills/taste/SKILL.md",
       "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/taste/SKILL.md",
       "url": "https://ecc.tools/skills/taste"
+    },
+    {
+      "type": "skill",
+      "name": "taste-application",
+      "slug": "taste-application",
+      "summary": "Generate new video against a distilled style pack and cut it into a finished piece - plan takes from the reference's cut rhythm, generate on fal, grade with the pack's measured LUT, cut at the measured cadence, weave in existing footage, composite overlay plates, mint 3D props, and verify the res...",
+      "model": null,
+      "tools": null,
+      "source": "skills/taste-application/SKILL.md",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/taste-application/SKILL.md",
+      "url": "https://ecc.tools/skills/taste-application"
+    },
+    {
+      "type": "skill",
+      "name": "taste-distillation",
+      "slug": "taste-distillation",
+      "summary": "Measure a set of reference videos into a reusable style pack - colour grade as a 3D LUT, cut rhythm as a shot-length distribution, hero stills, screen-blend overlay plates, and a text spec for a generative model. Use when the user wants to capture the look of reference footage, build a repeatable...",
+      "model": null,
+      "tools": null,
+      "source": "skills/taste-distillation/SKILL.md",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/main/skills/taste-distillation/SKILL.md",
+      "url": "https://ecc.tools/skills/taste-distillation"
     },
     {
       "type": "skill",
@@ -4665,7 +4731,7 @@
       "type": "command",
       "name": "prp-pr",
       "slug": "prp-pr",
-      "summary": "Create a GitHub PR from current branch with unpushed commits — discovers templates, analyzes changes, pushes",
+      "summary": "Alias of /pr for the PRP workflow series. Use when creating a pull request mid-PRP workflow; otherwise use /pr.",
       "model": null,
       "tools": null,
       "source": "commands/prp-pr.md",
