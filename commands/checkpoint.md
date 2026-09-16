@@ -1,78 +1,78 @@
 ---
-description: Create, verify, or list workflow checkpoints after running verification checks.
+description: Crea, verifica o lista puntos de control (checkpoints) del flujo de trabajo tras ejecutar comprobaciones de verificación.
 ---
 
-# Checkpoint Command
+# Comando Checkpoint
 
-Create or verify a checkpoint in your workflow.
+Crea o verifica un punto de control en tu flujo de trabajo.
 
-## Usage
+## Uso
 
-`/checkpoint [create|verify|list] [name]`
+`/checkpoint [create|verify|list] [nombre]`
 
-## Create Checkpoint
+## Crear Punto de Control (Create Checkpoint)
 
-When creating a checkpoint:
+Al crear un punto de control:
 
-1. Run `/verify quick` to ensure current state is clean
-2. Create a git stash or commit with checkpoint name
-3. Log checkpoint to `.claude/checkpoints.log`:
+1. Ejecuta `/verify quick` para asegurar que el estado actual esté limpio
+2. Crea un stash de git o commit con el nombre del punto de control
+3. Registra el punto de control en `.claude/checkpoints.log`:
 
 ```bash
 echo "$(date +%Y-%m-%d-%H:%M) | $CHECKPOINT_NAME | $(git rev-parse --short HEAD)" >> .claude/checkpoints.log
 ```
 
-4. Report checkpoint created
+4. Informa que el punto de control fue creado
 
-## Verify Checkpoint
+## Verificar Punto de Control (Verify Checkpoint)
 
-When verifying against a checkpoint:
+Al verificar frente a un punto de control:
 
-1. Read checkpoint from log
-2. Compare current state to checkpoint:
-   - Files added since checkpoint
-   - Files modified since checkpoint
-   - Test pass rate now vs then
-   - Coverage now vs then
+1. Lee el punto de control desde el registro
+2. Compara el estado actual con el punto de control:
+   - Archivos añadidos desde el punto de control
+   - Archivos modificados desde el punto de control
+   - Tasa de aprobación de pruebas ahora vs antes
+   - Cobertura ahora vs antes
 
-3. Report:
+3. Reporta:
 ```
-CHECKPOINT COMPARISON: $NAME
-============================
-Files changed: X
-Tests: +Y passed / -Z failed
-Coverage: +X% / -Y%
-Build: [PASS/FAIL]
-```
-
-## List Checkpoints
-
-Show all checkpoints with:
-- Name
-- Timestamp
-- Git SHA
-- Status (current, behind, ahead)
-
-## Workflow
-
-Typical checkpoint flow:
-
-```
-[Start] --> /checkpoint create "feature-start"
-   |
-[Implement] --> /checkpoint create "core-done"
-   |
-[Test] --> /checkpoint verify "core-done"
-   |
-[Refactor] --> /checkpoint create "refactor-done"
-   |
-[PR] --> /checkpoint verify "feature-start"
+COMPARACIÓN CON PUNTO DE CONTROL: $NAME
+=======================================
+Archivos modificados: X
+Pruebas: +Y aprobadas / -Z fallidas
+Cobertura: +X% / -Y%
+Compilación: [PASS/FAIL]
 ```
 
-## Arguments
+## Listar Puntos de Control (List Checkpoints)
+
+Muestra todos los puntos de control con:
+- Nombre
+- Marca de tiempo
+- SHA de Git
+- Estado (actual, por detrás, por delante)
+
+## Flujo de Trabajo
+
+Flujo típico de puntos de control:
+
+```
+[Inicio] --> /checkpoint create "inicio-caracteristica"
+   |
+[Implementar] --> /checkpoint create "nucleo-completado"
+   |
+[Probar] --> /checkpoint verify "nucleo-completado"
+   |
+[Refactorizar] --> /checkpoint create "refactor-completado"
+   |
+[PR] --> /checkpoint verify "inicio-caracteristica"
+```
+
+## Argumentos
 
 $ARGUMENTS:
-- `create <name>` - Create named checkpoint
-- `verify <name>` - Verify against named checkpoint
-- `list` - Show all checkpoints
-- `clear` - Remove old checkpoints (keeps last 5)
+- `create <nombre>` - Crea un punto de control con nombre
+- `verify <nombre>` - Verifica frente a un punto de control nombrado
+- `list` - Muestra todos los puntos de control
+- `clear` - Elimina puntos de control antiguos (mantiene los últimos 5)

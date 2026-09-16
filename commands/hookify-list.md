@@ -1,21 +1,23 @@
 ---
-description: List all configured hookify rules
+description: Lista todas las reglas configuradas de hookify
 ---
 
-Find and display all hookify rules in a formatted table.
+# Listar Reglas de Hookify
 
-## Steps
+Busca y muestra todas las reglas de hookify en una tabla formateada.
 
-1. Find all `.claude/hookify.*.local.md` files
-2. Read each file's frontmatter:
+## Pasos
+
+1. Buscar todos los archivos `.claude/hookify.*.local.md`
+2. Leer el frontmatter de cada archivo:
    - `name`
    - `enabled`
    - `event`
    - `action`
    - `pattern`
-3. Display them as a table:
+3. Mostrarlos en una tabla:
 
-| Rule | Enabled | Event | Pattern | File |
-|------|---------|-------|---------|------|
+| Regla | Habilitada | Evento | Patrón | Archivo |
+|---|---|---|---|---|
 
-4. Show the rule count and remind the user that `/hookify-configure` can change state later.
+4. Mostrar la cantidad de reglas y recordar al usuario que `/hookify-configure` puede cambiar su estado posteriormente.

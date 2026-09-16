@@ -1,50 +1,52 @@
 ---
-description: Create hooks to prevent unwanted behaviors from conversation analysis or explicit instructions
+description: Crea hooks para evitar comportamientos no deseados a partir del análisis de la conversación o instrucciones explícitas
 ---
 
-Create hook rules to prevent unwanted Claude Code behaviors by analyzing conversation patterns or explicit user instructions.
+# Comando Hookify
 
-## Usage
+Crea reglas de hook para evitar comportamientos no deseados de Claude Code analizando patrones de conversación o instrucciones explícitas del usuario.
 
-`/hookify [description of behavior to prevent]`
+## Uso
 
-If no arguments are provided, analyze the current conversation to find behaviors worth preventing.
+`/hookify [descripcion del comportamiento a evitar]`
 
-## Workflow
+Si no se proporcionan argumentos, analiza la conversación actual para encontrar comportamientos que valga la pena prevenir.
 
-### Step 1: Gather Behavior Info
+## Flujo de Trabajo
 
-- With arguments: parse the user's description of the unwanted behavior
-- Without arguments: use the `conversation-analyzer` agent to find:
-  - explicit corrections
-  - frustrated reactions to repeated mistakes
-  - reverted changes
-  - repeated similar issues
+### Paso 1: Recopilar Información del Comportamiento
 
-### Step 2: Present Findings
+- Con argumentos: analiza la descripción del usuario del comportamiento no deseado
+- Sin argumentos: utiliza el agente `conversation-analyzer` para encontrar:
+  - correcciones explícitas
+  - reacciones de frustración ante errores repetidos
+  - cambios revertidos
+  - problemas similares repetitivos
 
-Show the user:
+### Paso 2: Presentar Hallazgos
 
-- behavior description
-- proposed event type
-- proposed pattern or matcher
-- proposed action
+Mostrar al usuario:
 
-### Step 3: Generate Rule Files
+- descripción del comportamiento
+- tipo de evento propuesto
+- patrón o coincidencia propuesta
+- acción propuesta
 
-For each approved rule, create a file at `.claude/hookify.{name}.local.md`:
+### Paso 3: Generar Archivos de Regla
+
+Para cada regla aprobada, crear un archivo en `.claude/hookify.{name}.local.md`:
 
 ```yaml
 ---
-name: rule-name
+name: nombre-regla
 enabled: true
 event: bash|file|stop|prompt|all
 action: block|warn
-pattern: "regex pattern"
+pattern: "patron regex"
 ---
-Message shown when rule triggers.
+Mensaje mostrado cuando la regla se active.
 ```
 
-### Step 4: Confirm
+### Paso 4: Confirmar
 
-Report created rules and how to manage them with `/hookify-list` and `/hookify-configure`.
+Reportar las reglas creadas y cómo gestionarlas con `/hookify-list` y `/hookify-configure`.

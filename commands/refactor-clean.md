@@ -1,84 +1,84 @@
 ---
-description: Safely identify and remove dead code with verification after each change.
+description: Identifica y elimina de forma segura código muerto con verificación tras cada cambio.
 ---
 
-# Refactor Clean
+# Limpieza y Refactorización (Refactor Clean)
 
-Safely identify and remove dead code with test verification at every step.
+Identifica y elimina de forma segura código muerto con verificación de pruebas en cada paso.
 
-## Step 1: Detect Dead Code
+## Paso 1: Detectar Código Muerto
 
-Run analysis tools based on project type:
+Ejecutar herramientas de análisis según el tipo de proyecto:
 
-| Tool | What It Finds | Command |
-|------|--------------|---------|
-| knip | Unused exports, files, dependencies | `npx knip` |
-| depcheck | Unused npm dependencies | `npx depcheck` |
-| ts-prune | Unused TypeScript exports | `npx ts-prune` |
-| vulture | Unused Python code | `vulture src/` |
-| deadcode | Unused Go code | `deadcode ./...` |
-| cargo-udeps | Unused Rust dependencies | `cargo +nightly udeps` |
+| Herramienta | Qué Detecta | Comando |
+|---|---|---|
+| knip | Exportaciones, archivos y dependencias no utilizados | `npx knip` |
+| depcheck | Dependencias npm no utilizadas | `npx depcheck` |
+| ts-prune | Exportaciones TypeScript no utilizadas | `npx ts-prune` |
+| vulture | Código Python no utilizado | `vulture src/` |
+| deadcode | Código Go no utilizado | `deadcode ./...` |
+| cargo-udeps | Dependencias Rust no utilizadas | `cargo +nightly udeps` |
 
-If no tool is available, use Grep to find exports with zero imports:
+Si no hay herramientas disponibles, usar Grep para encontrar exportaciones con cero importaciones:
 ```
-# Find exports, then check if they're imported anywhere
+# Encontrar exportaciones, luego verificar si están importadas en alguna parte
 ```
 
-## Step 2: Categorize Findings
+## Paso 2: Categorizar Hallazgos
 
-Sort findings into safety tiers:
+Clasificar hallazgos en niveles de seguridad:
 
-| Tier | Examples | Action |
-|------|----------|--------|
-| **SAFE** | Unused utilities, test helpers, internal functions | Delete with confidence |
-| **CAUTION** | Components, API routes, middleware | Verify no dynamic imports or external consumers |
-| **DANGER** | Config files, entry points, type definitions | Investigate before touching |
+| Nivel | Ejemplos | Acción |
+|---|---|---|
+| **SAFE (Seguro)** | Utilidades no utilizadas, helpers de prueba, funciones internas | Eliminar con confianza |
+| **CAUTION (Precaución)** | Componentes, rutas de API, middleware | Verificar que no haya imports dinámicos o consumidores externos |
+| **DANGER (Peligro)** | Archivos de configuración, puntos de entrada, definiciones de tipos | Investigar exhaustivamente antes de tocar |
 
-## Step 3: Safe Deletion Loop
+## Paso 3: Bucle de Eliminación Segura
 
-For each SAFE item:
+Para cada elemento del nivel SAFE:
 
-1. **Run full test suite** — Establish baseline (all green)
-2. **Delete the dead code** — Use Edit tool for surgical removal
-3. **Re-run test suite** — Verify nothing broke
-4. **If tests fail** — Immediately revert with `git checkout -- <file>` and skip this item
-5. **If tests pass** — Move to next item
+1. **Ejecutar la suite completa de pruebas** — Establecer línea base (todo en verde)
+2. **Eliminar el código muerto** — Usar la herramienta de edición para una remoción quirúrgica
+3. **Volver a ejecutar las pruebas** — Verificar que nada se haya roto
+4. **Si las pruebas fallan** — Revertir de inmediato con `git checkout -- <archivo>` y omitir este elemento
+5. **Si las pruebas pasan** — Pasar al siguiente elemento
 
-## Step 4: Handle CAUTION Items
+## Paso 4: Manejar Elementos de PRECAUCIÓN (CAUTION)
 
-Before deleting CAUTION items:
-- Search for dynamic imports: `import()`, `require()`, `__import__`
-- Search for string references: route names, component names in configs
-- Check if exported from a public package API
-- Verify no external consumers (check dependents if published)
+Antes de eliminar elementos CAUTION:
+- Buscar importaciones dinámicas: `import()`, `require()`, `__import__`
+- Buscar referencias por cadenas de texto: nombres de rutas o de componentes en configuraciones
+- Comprobar si se exporta desde la API pública de un paquete
+- Verificar que no existan consumidores externos (verificar paquetes dependientes si está publicado)
 
-## Step 5: Consolidate Duplicates
+## Paso 5: Consolidar Duplicados
 
-After removing dead code, look for:
-- Near-duplicate functions (>80% similar) — merge into one
-- Redundant type definitions — consolidate
-- Wrapper functions that add no value — inline them
-- Re-exports that serve no purpose — remove indirection
+Tras eliminar código muerto, buscar:
+- Funciones casi duplicadas (>80% similares) — unificarlas en una
+- Definiciones de tipo redundantes — consolidarlas
+- Funciones wrapper que no aportan valor — reemplazarlas en línea (inline)
+- Re-exportaciones sin propósito — eliminar indirecciones innecesarias
 
-## Step 6: Summary
+## Paso 6: Resumen
 
-Report results:
+Reportar resultados:
 
 ```
-Dead Code Cleanup
+Limpieza de Código Muerto
 ──────────────────────────────
-Deleted:   12 unused functions
-           3 unused files
-           5 unused dependencies
-Skipped:   2 items (tests failed)
-Saved:     ~450 lines removed
+Eliminados:  12 funciones no utilizadas
+             3 archivos no utilizados
+             5 dependencias no utilizadas
+Omitidos:    2 elementos (pruebas fallidas)
+Ahorro:      ~450 líneas eliminadas
 ──────────────────────────────
-All tests passing PASS:
+Todas las pruebas pasadas PASS:
 ```
 
-## Rules
+## Reglas
 
-- **Never delete without running tests first**
-- **One deletion at a time** — Atomic changes make rollback easy
-- **Skip if uncertain** — Better to keep dead code than break production
-- **Don't refactor while cleaning** — Separate concerns (clean first, refactor later)
+- **Nunca eliminar sin ejecutar las pruebas primero**
+- **Una eliminación a la vez** — Los cambios atómicos facilitan la reversión
+- **Omitir en caso de duda** — Es preferible conservar código muerto que romper producción
+- **No refactorizar durante la limpieza** — Separar responsabilidades (limpiar primero, refactorizar después)

@@ -1,75 +1,75 @@
 ---
-description: Run AgentShield against agent, hook, MCP, permission, and secret surfaces.
+description: Ejecuta AgentShield contra superficies de agentes, hooks, MCP, permisos y secretos.
 agent: ecc:security-reviewer
 subtask: true
 ---
 
-# Security Scan Command
+# Comando Security Scan
 
-Run AgentShield against the current project or a target path, then turn the findings into a prioritized remediation plan.
+Ejecuta AgentShield contra el proyecto actual o una ruta objetivo, y luego convierte los hallazgos en un plan de remediación priorizado.
 
-## Usage
+## Uso
 
-`/security-scan [path] [--format text|json|markdown|html] [--min-severity low|medium|high|critical] [--fix]`
+`/security-scan [ruta] [--format text|json|markdown|html] [--min-severity low|medium|high|critical] [--fix]`
 
-- `path` (optional): defaults to the current project. Use a `.claude/` path, a repo root, or a checked-in template directory.
-- `--format`: output format. Use `json` for CI, `markdown` for handoffs, and `html` for standalone review reports.
-- `--min-severity`: filters lower-priority findings.
-- `--fix`: applies only AgentShield fixes explicitly marked as safe and auto-fixable.
+- `ruta` (opcional): por defecto el proyecto actual. Usa una ruta `.claude/`, la raíz del repositorio o un directorio de plantillas controlado.
+- `--format`: formato de salida. Usa `json` para CI, `markdown` para traspasos de tareas, y `html` para reportes de revisión independientes.
+- `--min-severity`: filtra hallazgos de menor prioridad.
+- `--fix`: aplica únicamente las correcciones de AgentShield marcadas explícitamente como seguras y autocorregibles.
 
-## Deterministic Engine
+## Motor Determinista
 
-Prefer the packaged scanner:
+Preferir el escáner empaquetado:
 
 ```bash
 npx ecc-agentshield scan --path "${TARGET_PATH:-.}" --format text
 ```
 
-For local AgentShield development, run from the AgentShield checkout:
+Para desarrollo local de AgentShield, ejecutar desde la copia local de AgentShield:
 
 ```bash
 npm run scan -- --path "${TARGET_PATH:-.}" --format text
 ```
 
-Do not invent findings. Use AgentShield output as the source of truth and separate scanner facts from follow-up judgment.
+No inventar hallazgos. Utilizar la salida de AgentShield como fuente de verdad y separar los hechos del escáner del juicio posterior.
 
-## Review Checklist
+## Lista de Verificación de Revisión
 
-1. Identify active runtime findings first:
-   - hardcoded secrets
-   - broad permissions
-   - executable hooks
-   - MCP servers with shell, filesystem, remote transport, or unpinned `npx`
-   - agent prompts that handle untrusted content without defenses
-2. Separate lower-confidence inventory:
-   - docs examples
-   - template examples
-   - plugin manifests
-   - project-local optional settings
-3. For each critical or high finding, return:
-   - file path
-   - severity
-   - runtime confidence
-   - why it matters
-   - exact remediation
-   - whether it is safe to auto-fix
-4. If `--fix` is requested, state the planned edits before applying fixes.
-5. Re-run the scan after fixes and report the before/after score.
+1. Identificar primero los hallazgos en tiempo de ejecución activos:
+   - secretos hardcodeados
+   - permisos excesivamente amplios
+   - hooks ejecutables
+   - servidores MCP con shell, sistema de archivos, transporte remoto o `npx` sin versión fijada
+   - prompts de agentes que manejan contenido no confiable sin defensas
+2. Separar el inventario de menor confianza:
+   - ejemplos en documentación
+   - ejemplos en plantillas
+   - manifiestos de plugins
+   - configuraciones locales opcionales del proyecto
+3. Para cada hallazgo crítico o alto, reportar:
+   - ruta del archivo
+   - severidad
+   - confianza en tiempo de ejecución
+   - por qué importa
+   - remediación exacta
+   - si es seguro autocorregirlo
+4. Si se solicita `--fix`, detallar las modificaciones previstas antes de aplicar las soluciones.
+5. Volver a ejecutar el escaneo tras las correcciones y reportar la puntuación antes/después.
 
-## Output Contract
+## Contrato de Salida
 
-Return:
+Retornar:
 
-1. Security grade and score.
-2. Counts by severity and runtime confidence.
-3. Critical/high findings with exact paths.
-4. Lower-confidence findings grouped separately.
-5. A remediation order.
-6. Commands run and whether the scan was local, CI, or npx-backed.
+1. Calificación de seguridad y puntuación.
+2. Conteos por severidad y confianza en tiempo de ejecución.
+3. Hallazgos críticos/altos con rutas exactas.
+4. Hallazgos de menor confianza agrupados por separado.
+5. Un orden de remediación.
+6. Comandos ejecutados y si el escaneo fue local, CI o respaldado por npx.
 
-## CI Pattern
+## Patrón para CI
 
-Use AgentShield in GitHub Actions for enforced gates:
+Usar AgentShield en GitHub Actions para barreras obligatorias:
 
 ```yaml
 - uses: affaan-m/agentshield@v1
@@ -79,14 +79,14 @@ Use AgentShield in GitHub Actions for enforced gates:
     fail-on-findings: true
 ```
 
-## Links
+## Enlaces
 
-- Skill: `skills/security-scan/SKILL.md`
-- Agent: `agents/security-reviewer.md`
-- Scanner: <https://github.com/affaan-m/agentshield>
+- Habilidad: `skills/security-scan/SKILL.md`
+- Agente: `agents/security-reviewer.md`
+- Escáner: <https://github.com/affaan-m/agentshield>
 
-## Arguments
+## Argumentos
 
 $ARGUMENTS:
-- optional target path
-- optional AgentShield flags
+- ruta objetivo opcional
+- banderas opcionales de AgentShield

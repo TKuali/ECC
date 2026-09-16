@@ -1,112 +1,112 @@
 ---
-description: "Quick commit with natural language file targeting — describe what to commit in plain English"
-argument-hint: "[target description] (blank = all changes)"
+description: "Commit rápido con selección de archivos en lenguaje natural — describe qué confirmar en lenguaje sencillo"
+argument-hint: "[descripción del objetivo] (en blanco = todos los cambios)"
 ---
 
-# Smart Commit
+# Commit Inteligente (Smart Commit)
 
-> Adapted from PRPs-agentic-eng by Wirasm. Part of the PRP workflow series.
+> Adaptado de PRPs-agentic-eng por Wirasm. Parte de la serie de flujos de trabajo PRP.
 
-**Input**: $ARGUMENTS
+**Entrada**: $ARGUMENTS
 
 ---
 
-## Phase 1 — ASSESS
+## Fase 1 — EVALUAR
 
 ```bash
 git status --short
 ```
 
-If output is empty → stop: "Nothing to commit."
+Si la salida está vacía → detenerse: "No hay nada para hacer commit."
 
-Show the user a summary of what's changed (added, modified, deleted, untracked).
+Muestra al usuario un resumen de lo que ha cambiado (añadidos, modificados, eliminados, sin seguimiento).
 
 ---
 
-## Phase 2 — INTERPRET & STAGE
+## Fase 2 — INTERPRETAR Y PREPARAR (STAGE)
 
-Interpret `$ARGUMENTS` to determine what to stage:
+Interpreta `$ARGUMENTS` para determinar qué archivos preparar:
 
-| Input | Interpretation | Git Command |
+| Entrada | Interpretación | Comando Git |
 |---|---|---|
-| *(blank / empty)* | Stage everything | `git add -A` |
-| `staged` | Use whatever is already staged | *(no git add)* |
-| `*.ts` or `*.py` etc. | Stage matching glob | `git add '*.ts'` |
-| `except tests` | Stage all, then unstage tests | `git add -A && git reset -- '**/*.test.*' '**/*.spec.*' '**/test_*' 2>/dev/null \|\| true` |
-| `only new files` | Stage untracked files only | `git ls-files --others --exclude-standard \| grep . && git ls-files --others --exclude-standard \| xargs git add` |
-| `the auth changes` | Interpret from status/diff — find auth-related files | `git add <matched files>` |
-| Specific filenames | Stage those files | `git add <files>` |
+| *(en blanco / vacío)* | Preparar todo | `git add -A` |
+| `staged` | Usar lo que ya esté preparado | *(sin git add)* |
+| `*.ts` o `*.py` etc. | Preparar archivos que coincidan con el patrón | `git add '*.ts'` |
+| `except tests` | Preparar todo y luego desmarcar pruebas | `git add -A && git reset -- '**/*.test.*' '**/*.spec.*' '**/test_*' 2>/dev/null \|\| true` |
+| `only new files` | Preparar solo archivos sin seguimiento (untracked) | `git ls-files --others --exclude-standard \| grep . && git ls-files --others --exclude-standard \| xargs git add` |
+| `the auth changes` | Interpretar a partir del estado/diff — buscar archivos de autenticación | `git add <archivos coincidentes>` |
+| Nombres de archivos específicos | Preparar esos archivos | `git add <archivos>` |
 
-For natural language inputs (like "the auth changes"), cross-reference the `git status` output and `git diff` to identify relevant files. Show the user which files you're staging and why.
+Para entradas en lenguaje natural (como "los cambios de autenticación"), coteja la salida de `git status` y `git diff` para identificar los archivos pertinentes. Muestra al usuario qué archivos estás preparando y por qué.
 
 ```bash
-git add <determined files>
+git add <archivos determinados>
 ```
 
-After staging, verify:
+Tras preparar, verifica:
 ```bash
 git diff --cached --stat
 ```
 
-If nothing staged, stop: "No files matched your description."
+Si no hay nada preparado, detente: "Ningún archivo coincidió con tu descripción."
 
 ---
 
-## Phase 3 — COMMIT
+## Fase 3 — CONFIRMAR (COMMIT)
 
-Craft a single-line commit message in imperative mood:
+Redacta un mensaje de commit de una sola línea en modo imperativo:
 
 ```
-{type}: {description}
+{tipo}: {descripción}
 ```
 
-Types:
-- `feat` — New feature or capability
-- `fix` — Bug fix
-- `refactor` — Code restructuring without behavior change
-- `docs` — Documentation changes
-- `test` — Adding or updating tests
-- `chore` — Build, config, dependencies
-- `perf` — Performance improvement
-- `ci` — CI/CD changes
+Tipos:
+- `feat` — Nueva característica o funcionalidad
+- `fix` — Corrección de errores
+- `refactor` — Reestructuración de código sin cambios de comportamiento
+- `docs` — Cambios en la documentación
+- `test` — Incorporación o actualización de pruebas
+- `chore` — Tareas de compilación, configuración, dependencias
+- `perf` — Mejoras de rendimiento
+- `ci` — Cambios en integración y entrega continua (CI/CD)
 
-Rules:
-- Imperative mood ("add feature" not "added feature")
-- Lowercase after the type prefix
-- No period at the end
-- Under 72 characters
-- Describe WHAT changed, not HOW
+Reglas:
+- Modo imperativo ("añadir característica" en vez de "añadida característica")
+- Minúsculas tras el prefijo del tipo
+- Sin punto al final
+- Menos de 72 caracteres
+- Describe QUÉ cambió, no CÓMO
 
 ```bash
-git commit -m "{type}: {description}"
+git commit -m "{tipo}: {descripción}"
 ```
 
 ---
 
-## Phase 4 — OUTPUT
+## Fase 4 — SALIDA
 
-Report to user:
+Informa al usuario:
 
 ```
-Committed: {hash_short}
-Message:   {type}: {description}
-Files:     {count} file(s) changed
+Confirmado: {hash_short}
+Mensaje:    {tipo}: {descripción}
+Archivos:   {count} archivo(s) modificado(s)
 
-Next steps:
-  - git push           → push to remote
-  - /prp-pr            → create a pull request
-  - /code-review       → review before pushing
+Siguientes pasos:
+  - git push           → subir al repositorio remoto
+  - /prp-pr            → crear un pull request
+  - /code-review       → revisar antes de subir
 ```
 
 ---
 
-## Examples
+## Ejemplos
 
-| You say | What happens |
+| Tú dices | Qué ocurre |
 |---|---|
-| `/prp-commit` | Stages all, auto-generates message |
-| `/prp-commit staged` | Commits only what's already staged |
-| `/prp-commit *.ts` | Stages all TypeScript files, commits |
-| `/prp-commit except tests` | Stages everything except test files |
-| `/prp-commit the database migration` | Finds DB migration files from status, stages them |
-| `/prp-commit only new files` | Stages untracked files only |
+| `/prp-commit` | Prepara todo y autogenera el mensaje |
+| `/prp-commit staged` | Hace commit solo de lo que ya esté preparado |
+| `/prp-commit *.ts` | Prepara todos los archivos TypeScript y hace commit |
+| `/prp-commit except tests` | Prepara todo excepto los archivos de prueba |
+| `/prp-commit the database migration` | Busca archivos de migración de BD desde el estado y los prepara |
+| `/prp-commit only new files` | Prepara solo los archivos nuevos sin seguimiento |

@@ -1,76 +1,76 @@
 ---
-description: Scan project structure and generate token-lean architecture codemaps.
+description: Escanea la estructura del proyecto y genera mapas de código arquitectónicos optimizados en consumo de tokens.
 ---
 
-# Update Codemaps
+# Actualizar Mapas de Código (Update Codemaps)
 
-Analyze the codebase structure and generate token-lean architecture documentation.
+Analiza la estructura del código base y genera documentación de arquitectura optimizada en tokens.
 
-## Step 1: Scan Project Structure
+## Paso 1: Escanear Estructura del Proyecto
 
-1. Identify the project type (monorepo, single app, library, microservice)
-2. Find all source directories (src/, lib/, app/, packages/)
-3. Map entry points (main.ts, index.ts, app.py, main.go, etc.)
+1. Identificar el tipo de proyecto (monorepositorio, app única, librería, microservicio)
+2. Encontrar todos los directorios de código fuente (src/, lib/, app/, packages/)
+3. Mapear puntos de entrada (main.ts, index.ts, app.py, main.go, etc.)
 
-## Step 2: Generate Codemaps
+## Paso 2: Generar Mapas de Código
 
-Create or update codemaps in `docs/CODEMAPS/` (or `.reports/codemaps/`):
+Crear o actualizar los mapas de código en `docs/CODEMAPS/` (o `.reports/codemaps/`):
 
-| File | Contents |
-|------|----------|
-| `architecture.md` | High-level system diagram, service boundaries, data flow |
-| `backend.md` | API routes, middleware chain, service → repository mapping |
-| `frontend.md` | Page tree, component hierarchy, state management flow |
-| `data.md` | Database tables, relationships, migration history |
-| `dependencies.md` | External services, third-party integrations, shared libraries |
+| Archivo | Contenido |
+|---|---|
+| `architecture.md` | Diagrama general del sistema, límites de servicios, flujo de datos |
+| `backend.md` | Rutas de API, cadena de middleware, mapeo servicio → repositorio |
+| `frontend.md` | Árbol de páginas, jerarquía de componentes, flujo de gestión de estado |
+| `data.md` | Tablas de base de datos, relaciones, historial de migraciones |
+| `dependencies.md` | Servicios externos, integraciones de terceros, librerías compartidas |
 
-### Codemap Format
+### Formato de Mapa de Código
 
-Each codemap should be token-lean — optimized for AI context consumption:
+Cada mapa debe ser reducido en tokens — optimizado para el consumo del contexto por la IA:
 
 ```markdown
-# Backend Architecture
+# Arquitectura Backend
 
-## Routes
+## Rutas
 POST /api/users → UserController.create → UserService.create → UserRepo.insert
 GET  /api/users/:id → UserController.get → UserService.findById → UserRepo.findById
 
-## Key Files
-src/services/user.ts (business logic, 120 lines)
-src/repos/user.ts (database access, 80 lines)
+## Archivos Clave
+src/services/user.ts (lógica de negocio, 120 líneas)
+src/repos/user.ts (acceso a base de datos, 80 líneas)
 
-## Dependencies
-- PostgreSQL (primary data store)
-- Redis (session cache, rate limiting)
-- Stripe (payment processing)
+## Dependencias
+- PostgreSQL (almacén de datos principal)
+- Redis (caché de sesiones, limitador de tasa)
+- Stripe (procesamiento de pagos)
 ```
 
-## Step 3: Diff Detection
+## Paso 3: Detección de Diferencias (Diff)
 
-1. If previous codemaps exist, calculate the diff percentage
-2. If changes > 30%, show the diff and request user approval before overwriting
-3. If changes <= 30%, update in place
+1. Si existen mapas de código previos, calcular el porcentaje de diferencia
+2. Si los cambios son > 30%, mostrar el diff y solicitar aprobación del usuario antes de sobrescribir
+3. Si los cambios son <= 30%, actualizar directamente
 
-## Step 4: Add Metadata
+## Paso 4: Añadir Metadatos
 
-Add a freshness header to each codemap:
+Añadir una cabecera de frescura a cada mapa de código:
 
 ```markdown
 <!-- Generated: 2026-02-11 | Files scanned: 142 | Token estimate: ~800 -->
 ```
 
-## Step 5: Save Analysis Report
+## Paso 5: Guardar Reporte de Análisis
 
-Write a summary to `.reports/codemap-diff.txt`:
-- Files added/removed/modified since last scan
-- New dependencies detected
-- Architecture changes (new routes, new services, etc.)
-- Staleness warnings for docs not updated in 90+ days
+Escribir un resumen en `.reports/codemap-diff.txt`:
+- Archivos añadidos/eliminados/modificados desde el último escaneo
+- Nuevas dependencias detectadas
+- Cambios de arquitectura (nuevas rutas, nuevos servicios, etc.)
+- Advertencias de desactualización para docs no actualizados en más de 90 días
 
-## Tips
+## Consejos
 
-- Focus on **high-level structure**, not implementation details
-- Prefer **file paths and function signatures** over full code blocks
-- Keep each codemap under **1000 tokens** for efficient context loading
-- Use ASCII diagrams for data flow instead of verbose descriptions
-- Run after major feature additions or refactoring sessions
+- Centrarse en la **estructura de alto nivel**, no en detalles de implementación
+- Preferir **rutas de archivo y firmas de función** antes que bloques enteros de código
+- Mantener cada mapa de código por debajo de **1000 tokens** para una carga de contexto eficiente
+- Usar diagramas ASCII para flujos de datos en lugar de descripciones extensas
+- Ejecutar tras la incorporación de funcionalidades grandes o sesiones de refactorización

@@ -1,132 +1,132 @@
 ---
-description: Comprehensive C++ code review for memory safety, modern C++ idioms, concurrency, and security. Invokes the cpp-reviewer agent.
+description: Revisión exhaustiva de código C++ para seguridad de memoria, modismos modernos de C++, concurrencia y seguridad. Invoca al agente cpp-reviewer.
 ---
 
-# C++ Code Review
+# Revisión de Código C++
 
-This command invokes the **cpp-reviewer** agent for comprehensive C++-specific code review.
+Este comando invoca al agente **cpp-reviewer** para una revisión de código exhaustiva y específica de C++.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Identify C++ Changes**: Find modified `.cpp`, `.hpp`, `.cc`, `.h` files via `git diff`
-2. **Run Static Analysis**: Execute `clang-tidy` and `cppcheck`
-3. **Memory Safety Scan**: Check for raw new/delete, buffer overflows, use-after-free
-4. **Concurrency Review**: Analyze thread safety, mutex usage, data races
-5. **Modern C++ Check**: Verify code follows C++17/20 conventions and best practices
-6. **Generate Report**: Categorize issues by severity
+1. **Identificar cambios en C++**: Encuentra archivos modificados `.cpp`, `.hpp`, `.cc`, `.h` mediante `git diff`
+2. **Ejecutar análisis estático**: Ejecuta `clang-tidy` y `cppcheck`
+3. **Escaneo de seguridad de memoria**: Busca `new`/`delete` manuales, desbordamientos de búfer, uso tras liberación (use-after-free)
+4. **Revisión de concurrencia**: Analiza seguridad de hilos (thread safety), uso de mutex, condiciones de carrera de datos
+5. **Comprobación de C++ moderno**: Verifica que el código siga las convenciones y mejores prácticas de C++17/20
+6. **Generar reporte**: Categoriza problemas por severidad
 
-## When to Use
+## Cuándo usarlo
 
-Use `/cpp-review` when:
-- After writing or modifying C++ code
-- Before committing C++ changes
-- Reviewing pull requests with C++ code
-- Onboarding to a new C++ codebase
-- Checking for memory safety issues
+Usa `/cpp-review` cuando:
+- Después de escribir o modificar código C++
+- Antes de confirmar cambios en C++
+- Al revisar pull requests con código C++
+- Al integrarse a un nuevo proyecto en C++
+- Al verificar posibles problemas de seguridad de memoria
 
-## Review Categories
+## Categorías de Revisión
 
-### CRITICAL (Must Fix)
-- Raw `new`/`delete` without RAII
-- Buffer overflows and use-after-free
-- Data races without synchronization
-- Command injection via `system()`
-- Uninitialized variable reads
-- Null pointer dereferences
+### CRÍTICO (Debe Corregirse)
+- Uso de `new`/`delete` manual sin RAII
+- Desbordamientos de búfer y uso tras liberación (use-after-free)
+- Condiciones de carrera de datos sin sincronización
+- Inyección de comandos a través de `system()`
+- Lectura de variables no inicializadas
+- Desreferencias de punteros nulos
 
-### HIGH (Should Fix)
-- Rule of Five violations
-- Missing `std::lock_guard` / `std::scoped_lock`
-- Detached threads without proper lifetime management
-- C-style casts instead of `static_cast`/`dynamic_cast`
-- Missing `const` correctness
+### ALTO (Debería Corregirse)
+- Violaciones de la Regla de los Cinco (Rule of Five)
+- Falta de `std::lock_guard` / `std::scoped_lock`
+- Hilos separados (detached threads) sin gestión adecuada de su ciclo de vida
+- Conversiones al estilo C en lugar de `static_cast`/`dynamic_cast`
+- Falta de corrección de `const` (const correctness)
 
-### MEDIUM (Consider)
-- Unnecessary copies (pass by value instead of `const&`)
-- Missing `reserve()` on known-size containers
-- `using namespace std;` in headers
-- Missing `[[nodiscard]]` on important return values
-- Overly complex template metaprogramming
+### MEDIO (A Considerar)
+- Copias innecesarias (pasar por valor en lugar de `const&`)
+- Falta de `reserve()` en contenedores de tamaño conocido
+- `using namespace std;` en encabezados (.h/.hpp)
+- Falta de `[[nodiscard]]` en valores de retorno importantes
+- Metaprogramación de plantillas excesivamente compleja
 
-## Automated Checks Run
+## Comprobaciones Automatizadas Ejecutadas
 
 ```bash
-# Static analysis
+# Análisis estático
 clang-tidy --checks='*,-llvmlibc-*' src/*.cpp -- -std=c++17
 
-# Additional analysis
+# Análisis adicional
 cppcheck --enable=all --suppress=missingIncludeSystem src/
 
-# Build with warnings
+# Compilación con advertencias
 cmake --build build -- -Wall -Wextra -Wpedantic
 ```
 
-## Example Usage
+## Ejemplo de Uso
 
 ```text
-User: /cpp-review
+Usuario: /cpp-review
 
-Agent:
-# C++ Code Review Report
+Agente:
+# Reporte de Revisión de Código C++
 
-## Files Reviewed
-- src/handler/user.cpp (modified)
-- src/service/auth.cpp (modified)
+## Archivos Revisados
+- src/handler/user.cpp (modificado)
+- src/service/auth.cpp (modificado)
 
-## Static Analysis Results
-✓ clang-tidy: 2 warnings
-✓ cppcheck: No issues
+## Resultados de Análisis Estático
+✓ clang-tidy: 2 advertencias
+✓ cppcheck: Sin problemas
 
-## Issues Found
+## Problemas Encontrados
 
-[CRITICAL] Memory Leak
-File: src/service/auth.cpp:45
-Issue: Raw `new` without matching `delete`
+[CRITICAL] Fuga de Memoria
+Archivo: src/service/auth.cpp:45
+Problema: `new` manual sin el `delete` correspondiente
 ```cpp
-auto* session = new Session(userId);  // Memory leak!
+auto* session = new Session(userId);  // ¡Fuga de memoria!
 cache[userId] = session;
 ```
-Fix: Use `std::unique_ptr`
+Solución: Usar `std::unique_ptr`
 ```cpp
 auto session = std::make_unique<Session>(userId);
 cache[userId] = std::move(session);
 ```
 
-[HIGH] Missing const Reference
-File: src/handler/user.cpp:28
-Issue: Large object passed by value
+[HIGH] Falta Referencia Const
+Archivo: src/handler/user.cpp:28
+Problema: Objeto grande pasado por valor
 ```cpp
-void processUser(User user) {  // Unnecessary copy
+void processUser(User user) {  // Copia innecesaria
 ```
-Fix: Pass by const reference
+Solución: Pasar por referencia constante
 ```cpp
 void processUser(const User& user) {
 ```
 
-## Summary
+## Resumen
 - CRITICAL: 1
 - HIGH: 1
 - MEDIUM: 0
 
-Recommendation: FAIL: Block merge until CRITICAL issue is fixed
+Recomendación: FAIL: Bloquear fusión hasta corregir problemas CRITICAL
 ```
 
-## Approval Criteria
+## Criterios de Aprobación
 
-| Status | Condition |
+| Estado | Condición |
 |--------|-----------|
-| PASS: Approve | No CRITICAL or HIGH issues |
-| WARNING: Warning | Only MEDIUM issues (merge with caution) |
-| FAIL: Block | CRITICAL or HIGH issues found |
+| PASS: Aprobar | Sin problemas CRITICAL o HIGH |
+| WARNING: Advertencia | Solo problemas MEDIUM (fusionar con precaución) |
+| FAIL: Bloquear | Problemas CRITICAL o HIGH encontrados |
 
-## Integration with Other Commands
+## Integración con Otros Comandos
 
-- Use `/cpp-test` first to ensure tests pass
-- Use `/cpp-build` if build errors occur
-- Use `/cpp-review` before committing
-- Use `/code-review` for non-C++ specific concerns
+- Usa `/cpp-test` primero para garantizar que las pruebas pasen
+- Usa `/cpp-build` si ocurren errores de compilación
+- Usa `/cpp-review` antes de hacer commit
+- Usa `/code-review` para aspectos generales no específicos de C++
 
-## Related
+## Relacionado
 
-- Agent: `agents/cpp-reviewer.md`
+- Agente: `agents/cpp-reviewer.md`
 - Skills: `skills/cpp-coding-standards/`, `skills/cpp-testing/`

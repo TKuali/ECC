@@ -1,502 +1,501 @@
 ---
-description: Create comprehensive feature implementation plan with codebase analysis and pattern extraction
-argument-hint: <feature description | path/to/prd.md>
+description: Crea un plan exhaustivo de implementación de características con análisis del código base y extracción de patrones
+argument-hint: <descripción de la característica | ruta/hacia/prd.md>
 ---
 
-> Adapted from PRPs-agentic-eng by Wirasm. Part of the PRP workflow series.
+> Adaptado de PRPs-agentic-eng por Wirasm. Parte de la serie de flujos de trabajo PRP.
 
-# PRP Plan
+# Planificación PRP (PRP Plan)
 
-Create a detailed, self-contained implementation plan that captures all codebase patterns, conventions, and context needed to implement a feature in a single pass.
+Crea un plan de implementación detallado e independiente que captura todos los patrones, convenciones y contexto del código base necesarios para implementar una característica en una sola pasada.
 
-**Core Philosophy**: A great plan contains everything needed to implement without asking further questions. Every pattern, every convention, every gotcha — captured once, referenced throughout.
+**Filosofía Central**: Un gran plan contiene todo lo necesario para implementar sin requerir preguntas adicionales. Cada patrón, cada convención, cada detalle crítico — capturado una vez, referenciado en todo momento.
 
-**Golden Rule**: If you would need to search the codebase during implementation, capture that knowledge NOW in the plan.
+**Regla de Oro**: Si necesitarías buscar en el código base durante la implementación, captura ese conocimiento AHORA en el plan.
 
 ---
 
-## Phase 0 — DETECT
+## Fase 0 — DETECTAR
 
-Determine input type from `$ARGUMENTS`:
+Determina el tipo de entrada a partir de `$ARGUMENTS`:
 
-| Input Pattern | Detection | Action |
+| Patrón de Entrada | Detección | Acción |
 |---|---|---|
-| Path ending in `.prd.md` | File path to PRD | Parse PRD, find next pending phase |
-| Path to `.md` with "Implementation Phases" | PRD-like document | Parse phases, find next pending |
-| Path to any other file | Reference file | Read file for context, treat as free-form |
-| Free-form text | Feature description | Proceed directly to Phase 1 |
-| Empty / blank | No input | Ask user what feature to plan |
+| Ruta que termina en `.prd.md` | Ruta a archivo PRD | Analizar PRD, buscar la siguiente fase pendiente |
+| Ruta a `.md` con "Implementation Phases" | Documento tipo PRD | Analizar fases, buscar la siguiente pendiente |
+| Ruta a cualquier otro archivo | Archivo de referencia | Leer archivo como contexto, tratar como texto libre |
+| Texto en lenguaje libre | Descripción de característica | Avanzar directamente a la Fase 1 |
+| Vacío / en blanco | Sin entrada | Preguntar al usuario qué característica planificar |
 
-### PRD Parsing (when input is a PRD)
+### Análisis de PRD (cuando la entrada es un PRD)
 
-1. Read the PRD file with `cat "$PRD_PATH"`
-2. Parse the **Implementation Phases** section
-3. Find phases by status:
-   - Look for `pending` phases
-   - Check dependency chains (a phase may depend on prior phases being `complete`)
-   - Select the **next eligible pending phase**
-4. Extract from the selected phase:
-   - Phase name and description
-   - Acceptance criteria
-   - Dependencies on prior phases
-   - Any scope notes or constraints
-5. Use the phase description as the feature to plan
+1. Lee el archivo PRD con `cat "$PRD_PATH"`
+2. Analiza la sección **Implementation Phases**
+3. Encuentra fases por estado:
+   - Busca fases `pending`
+   - Revisa cadenas de dependencias (una fase puede depender de que fases previas estén `complete`)
+   - Selecciona la **siguiente fase pendiente elegible**
+4. Extrae de la fase seleccionada:
+   - Nombre y descripción de la fase
+   - Criterios de aceptación
+   - Dependencias de fases previas
+   - Notas de alcance o restricciones
+5. Utiliza la descripción de la fase como la característica a planificar
 
-If no pending phases remain, report that all phases are complete.
+Si no quedan fases pendientes, informa que todas las fases están completadas.
 
 ---
 
-## Phase 1 — PARSE
+## Fase 1 — PARSEAR (PARSE)
 
-Extract and clarify the feature requirements.
+Extrae y aclara los requerimientos de la característica.
 
-### Feature Understanding
+### Comprensión de la Característica
 
-From the input (PRD phase or free-form description), identify:
+A partir de la entrada (fase de PRD o descripción en texto libre), identifica:
 
-- **What** is being built (concrete deliverable)
-- **Why** it matters (user value)
-- **Who** uses it (target user/system)
-- **Where** it fits (which part of the codebase)
+- **Qué** se está construyendo (entregable concreto)
+- **Por qué** es importante (valor para el usuario)
+- **Quién** lo utiliza (usuario o sistema objetivo)
+- **Dónde** encaja (qué parte del código base)
 
-### User Story
+### Historia de Usuario
 
-Format as:
+Formato:
 ```
-As a [type of user],
-I want [capability],
-So that [benefit].
+Como [tipo de usuario],
+Quiero [capacidad],
+Para [beneficio].
 ```
 
-### Complexity Assessment
+### Evaluación de Complejidad
 
-| Level | Indicators | Typical Scope |
+| Nivel | Indicadores | Alcance Típico |
 |---|---|---|
-| **Small** | Single file, isolated change, no new dependencies | 1-3 files, <100 lines |
-| **Medium** | Multiple files, follows existing patterns, minor new concepts | 3-10 files, 100-500 lines |
-| **Large** | Cross-cutting concerns, new patterns, external integrations | 10+ files, 500+ lines |
-| **XL** | Architectural changes, new subsystems, migration needed | 20+ files, consider splitting |
+| **Pequeño** | Archivo único, cambio aislado, sin dependencias nuevas | 1-3 archivos, <100 líneas |
+| **Mediano** | Múltiples archivos, sigue patrones existentes, conceptos nuevos menores | 3-10 archivos, 100-500 líneas |
+| **Grande** | Preocupaciones transversales, patrones nuevos, integraciones externas | 10+ archivos, 500+ líneas |
+| **XL** | Cambios arquitectónicos, nuevos subsistemas, migración requerida | 20+ archivos, considerar dividir |
 
-### Ambiguity Gate
+### Control de Ambigüedad (Ambiguity Gate)
 
-If any of these are unclear, **STOP and ask the user** before proceeding:
+Si alguno de estos puntos no está claro, **DETENTE y pregunta al usuario** antes de continuar:
 
-- The core deliverable is vague
-- Success criteria are undefined
-- There are multiple valid interpretations
-- Technical approach has major unknowns
+- El entregable central es vago
+- Los criterios de éxito no están definidos
+- Existen múltiples interpretaciones válidas
+- El enfoque técnico presenta grandes incógnitas
 
-Do NOT guess. Ask. A plan built on assumptions fails during implementation.
+NO adivines. Pregunta. Un plan construido sobre suposiciones fracasa durante la implementación.
 
 ---
 
-## Phase 2 — EXPLORE
+## Fase 2 — EXPLORAR (EXPLORE)
 
-Gather deep codebase intelligence. Search the codebase directly for each category below.
+Reúne inteligencia profunda del código base. Busca en el repositorio directamente para cada una de las siguientes categorías.
 
-### Codebase Search (8 Categories)
+### Búsqueda en el Código Base (8 Categorías)
 
-For each category, search using grep, find, and file reading:
+Para cada categoría, busca usando grep, find y lectura de archivos:
 
-1. **Similar Implementations** — Find existing features that resemble the planned one. Look for analogous patterns, endpoints, components, or modules.
+1. **Implementaciones Similares** — Encuentra características existentes que se asemejen a la planeada. Busca patrones, endpoints, componentes o módulos análogos.
 
-2. **Naming Conventions** — Identify how files, functions, variables, classes, and exports are named in the relevant area of the codebase.
+2. **Convenciones de Nomenclatura** — Identifica cómo se nombran archivos, funciones, variables, clases y exportaciones en el área relevante del código base.
 
-3. **Error Handling** — Find how errors are caught, propagated, logged, and returned to users in similar code paths.
+3. **Manejo de Errores** — Identifica cómo se capturan, propagan, registran y devuelven los errores a los usuarios en rutas de código similares.
 
-4. **Logging Patterns** — Identify what gets logged, at what level, and in what format.
+4. **Patrones de Logging** — Identifica qué se registra, en qué nivel y con qué formato.
 
-5. **Type Definitions** — Find relevant types, interfaces, schemas, and how they're organized.
+5. **Definiciones de Tipos** — Encuentra tipos, interfaces y esquemas relevantes, y cómo están organizados.
 
-6. **Test Patterns** — Find how similar features are tested. Note test file locations, naming, setup/teardown patterns, and assertion styles.
+6. **Patrones de Prueba** — Identifica cómo se prueban características similares. Anota ubicación de archivos de prueba, nombres, patrones de setup/teardown y estilos de aserción.
 
-7. **Configuration** — Find relevant config files, environment variables, and feature flags.
+7. **Configuración** — Encuentra archivos de configuración relevantes, variables de entorno y feature flags.
 
-8. **Dependencies** — Identify packages, imports, and internal modules used by similar features.
+8. **Dependencias** — Identifica paquetes, importaciones y módulos internos utilizados por características similares.
 
-### Codebase Analysis (5 Traces)
+### Análisis del Código Base (5 Trazas)
 
-Read relevant files to trace:
+Lee archivos relevantes para trazar:
 
-1. **Entry Points** — How does a request/action enter the system and reach the area you're modifying?
-2. **Data Flow** — How does data move through the relevant code paths?
-3. **State Changes** — What state is modified and where?
-4. **Contracts** — What interfaces, APIs, or protocols must be honored?
-5. **Patterns** — What architectural patterns are used (repository, service, controller, etc.)?
+1. **Puntos de Entrada** — ¿Cómo entra una solicitud/acción al sistema y llega al área que estás modificando?
+2. **Flujo de Datos** — ¿Cómo se mueven los datos a través de las rutas de código pertinentes?
+3. **Cambios de Estado** — ¿Qué estado se modifica y dónde?
+4. **Contratos** — ¿Qué interfaces, APIs o protocolos deben respetarse?
+5. **Patrones** — ¿Qué patrones arquitectónicos se utilizan (repositorio, servicio, controlador, etc.)?
 
-### Unified Discovery Table
+### Tabla Unificada de Descubrimiento
 
-Compile findings into a single reference:
+Compila los hallazgos en una única referencia:
 
-| Category | File:Lines | Pattern | Key Snippet |
+| Categoría | Archivo:Líneas | Patrón | Fragmento Clave |
 |---|---|---|---|
-| Naming | `src/services/userService.ts:1-5` | camelCase services, PascalCase types | `export class UserService` |
-| Error | `src/middleware/errorHandler.ts:10-25` | Custom AppError class | `throw new AppError(...)` |
+| Nomenclatura | `src/services/userService.ts:1-5` | Servicios en camelCase, tipos en PascalCase | `export class UserService` |
+| Errores | `src/middleware/errorHandler.ts:10-25` | Clase personalizada AppError | `throw new AppError(...)` |
 | ... | ... | ... | ... |
 
 ---
 
-## Phase 3 — RESEARCH
+## Fase 3 — INVESTIGAR (RESEARCH)
 
-If the feature involves external libraries, APIs, or unfamiliar technology:
+Si la característica involucra librerías externas, APIs o tecnologías no familiares:
 
-1. Search the web for official documentation
-2. Find usage examples and best practices
-3. Identify version-specific gotchas
+1. Busca en la web la documentación oficial
+2. Encuentra ejemplos de uso y mejores prácticas
+3. Identifica advertencias o detalles críticos específicos de la versión
 
-Format each finding as:
+Formatea cada hallazgo como:
 
 ```
-KEY_INSIGHT: [what you learned]
-APPLIES_TO: [which part of the plan this affects]
-GOTCHA: [any warnings or version-specific issues]
+KEY_INSIGHT: [lo que aprendiste]
+APPLIES_TO: [a qué parte del plan afecta esto]
+GOTCHA: [advertencias o problemas específicos de versión]
 ```
 
-If the feature uses only well-understood internal patterns, skip this phase and note: "No external research needed — feature uses established internal patterns."
+Si la característica utiliza únicamente patrones internos bien conocidos, omite esta fase y anota: "No se requiere investigación externa — la característica utiliza patrones internos consolidados."
 
 ---
 
-## Phase 4 — DESIGN
+## Fase 4 — DISEÑAR (DESIGN)
 
-### UX Transformation (if applicable)
+### Transformación de UX (si corresponde)
 
-Document the before/after user experience:
+Documenta la experiencia de usuario antes y después:
 
-**Before:**
+**Antes:**
 ```
 ┌─────────────────────────────┐
-│  [Current user experience]  │
-│  Show the current flow,     │
-│  what the user sees/does    │
+│  [Experiencia actual]       │
+│  Muestra el flujo actual,   │
+│  lo que el usuario ve/hace  │
 └─────────────────────────────┘
 ```
 
-**After:**
+**Después:**
 ```
 ┌─────────────────────────────┐
-│  [New user experience]      │
-│  Show the improved flow,    │
-│  what changes for the user  │
+│  [Nueva experiencia]        │
+│  Muestra el flujo mejorado, │
+│  qué cambia para el usuario │
 └─────────────────────────────┘
 ```
 
-### Interaction Changes
+### Cambios en Interacción
 
-| Touchpoint | Before | After | Notes |
+| Punto de Contacto | Antes | Después | Notas |
 |---|---|---|---|
 | ... | ... | ... | ... |
 
-If the feature is purely backend/internal with no UX change, note: "Internal change — no user-facing UX transformation."
+Si la característica es puramente de backend o interna sin impacto en UX, anota: "Cambio interno — sin transformación de UX de cara al usuario."
 
 ---
 
-## Phase 5 — ARCHITECT
+## Fase 5 — ARQUITECTURA (ARCHITECT)
 
-### Strategic Design
+### Diseño Estratégico
 
-Define the implementation approach:
+Define el enfoque de implementación:
 
-- **Approach**: High-level strategy (e.g., "Add new service layer following existing repository pattern")
-- **Alternatives Considered**: What other approaches were evaluated and why they were rejected
-- **Scope**: Concrete boundaries of what WILL be built
-- **NOT Building**: Explicit list of what is OUT OF SCOPE (prevents scope creep during implementation)
+- **Enfoque**: Estrategia de alto nivel (ej., "Añadir nueva capa de servicio siguiendo el patrón de repositorio existente")
+- **Alternativas Consideradas**: Qué otros enfoques se evaluaron y por qué fueron descartados
+- **Alcance**: Límites concretos de lo que SÍ se construirá
+- **FUERA de Alcance**: Lista explícita de lo que NO se construirá (evita desviaciones de alcance durante la implementación)
 
 ---
 
-## Phase 6 — GENERATE
+## Fase 6 — GENERAR (GENERATE)
 
-Write the full plan document using the template below. Save to `.claude/PRPs/plans/{kebab-case-feature-name}.plan.md`.
+Redacta el documento de plan completo utilizando la plantilla siguiente. Guárdalo en `.claude/PRPs/plans/{nombre-en-kebab-case}.plan.md`.
 
-Create the directory if it doesn't exist:
+Crea el directorio si no existe:
 ```bash
 mkdir -p .claude/PRPs/plans
 ```
 
-### Plan Template
+### Plantilla de Plan
 
 ````markdown
-# Plan: [Feature Name]
+# Plan: [Nombre de la Característica]
 
-## Summary
-[2-3 sentence overview]
+## Resumen
+[Descripción general de 2-3 oraciones]
 
-## User Story
-As a [user], I want [capability], so that [benefit].
+## Historia de Usuario
+Como [usuario], quiero [capacidad], para [beneficio].
 
-## Problem → Solution
-[Current state] → [Desired state]
+## Problema → Solución
+[Estado actual] → [Estado deseado]
 
-## Metadata
-- **Complexity**: [Small | Medium | Large | XL]
-- **Source PRD**: [path or "N/A"]
-- **PRD Phase**: [phase name or "N/A"]
-- **Estimated Files**: [count]
+## Metadatos
+- **Complejidad**: [Pequeño | Mediano | Grande | XL]
+- **PRD de Origen**: [ruta o "N/A"]
+- **Fase de PRD**: [nombre de la fase o "N/A"]
+- **Archivos Estimados**: [cantidad]
 
 ---
 
-## UX Design
+## Diseño UX
 
-### Before
-[ASCII diagram or "N/A — internal change"]
+### Antes
+[Diagrama ASCII o "N/A — cambio interno"]
 
-### After
-[ASCII diagram or "N/A — internal change"]
+### Después
+[Diagrama ASCII o "N/A — cambio interno"]
 
-### Interaction Changes
-| Touchpoint | Before | After | Notes |
+### Cambios de Interacción
+| Punto de Contacto | Antes | Después | Notas |
 |---|---|---|---|
 
 ---
 
-## Mandatory Reading
+## Lectura Obligatoria
 
-Files that MUST be read before implementing:
+Archivos que DEBEN leerse antes de implementar:
 
-| Priority | File | Lines | Why |
+| Prioridad | Archivo | Líneas | Motivo |
 |---|---|---|---|
-| P0 (critical) | `path/to/file` | 1-50 | Core pattern to follow |
-| P1 (important) | `path/to/file` | 10-30 | Related types |
-| P2 (reference) | `path/to/file` | all | Similar implementation |
+| P0 (crítico) | `ruta/al/archivo` | 1-50 | Patrón principal a seguir |
+| P1 (importante) | `ruta/al/archivo` | 10-30 | Tipos relacionados |
+| P2 (referencia) | `ruta/al/archivo` | todas | Implementación similar |
 
-## External Documentation
+## Documentación Externa
 
-| Topic | Source | Key Takeaway |
+| Tema | Fuente | Conclusión Clave |
 |---|---|---|
 | ... | ... | ... |
 
 ---
 
-## Patterns to Mirror
+## Patrones a Reflejar
 
-Code patterns discovered in the codebase. Follow these exactly.
+Patrones de código descubiertos en el código base. Síguelos al pie de la letra.
 
 ### NAMING_CONVENTION
-// SOURCE: [file:lines]
-[actual code snippet showing the naming pattern]
+// FUENTE: [archivo:líneas]
+[fragmento de código real mostrando el patrón de nombres]
 
 ### ERROR_HANDLING
-// SOURCE: [file:lines]
-[actual code snippet showing error handling]
+// FUENTE: [archivo:líneas]
+[fragmento de código real mostrando el manejo de errores]
 
 ### LOGGING_PATTERN
-// SOURCE: [file:lines]
-[actual code snippet showing logging]
+// FUENTE: [archivo:líneas]
+[fragmento de código real mostrando el logging]
 
 ### REPOSITORY_PATTERN
-// SOURCE: [file:lines]
-[actual code snippet showing data access]
+// FUENTE: [archivo:líneas]
+[fragmento de código real mostrando el acceso a datos]
 
 ### SERVICE_PATTERN
-// SOURCE: [file:lines]
-[actual code snippet showing service layer]
+// FUENTE: [archivo:líneas]
+[fragmento de código real mostrando la capa de servicio]
 
 ### TEST_STRUCTURE
-// SOURCE: [file:lines]
-[actual code snippet showing test setup]
+// FUENTE: [archivo:líneas]
+[fragmento de código real mostrando la estructura de pruebas]
 
 ---
 
-## Files to Change
+## Archivos a Modificar
 
-| File | Action | Justification |
+| Archivo | Acción | Justificación |
 |---|---|---|
-| `path/to/file.ts` | CREATE | New service for feature |
-| `path/to/existing.ts` | UPDATE | Add new method |
+| `ruta/al/archivo.ts` | CREAR | Nuevo servicio para la característica |
+| `ruta/al/existente.ts` | ACTUALIZAR | Añadir nuevo método |
 
-## NOT Building
+## FUERA de Alcance
 
-- [Explicit item 1 that is out of scope]
-- [Explicit item 2 that is out of scope]
-
----
-
-## Step-by-Step Tasks
-
-### Task 1: [Name]
-- **ACTION**: [What to do]
-- **IMPLEMENT**: [Specific code/logic to write]
-- **MIRROR**: [Pattern from Patterns to Mirror section to follow]
-- **IMPORTS**: [Required imports]
-- **GOTCHA**: [Known pitfall to avoid]
-- **VALIDATE**: [How to verify this task is correct]
-
-### Task 2: [Name]
-- **ACTION**: ...
-- **IMPLEMENT**: ...
-- **MIRROR**: ...
-- **IMPORTS**: ...
-- **GOTCHA**: ...
-- **VALIDATE**: ...
-
-[Continue for all tasks...]
+- [Elemento explícito 1 fuera de alcance]
+- [Elemento explícito 2 fuera de alcance]
 
 ---
 
-## Testing Strategy
+## Tareas Paso a Paso
 
-### Unit Tests
+### Tarea 1: [Nombre]
+- **ACCIÓN**: [Qué hacer]
+- **IMPLEMENTAR**: [Código/lógica específica a escribir]
+- **REFLEJAR**: [Patrón de la sección Patrones a Reflejar a seguir]
+- **IMPORTACIONES**: [Importaciones requeridas]
+- **DETALLE CRÍTICO (GOTCHA)**: [Trampa conocida a evitar]
+- **VALIDAR**: [Cómo verificar que esta tarea es correcta]
 
-| Test | Input | Expected Output | Edge Case? |
+### Tarea 2: [Nombre]
+- **ACCIÓN**: ...
+- **IMPLEMENTAR**: ...
+- **REFLEJAR**: ...
+- **IMPORTACIONES**: ...
+- **DETALLE CRÍTICO (GOTCHA)**: ...
+- **VALIDAR**: ...
+
+[Continuar para todas las tareas...]
+
+---
+
+## Estrategia de Pruebas
+
+### Pruebas Unitarias
+
+| Prueba | Entrada | Salida Esperada | ¿Caso Límite? |
 |---|---|---|---|
 | ... | ... | ... | ... |
 
-### Edge Cases Checklist
-- [ ] Empty input
-- [ ] Maximum size input
-- [ ] Invalid types
-- [ ] Concurrent access
-- [ ] Network failure (if applicable)
-- [ ] Permission denied
+### Lista de Verificación de Casos Límite
+- [ ] Entrada vacía
+- [ ] Entrada de tamaño máximo
+- [ ] Tipos inválidos
+- [ ] Acceso concurrente
+- [ ] Fallo de red (si aplica)
+- [ ] Permiso denegado
 
 ---
 
-## Validation Commands
+## Comandos de Validación
 
-### Static Analysis
+### Análisis Estático
 ```bash
-# Run type checker
-[project-specific type check command]
+# Ejecutar verificador de tipos
+[comando de comprobación de tipos específico del proyecto]
 ```
-EXPECT: Zero type errors
+ESPERADO: Cero errores de tipos
 
-### Unit Tests
+### Pruebas Unitarias
 ```bash
-# Run tests for affected area
-[project-specific test command]
+# Ejecutar pruebas del área afectada
+[comando de prueba específico del proyecto]
 ```
-EXPECT: All tests pass
+ESPERADO: Todas las pruebas pasan
 
-### Full Test Suite
+### Suite Completa de Pruebas
 ```bash
-# Run complete test suite
-[project-specific full test command]
+# Ejecutar suite completa de pruebas
+[comando de prueba completa específico del proyecto]
 ```
-EXPECT: No regressions
+ESPERADO: Sin regresiones
 
-### Database Validation (if applicable)
+### Validación de Base de Datos (si aplica)
 ```bash
-# Verify schema/migrations
-[project-specific db command]
+# Verificar esquema/migraciones
+[comando de BD específico del proyecto]
 ```
-EXPECT: Schema up to date
+ESPERADO: Esquema actualizado
 
-### Browser Validation (if applicable)
+### Validación en Navegador (si aplica)
 ```bash
-# Start dev server and verify
-[project-specific dev server command]
+# Iniciar servidor de desarrollo y verificar
+[comando de servidor de desarrollo específico del proyecto]
 ```
-EXPECT: Feature works as designed
+ESPERADO: La característica funciona según el diseño
 
-### Manual Validation
-- [ ] [Step-by-step manual verification checklist]
+### Validación Manual
+- [ ] [Lista de verificación de comprobación manual paso a paso]
 
 ---
 
-## Acceptance Criteria
-- [ ] All tasks completed
-- [ ] All validation commands pass
-- [ ] Tests written and passing
-- [ ] No type errors
-- [ ] No lint errors
-- [ ] Matches UX design (if applicable)
+## Criterios de Aceptación
+- [ ] Todas las tareas completadas
+- [ ] Todos los comandos de validación aprobados
+- [ ] Pruebas escritas y pasando
+- [ ] Sin errores de tipos
+- [ ] Sin errores de lint
+- [ ] Coincide con el diseño de UX (si aplica)
 
-## Completion Checklist
-- [ ] Code follows discovered patterns
-- [ ] Error handling matches codebase style
-- [ ] Logging follows codebase conventions
-- [ ] Tests follow test patterns
-- [ ] No hardcoded values
-- [ ] Documentation updated (if needed)
-- [ ] No unnecessary scope additions
-- [ ] Self-contained — no questions needed during implementation
+## Lista de Verificación de Finalización
+- [ ] El código sigue los patrones descubiertos
+- [ ] El manejo de errores coincide con el estilo del código base
+- [ ] El logging sigue las convenciones del código base
+- [ ] Las pruebas siguen los patrones de prueba
+- [ ] Sin valores fijos o codificados a mano (hardcoded)
+- [ ] Documentación actualizada (si es necesario)
+- [ ] Sin adiciones de alcance innecesarias
+- [ ] Autónomo — sin necesidad de hacer preguntas durante la implementación
 
-## Risks
-| Risk | Likelihood | Impact | Mitigation |
+## Riesgos
+| Riesgo | Probabilidad | Impacto | Mitigación |
 |---|---|---|---|
 | ... | ... | ... | ... |
 
-## Notes
-[Any additional context, decisions, or observations]
-```
-
----
-
-## Output
-
-### Save the Plan
-
-Write the generated plan to:
-```
-.claude/PRPs/plans/{kebab-case-feature-name}.plan.md
-```
-
-### Update PRD (if input was a PRD)
-
-If this plan was generated from a PRD phase:
-1. Update the phase status from `pending` to `in-progress`
-2. Add the plan file path as a reference in the phase
-
-### Report to User
-
-```
-## Plan Created
-
-- **File**: .claude/PRPs/plans/{kebab-case-feature-name}.plan.md
-- **Source PRD**: [path or "N/A"]
-- **Phase**: [phase name or "standalone"]
-- **Complexity**: [level]
-- **Scope**: [N files, M tasks]
-- **Key Patterns**: [top 3 discovered patterns]
-- **External Research**: [topics researched or "none needed"]
-- **Risks**: [top risk or "none identified"]
-- **Confidence Score**: [1-10] — likelihood of single-pass implementation
-
-> Next step: Run `/prp-implement .claude/PRPs/plans/{name}.plan.md` to execute this plan.
-```
-
----
-
-## Verification
-
-Before finalizing, verify the plan against these checklists:
-
-### Context Completeness
-- [ ] All relevant files discovered and documented
-- [ ] Naming conventions captured with examples
-- [ ] Error handling patterns documented
-- [ ] Test patterns identified
-- [ ] Dependencies listed
-
-### Implementation Readiness
-- [ ] Every task has ACTION, IMPLEMENT, MIRROR, and VALIDATE
-- [ ] No task requires additional codebase searching
-- [ ] Import paths are specified
-- [ ] GOTCHAs documented where applicable
-
-### Pattern Faithfulness
-- [ ] Code snippets are actual codebase examples (not invented)
-- [ ] SOURCE references point to real files and line numbers
-- [ ] Patterns cover naming, errors, logging, data access, and tests
-- [ ] New code will be indistinguishable from existing code
-
-### Validation Coverage
-- [ ] Static analysis commands specified
-- [ ] Test commands specified
-- [ ] Build verification included
-
-### UX Clarity
-- [ ] Before/after states documented (or marked N/A)
-- [ ] Interaction changes listed
-- [ ] Edge cases for UX identified
-
-### No Prior Knowledge Test
-A developer unfamiliar with this codebase should be able to implement the feature using ONLY this plan, without searching the codebase or asking questions. If not, add the missing context.
-
----
-
-## Next Steps
-
-- Run `/prp-implement <plan-path>` to execute this plan
-- Run `/plan` for quick conversational planning without artifacts
-- Run `/prp-prd` to create a PRD first if scope is unclear
+## Notas
+[Contexto adicional, decisiones u observaciones]
 ````
+
+---
+
+## Salida
+
+### Guardar el Plan
+
+Escribe el plan generado en:
+```
+.claude/PRPs/plans/{nombre-de-caracteristica-en-kebab-case}.plan.md
+```
+
+### Actualizar PRD (si la entrada fue un PRD)
+
+Si este plan se generó a partir de una fase de un PRD:
+1. Actualiza el estado de la fase de `pending` a `in-progress`
+2. Añade la ruta del archivo del plan como referencia en la fase
+
+### Reportar al Usuario
+
+```
+## Plan Creado
+
+- **Archivo**: .claude/PRPs/plans/{nombre-de-caracteristica-en-kebab-case}.plan.md
+- **PRD de Origen**: [ruta o "N/A"]
+- **Fase**: [nombre de la fase o "independiente"]
+- **Complejidad**: [nivel]
+- **Alcance**: [N archivos, M tareas]
+- **Patrones Clave**: [los 3 principales patrones descubiertos]
+- **Investigación Externa**: [temas investigados o "no requerida"]
+- **Riesgos**: [riesgo principal o "ninguno identificado"]
+- **Puntuación de Confianza**: [1-10] — probabilidad de implementación en una sola pasada
+
+> Siguiente paso: Ejecuta `/prp-implement .claude/PRPs/plans/{name}.plan.md` para ejecutar este plan.
+```
+
+---
+
+## Verificación
+
+Antes de finalizar, verifica el plan con estas listas de control:
+
+### Exhaustividad de Contexto
+- [ ] Todos los archivos relevantes descubiertos y documentados
+- [ ] Convenciones de nomenclatura capturadas con ejemplos
+- [ ] Patrones de manejo de errores documentados
+- [ ] Patrones de pruebas identificados
+- [ ] Dependencias listadas
+
+### Preparación para la Implementación
+- [ ] Cada tarea contiene ACCIÓN, IMPLEMENTAR, REFLEJAR y VALIDAR
+- [ ] Ninguna tarea requiere búsquedas adicionales en el código base
+- [ ] Rutas de importación especificadas
+- [ ] Trampas conocidas (GOTCHAs) documentadas cuando corresponda
+
+### Fidelidad a los Patrones
+- [ ] Los fragmentos de código son ejemplos reales del código base (no inventados)
+- [ ] Las referencias de FUENTE apuntan a archivos y números de línea reales
+- [ ] Los patrones cubren nombres, errores, logging, acceso a datos y pruebas
+- [ ] El nuevo código será indistinguible del código existente
+
+### Cobertura de Validación
+- [ ] Comandos de análisis estático especificados
+- [ ] Comandos de prueba especificados
+- [ ] Verificación de compilación incluida
+
+### Claridad de UX
+- [ ] Estados antes/después documentados (o marcados como N/A)
+- [ ] Cambios de interacción listados
+- [ ] Casos límite de UX identificados
+
+### Prueba de Cero Conocimiento Previo
+Un desarrollador no familiarizado con este repositorio debería ser capaz de implementar la característica usando ÚNICAMENTE este plan, sin buscar en el código ni hacer preguntas. Si no es así, añade el contexto faltante.
+
+---
+
+## Siguientes Pasos
+
+- Ejecuta `/prp-implement <ruta-del-plan>` para ejecutar este plan
+- Ejecuta `/plan` para una planificación conversacional rápida sin artefactos
+- Ejecuta `/prp-prd` para crear un PRD primero si el alcance no está claro

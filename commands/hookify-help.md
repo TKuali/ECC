@@ -1,46 +1,48 @@
 ---
-description: Get help with the hookify system
+description: Obtiene ayuda sobre el sistema hookify
 ---
 
-Display comprehensive hookify documentation.
+# Ayuda de Hookify
 
-## Hook System Overview
+Muestra la documentación completa de hookify.
 
-Hookify creates rule files that integrate with Claude Code's hook system to prevent unwanted behaviors.
+## Descripción General del Sistema de Hooks
 
-### Event Types
+Hookify crea archivos de reglas que se integran con el sistema de hooks de Claude Code para prevenir comportamientos no deseados.
 
-- `bash`: triggers on Bash tool use and matches command patterns
-- `file`: triggers on Write/Edit tool use and matches file paths
-- `stop`: triggers when a session ends
-- `prompt`: triggers on user message submission and matches input patterns
-- `all`: triggers on all events
+### Tipos de Eventos
 
-### Rule File Format
+- `bash`: se activa con el uso de la herramienta Bash y evalúa patrones en los comandos
+- `file`: se activa con el uso de las herramientas Write/Edit y evalúa rutas de archivo
+- `stop`: se activa cuando finaliza una sesión
+- `prompt`: se activa al enviar mensajes de usuario y evalúa patrones en las entradas
+- `all`: se activa en todos los eventos
 
-Files are stored as `.claude/hookify.{name}.local.md`:
+### Formato de Archivo de Regla
+
+Los archivos se almacenan como `.claude/hookify.{name}.local.md`:
 
 ```yaml
 ---
-name: descriptive-name
+name: nombre-descriptivo
 enabled: true
 event: bash|file|stop|prompt|all
 action: block|warn
-pattern: "regex pattern to match"
+pattern: "patron regex a coincidir"
 ---
-Message to display when rule triggers.
-Supports multiple lines.
+Mensaje a mostrar cuando la regla se active.
+Admite múltiples líneas.
 ```
 
-### Commands
+### Comandos
 
-- `/hookify [description]` creates new rules and auto-analyzes the conversation when no description is given
-- `/hookify-list` lists configured rules
-- `/hookify-configure` toggles rules on or off
+- `/hookify [descripcion]` crea nuevas reglas y autoanaliza la conversación si no se proporciona descripción
+- `/hookify-list` lista las reglas configuradas
+- `/hookify-configure` activa o desactiva reglas
 
-### Pattern Tips
+### Consejos para Patrones
 
-- use regex syntax
-- for `bash`, match against the full command string
-- for `file`, match against the file path
-- test patterns before deploying
+- utilizar sintaxis regex
+- para `bash`, evaluar contra la cadena completa del comando
+- para `file`, evaluar contra la ruta del archivo
+- probar los patrones antes del despliegue

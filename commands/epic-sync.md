@@ -1,23 +1,23 @@
 ---
-description: Sync epic issue bodies, labels, and local coordination snapshots from GitHub.
+description: Sincroniza los cuerpos de los issues de épicas, etiquetas y capturas de coordinación local desde GitHub.
 ---
 
 # /epic-sync
 
-Run a deterministic sync for epic issues.
+Ejecuta una sincronización determinista para issues de épicas.
 
 ```bash
 node scripts/github-coordination.js sync --repo <owner/repo>
 ```
 
-What this does:
+Qué hace este comando:
 
-1. Reads issue bodies as the canonical epic state.
-2. Reconciles the coordination block with labels.
-3. Writes a fresh local snapshot for each epic issue.
-4. Keeps the SQLite cache aligned with GitHub.
+1. Lee los cuerpos de los issues como el estado canónico de la épica.
+2. Concilia el bloque de coordinación con las etiquetas.
+3. Escribe una nueva captura instantánea local para cada issue de épica.
+4. Mantiene la caché de SQLite alineada con GitHub.
 
-Compatibility aliases:
+Alias de compatibilidad:
 
 - `/projects`
 - `/work-items sync-github`

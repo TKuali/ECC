@@ -1,275 +1,275 @@
 ---
-description: Save current session state to a dated file in ~/.claude/session-data/ so work can be resumed in a future session with full context.
+description: Guarda el estado de la sesión actual en un archivo fechado en ~/.claude/session-data/ para que el trabajo pueda reanudarse en una sesión futura con contexto completo.
 ---
 
-# Save Session Command
+# Comando Guardar Sesión (Save Session)
 
-Capture everything that happened in this session — what was built, what worked, what failed, what's left — and write it to a dated file so the next session can pick up exactly where this one left off.
+Captura todo lo ocurrido durante esta sesión —lo que se construyó, lo que funcionó, lo que falló, lo que queda pendiente— y escríbelo en un archivo fechado para que la siguiente sesión pueda continuar exactamente donde terminó esta.
 
-## When to Use
+## Cuándo usarlo
 
-- End of a work session before closing Claude Code
-- Before hitting context limits (run this first, then start a fresh session)
-- After solving a complex problem you want to remember
-- Any time you need to hand off context to a future session
+- Al final de una jornada o sesión de trabajo antes de cerrar Claude Code
+- Antes de alcanzar los límites de contexto (ejecuta esto primero y luego inicia una sesión limpia)
+- Después de resolver un problema complejo que desees recordar
+- Cada vez que necesites transferir contexto a una sesión futura
 
-## Process
+## Proceso
 
-### Step 1: Gather context
+### Paso 1: Recopilar contexto
 
-Before writing the file, collect:
+Antes de escribir el archivo, reúne:
 
-- Read all files modified during this session (use git diff or recall from conversation)
-- Review what was discussed, attempted, and decided
-- Note any errors encountered and how they were resolved (or not)
-- Check current test/build status if relevant
+- Lee todos los archivos modificados durante esta sesión (usa git diff o repasa la conversación)
+- Revisa lo que se debatió, se intentó y se decidió
+- Toma nota de cualquier error encontrado y cómo se resolvió (o no)
+- Comprueba el estado actual de pruebas y compilación si es relevante
 
-### Step 2: Create the sessions folder if it doesn't exist
+### Paso 2: Crear la carpeta de sesiones si no existe
 
-Create the canonical sessions folder in the user's Claude home directory:
+Crea la carpeta canónica de sesiones en el directorio home de Claude del usuario:
 
 ```bash
 mkdir -p ~/.claude/session-data
 ```
 
-### Step 3: Write the session file
+### Paso 3: Escribir el archivo de sesión
 
-Create `~/.claude/session-data/YYYY-MM-DD-<short-id>-session.tmp`, using today's actual date and a short-id that satisfies the rules enforced by `SESSION_FILENAME_REGEX` in `session-manager.js`:
+Crea `~/.claude/session-data/AAAA-MM-DD-<short-id>-session.tmp`, utilizando la fecha real de hoy y un identificador corto (short-id) que cumpla con las reglas impuestas por `SESSION_FILENAME_REGEX` en `session-manager.js`:
 
-- Compatibility characters: letters `a-z` / `A-Z`, digits `0-9`, hyphens `-`, underscores `_`
-- Compatibility minimum length: 1 character
-- Recommended style for new files: lowercase letters, digits, and hyphens with 8+ characters to avoid collisions
+- Caracteres compatibles: letras `a-z` / `A-Z`, dígitos `0-9`, guiones `-`, guiones bajos `_`
+- Longitud mínima de compatibilidad: 1 carácter
+- Estilo recomendado para archivos nuevos: letras minúsculas, dígitos y guiones con 8 o más caracteres para evitar colisiones
 
-Valid examples: `abc123de`, `a1b2c3d4`, `frontend-worktree-1`, `ChezMoi_2`
-Avoid for new files: `A`, `test_id1`, `ABC123de`
+Ejemplos válidos: `abc123de`, `a1b2c3d4`, `frontend-worktree-1`, `ChezMoi_2`
+Evitar en archivos nuevos: `A`, `test_id1`, `ABC123de`
 
-Full valid filename example: `2024-01-15-abc123de-session.tmp`
+Ejemplo completo de nombre válido: `2024-01-15-abc123de-session.tmp`
 
-The legacy filename `YYYY-MM-DD-session.tmp` is still valid, but new session files should prefer the short-id form to avoid same-day collisions.
+El nombre de archivo heredado `AAAA-MM-DD-session.tmp` sigue siendo válido, pero los nuevos archivos de sesión deben preferir la forma con short-id para evitar colisiones en el mismo día.
 
-### Step 4: Populate the file with all sections below
+### Paso 4: Poblar el archivo con todas las secciones siguientes
 
-Write every section honestly. Do not skip sections — write "Nothing yet" or "N/A" if a section genuinely has no content. An incomplete file is worse than an honest empty section.
+Escribe cada sección con honestidad. No omitas secciones — escribe "Nada aún" o "N/A" si una sección genuinamente no tiene contenido. Un archivo incompleto es peor que una sección honestamente vacía.
 
-### Step 5: Show the file to the user
+### Paso 5: Mostrar el archivo al usuario
 
-After writing, display the full contents and ask:
+Tras escribirlo, muestra el contenido completo y pregunta:
 
 ```
-Session saved to [actual resolved path to the session file]
+Sesión guardada en [ruta real resuelta al archivo de sesión]
 
-Does this look accurate? Anything to correct or add before we close?
+¿Se ve preciso? ¿Hay algo que corregir o añadir antes de cerrar?
 ```
 
-Wait for confirmation. Make edits if requested.
+Espera la confirmación. Realiza modificaciones si se solicitan.
 
 ---
 
-## Session File Format
+## Formato del Archivo de Sesión
 
 ```markdown
-# Session: YYYY-MM-DD
+# Sesión: AAAA-MM-DD
 
-**Started:** [approximate time if known]
-**Last Updated:** [current time]
-**Project:** [project name or path]
-**Topic:** [one-line summary of what this session was about]
-
----
-
-## What We Are Building
-
-[1-3 paragraphs describing the feature, bug fix, or task. Include enough
-context that someone with zero memory of this session can understand the goal.
-Include: what it does, why it's needed, how it fits into the larger system.]
+**Iniciada:** [hora aproximada si se conoce]
+**Última Actualización:** [hora actual]
+**Proyecto:** [nombre o ruta del proyecto]
+**Tema:** [resumen de una línea sobre qué trató esta sesión]
 
 ---
 
-## What WORKED (with evidence)
+## Qué Estamos Construyendo
 
-[List only things that are confirmed working. For each item include WHY you
-know it works — test passed, ran in browser, Postman returned 200, etc.
-Without evidence, move it to "Not Tried Yet" instead.]
-
-- **[thing that works]** — confirmed by: [specific evidence]
-- **[thing that works]** — confirmed by: [specific evidence]
-
-If nothing is confirmed working yet: "Nothing confirmed working yet — all approaches still in progress or untested."
+[1-3 párrafos describiendo la característica, corrección de error o tarea. Incluye
+suficiente contexto para que alguien sin memoria previa de esta sesión entienda el objetivo.
+Incluye: qué hace, por qué es necesario, cómo encaja en el sistema general.]
 
 ---
 
-## What Did NOT Work (and why)
+## Qué FUNCIONÓ (con evidencias)
 
-[This is the most important section. List every approach tried that failed.
-For each failure write the EXACT reason so the next session doesn't retry it.
-Be specific: "threw X error because Y" is useful. "didn't work" is not.]
+[Lista únicamente lo que esté confirmado que funciona. Para cada elemento incluye POR QUÉ
+sabes que funciona — prueba superada, probado en navegador, Postman devolvió 200, etc.
+Sin evidencia, muévelo a "Qué no se ha intentado aún".]
 
-- **[approach tried]** — failed because: [exact reason / error message]
-- **[approach tried]** — failed because: [exact reason / error message]
+- **[cosa que funciona]** — confirmado por: [evidencia específica]
+- **[cosa que funciona]** — confirmado por: [evidencia específica]
 
-If nothing failed: "No failed approaches yet."
-
----
-
-## What Has NOT Been Tried Yet
-
-[Approaches that seem promising but haven't been attempted. Ideas from the
-conversation. Alternative solutions worth exploring. Be specific enough that
-the next session knows exactly what to try.]
-
-- [approach / idea]
-- [approach / idea]
-
-If nothing is queued: "No specific untried approaches identified."
+Si aún no hay nada confirmado: "Nada confirmado como funcional todavía — todos los enfoques siguen en progreso o sin probar."
 
 ---
 
-## Current State of Files
+## Qué NO Funcionó (y por qué)
 
-[Every file touched this session. Be precise about what state each file is in.]
+[Esta es la sección más importante. Lista cada enfoque probado que haya fallado.
+Para cada fallo escribe la razón EXACTA para que la siguiente sesión no lo vuelva a intentar.
+Sé específico: "lanzó el error X debido a Y" es útil. "no funcionó" no lo es.]
 
-| File              | Status         | Notes                      |
+- **[enfoque probado]** — falló debido a: [motivo exacto / mensaje de error]
+- **[enfoque probado]** — falló debido a: [motivo exacto / mensaje de error]
+
+Si nada falló: "No hay enfoques fallidos todavía."
+
+---
+
+## Qué NO se ha Intentado Aún
+
+[Enfoques prometedores pero no probados. Ideas surgidas de la conversación.
+Soluciones alternativas que valga la pena explorar. Sé lo bastante específico para que
+la siguiente sesión sepa con exactitud qué probar.]
+
+- [enfoque / idea]
+- [enfoque / idea]
+
+Si no hay nada en cola: "No se identificaron enfoques no probados específicos."
+
+---
+
+## Estado Actual de los Archivos
+
+[Cada archivo tocado en esta sesión. Sé preciso con el estado de cada uno.]
+
+| Archivo           | Estado         | Notas                      |
 | ----------------- | -------------- | -------------------------- |
-| `path/to/file.ts` | PASS: Complete    | [what it does]             |
-| `path/to/file.ts` |  In Progress | [what's done, what's left] |
-| `path/to/file.ts` | FAIL: Broken      | [what's wrong]             |
-| `path/to/file.ts` |  Not Started | [planned but not touched]  |
+| `path/to/file.ts` | PASS: Completo    | [qué hace]                 |
+| `path/to/file.ts` |  En Progreso | [qué está hecho, qué falta]|
+| `path/to/file.ts` | FAIL: Roto        | [cuál es el problema]      |
+| `path/to/file.ts` |  No Iniciado | [planificado pero no tocado]|
 
-If no files were touched: "No files modified this session."
-
----
-
-## Decisions Made
-
-[Architecture choices, tradeoffs accepted, approaches chosen and why.
-These prevent the next session from relitigating settled decisions.]
-
-- **[decision]** — reason: [why this was chosen over alternatives]
-
-If no significant decisions: "No major decisions made this session."
+Si no se tocaron archivos: "No se modificaron archivos en esta sesión."
 
 ---
 
-## Blockers & Open Questions
+## Decisiones Tomadas
 
-[Anything unresolved that the next session needs to address or investigate.
-Questions that came up but weren't answered. External dependencies waiting on.]
+[Opciones de arquitectura, concesiones aceptadas, enfoques elegidos y motivos.
+Esto evita que la siguiente sesión vuelva a debatir decisiones ya tomadas.]
 
-- [blocker / open question]
+- **[decisión]** — motivo: [por qué se eligió sobre alternativas]
 
-If none: "No active blockers."
-
----
-
-## Exact Next Step
-
-[If known: The single most important thing to do when resuming. Be precise
-enough that resuming requires zero thinking about where to start.]
-
-[If not known: "Next step not determined — review 'What Has NOT Been Tried Yet'
-and 'Blockers' sections to decide on direction before starting."]
+Si no hubo decisiones significativas: "No se tomaron decisiones importantes en esta sesión."
 
 ---
 
-## Environment & Setup Notes
+## Bloqueadores y Preguntas Abiertas
 
-[Only fill this if relevant — commands needed to run the project, env vars
-required, services that need to be running, etc. Skip if standard setup.]
+[Cualquier aspecto no resuelto que la siguiente sesión deba abordar o investigar.
+Preguntas que surgieron pero no fueron respondidas. Dependencias externas pendientes.]
 
-[If none: omit this section entirely.]
+- [bloqueador / pregunta abierta]
+
+Si no hay: "No hay bloqueadores activos."
+
+---
+
+## Siguiente Paso Exacto
+
+[Si se conoce: La acción más importante que realizar al reanudar. Sé lo bastante
+preciso para que reanudar no requiera pensar por dónde empezar.]
+
+[Si no se conoce: "Siguiente paso no determinado — revisar las secciones 'Qué NO se ha intentado aún'
+y 'Bloqueadores' para decidir la dirección antes de comenzar."]
+
+---
+
+## Notas de Entorno y Configuración
+
+[Rellenar solo si es relevante — comandos necesarios para ejecutar el proyecto, variables
+de entorno requeridas, servicios que deben estar corriendo, etc. Omitir si es configuración estándar.]
+
+[Si no hay: omitir esta sección completamente.]
 ```
 
 ---
 
-## Example Output
+## Ejemplo de Salida
 
 ```markdown
-# Session: 2024-01-15
+# Sesión: 2024-01-15
 
-**Started:** ~2pm
-**Last Updated:** 5:30pm
-**Project:** my-app
-**Topic:** Building JWT authentication with httpOnly cookies
-
----
-
-## What We Are Building
-
-User authentication system for the Next.js app. Users register with email/password,
-receive a JWT stored in an httpOnly cookie (not localStorage), and protected routes
-check for a valid token via middleware. The goal is session persistence across browser
-refreshes without exposing the token to JavaScript.
+**Iniciada:** ~2pm
+**Última Actualización:** 5:30pm
+**Proyecto:** my-app
+**Tema:** Construcción de autenticación JWT con cookies httpOnly
 
 ---
 
-## What WORKED (with evidence)
+## Qué Estamos Construyendo
 
-- **`/api/auth/register` endpoint** — confirmed by: Postman POST returns 200 with user
-  object, row visible in Supabase dashboard, bcrypt hash stored correctly
-- **JWT generation in `lib/auth.ts`** — confirmed by: unit test passes
-  (`npm test -- auth.test.ts`), decoded token at jwt.io shows correct payload
-- **Password hashing** — confirmed by: `bcrypt.compare()` returns true in test
-
----
-
-## What Did NOT Work (and why)
-
-- **Next-Auth library** — failed because: conflicts with our custom Prisma adapter,
-  threw "Cannot use adapter with credentials provider in this configuration" on every
-  request. Not worth debugging — too opinionated for our setup.
-- **Storing JWT in localStorage** — failed because: SSR renders happen before
-  localStorage is available, caused React hydration mismatch error on every page load.
-  This approach is fundamentally incompatible with Next.js SSR.
+Sistema de autenticación de usuarios para la app en Next.js. Los usuarios se registran con correo/contraseña,
+reciben un JWT almacenado en una cookie httpOnly (no en localStorage), y las rutas protegidas
+verifican la validez del token mediante middleware. El objetivo es mantener la sesión tras recargar
+la página sin exponer el token a JavaScript.
 
 ---
 
-## What Has NOT Been Tried Yet
+## Qué FUNCIONÓ (con evidencias)
 
-- Store JWT as httpOnly cookie in the login route response (most likely solution)
-- Use `cookies()` from `next/headers` to read token in server components
-- Write middleware.ts to protect routes by checking cookie existence
+- **Endpoint `/api/auth/register`** — confirmado por: POST en Postman devuelve 200 con el objeto de
+  usuario, fila visible en el panel de Supabase, hash de bcrypt guardado correctamente
+- **Generación de JWT en `lib/auth.ts`** — confirmado por: prueba unitaria aprobada
+  (`npm test -- auth.test.ts`), token decodificado en jwt.io muestra el payload correcto
+- **Hash de contraseña** — confirmado por: `bcrypt.compare()` retorna true en la prueba
 
 ---
 
-## Current State of Files
+## Qué NO Funcionó (y por qué)
 
-| File                             | Status         | Notes                                           |
+- **Librería Next-Auth** — falló debido a: conflicto con nuestro adaptador personalizado de Prisma,
+  arrojó "Cannot use adapter with credentials provider in this configuration" en cada
+  solicitud. No vale la pena depurarlo — impone demasiadas restricciones para nuestra configuración.
+- **Guardar JWT en localStorage** — falló debido a: el renderizado SSR ocurre antes de que
+  localStorage esté disponible, provocando error de discordancia de hidratación en cada carga.
+  Este enfoque es fundamentalmente incompatible con el SSR de Next.js.
+
+---
+
+## Qué NO se ha Intentado Aún
+
+- Guardar el JWT como cookie httpOnly en la respuesta de la ruta de login (solución más probable)
+- Usar `cookies()` de `next/headers` para leer el token en componentes de servidor
+- Escribir middleware.ts para proteger rutas comprobando la existencia de la cookie
+
+---
+
+## Estado Actual de los Archivos
+
+| Archivo                          | Estado         | Notas                                           |
 | -------------------------------- | -------------- | ----------------------------------------------- |
-| `app/api/auth/register/route.ts` | PASS: Complete    | Works, tested                                   |
-| `app/api/auth/login/route.ts`    |  In Progress | Token generates but not setting cookie yet      |
-| `lib/auth.ts`                    | PASS: Complete    | JWT helpers, all tested                         |
-| `middleware.ts`                  |  Not Started | Route protection, needs cookie read logic first |
-| `app/login/page.tsx`             |  Not Started | UI not started                                  |
+| `app/api/auth/register/route.ts` | PASS: Completo    | Funciona, testeado                              |
+| `app/api/auth/login/route.ts`    |  En Progreso | Genera token pero aún no establece la cookie    |
+| `lib/auth.ts`                    | PASS: Completo    | Helpers de JWT, todos testeados                 |
+| `middleware.ts`                  |  No Iniciado | Protección de rutas, requiere lectura de cookie |
+| `app/login/page.tsx`             |  No Iniciado | Interfaz no iniciada                            |
 
 ---
 
-## Decisions Made
+## Decisiones Tomadas
 
-- **httpOnly cookie over localStorage** — reason: prevents XSS token theft, works with SSR
-- **Custom auth over Next-Auth** — reason: Next-Auth conflicts with our Prisma setup, not worth the fight
-
----
-
-## Blockers & Open Questions
-
-- Does `cookies().set()` work inside a Route Handler or only in Server Actions? Need to verify.
+- **Cookie httpOnly sobre localStorage** — motivo: previene robo de tokens por XSS, funciona con SSR
+- **Autenticación propia sobre Next-Auth** — motivo: Next-Auth entra en conflicto con nuestra configuración de Prisma
 
 ---
 
-## Exact Next Step
+## Bloqueadores y Preguntas Abiertas
 
-In `app/api/auth/login/route.ts`, after generating the JWT, set it as an httpOnly
-cookie using `cookies().set('token', jwt, { httpOnly: true, secure: true, sameSite: 'strict' })`.
-Then test with Postman — the response should include a `Set-Cookie` header.
+- ¿Funciona `cookies().set()` dentro de un Route Handler o solo en Server Actions? Requiere comprobación.
+
+---
+
+## Siguiente Paso Exacto
+
+En `app/api/auth/login/route.ts`, tras generar el JWT, establecerlo como una cookie
+httpOnly usando `cookies().set('token', jwt, { httpOnly: true, secure: true, sameSite: 'strict' })`.
+Luego probar con Postman — la respuesta debe incluir el encabezado `Set-Cookie`.
 ```
 
 ---
 
-## Notes
+## Notas
 
-- Each session gets its own file — never append to a previous session's file
-- The "What Did NOT Work" section is the most critical — future sessions will blindly retry failed approaches without it
-- If the user asks to save mid-session (not just at the end), save what's known so far and mark in-progress items clearly
-- The file is meant to be read by Claude at the start of the next session via `/resume-session`
-- Use the canonical global session store: `~/.claude/session-data/`
-- Prefer the short-id filename form (`YYYY-MM-DD-<short-id>-session.tmp`) for any new session file
+- Cada sesión tiene su propio archivo — nunca añadas contenido al final de un archivo de sesión previo
+- La sección "Qué NO Funcionó" es la más crítica — sesiones futuras reintentarán a ciegas enfoques fallidos si falta
+- Si el usuario solicita guardar a mitad de sesión, guarda lo conocido hasta el momento y marca con claridad los elementos en progreso
+- El archivo está pensado para ser leído por Claude al comienzo de la siguiente sesión mediante `/resume-session`
+- Usa el almacén canónico global de sesiones: `~/.claude/session-data/`
+- Prefiere el formato de nombre con short-id (`AAAA-MM-DD-<short-id>-session.tmp`) para cualquier archivo nuevo de sesión

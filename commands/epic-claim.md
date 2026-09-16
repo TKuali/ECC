@@ -1,25 +1,25 @@
 ---
-description: Claim an epic issue, stamp coordination state, and sync local ownership.
+description: Reclama un issue de tipo épica, registra el estado de coordinación y sincroniza la asignación local.
 ---
 
 # /epic-claim
 
-Claim one epic issue as the source of truth for a unit of work.
+Reclama un issue de épica como la fuente única de verdad para una unidad de trabajo.
 
-Use the coordination script:
+Usa el script de coordinación:
 
 ```bash
 node scripts/github-coordination.js claim <issue-number> --repo <owner/repo> --actor <login>
 ```
 
-What this does:
+Qué hace este comando:
 
-1. Loads the issue body and coordination block.
-2. Marks the epic as claimed in GitHub issue state.
-3. Updates labels and the local SQLite cache.
-4. Appends an audit comment for the claim.
+1. Carga el cuerpo del issue y el bloque de coordinación.
+2. Marca la épica como reclamada en el estado del issue en GitHub.
+3. Actualiza las etiquetas y la caché local de SQLite.
+4. Añade un comentario de auditoría correspondiente al reclamo.
 
-Compatibility aliases:
+Alias de compatibilidad:
 
 - `/orch-add-feature`
 - `/orch-change-feature`

@@ -1,30 +1,30 @@
 ---
-description: Create a multi-model implementation plan without modifying production code.
+description: Crea un plan de implementación multimodelo sin modificar código de producción.
 ---
 
-# Plan - Multi-Model Collaborative Planning
+# Plan - Planificación Colaborativa Multimodelo
 
-Multi-model collaborative planning - Context retrieval + Dual-model analysis → Generate step-by-step implementation plan.
+Planificación colaborativa multimodelo - Recuperación de contexto + Análisis con doble modelo → Generación de plan de implementación paso a paso.
 
-> **Prerequisite:** Requires the external `ccg-workflow` runtime, which is **not** part of the base ECC install. Initialize it with `npx ccg-workflow` to provision `~/.claude/bin/codeagent-wrapper` and the `~/.claude/.ccg/prompts/*` role files this command depends on. Without that runtime, this command will not run correctly.
+> **Prerrequisito:** Requiere el entorno de ejecución externo `ccg-workflow`, el cual **no** forma parte de la instalación base de ECC. Inicialízalo con `npx ccg-workflow` para aprovisionar `~/.claude/bin/codeagent-wrapper` y los archivos de rol `~/.claude/.ccg/prompts/*` de los que depende este comando. Sin ese entorno, este comando no funcionará correctamente.
 
 $ARGUMENTS
 
 ---
 
-## Core Protocols
+## Protocolos Fundamentales
 
-- **Language Protocol**: Use **English** when interacting with tools/models, communicate with user in their language
-- **Mandatory Parallel**: Codex/Antigravity calls MUST use `run_in_background: true` (including single model calls, to avoid blocking main thread)
-- **Code Sovereignty**: External models have **zero filesystem write access**, all modifications by Claude
-- **Stop-Loss Mechanism**: Do not proceed to next phase until current phase output is validated
-- **Planning Only**: This command allows reading context and writing to `.claude/plan/*` plan files, but **NEVER modify production code**
+- **Protocolo de Lenguaje**: Usar **inglés** al interactuar con herramientas/modelos externos, comunicarse con el usuario en su propio idioma
+- **Paralelismo Obligatorio**: Las llamadas a Codex/Antigravity DEBEN usar `run_in_background: true` (incluidas llamadas a un solo modelo, para no bloquear el hilo principal)
+- **Soberanía del Código**: Los modelos externos tienen **cero acceso de escritura en el sistema de archivos**, todas las modificaciones las realiza Claude
+- **Mecanismo de Contención de Pérdidas (Stop-Loss)**: No avanzar a la siguiente fase hasta que la salida de la fase actual haya sido validada
+- **Solo Planificación**: Este comando permite leer contexto y escribir en los archivos de plan `.claude/plan/*`, pero **NUNCA modificar código de producción**
 
 ---
 
-## Multi-Model Call Specification
+## Especificación de Llamadas Multimodelo
 
-**Call Syntax** (parallel: use `run_in_background: true`):
+**Sintaxis de Llamada** (en paralelo: usar `run_in_background: true`):
 
 ```
 Bash({
@@ -38,237 +38,237 @@ OUTPUT: Step-by-step implementation plan with pseudo-code. DO NOT modify any fil
 EOF",
   run_in_background: true,
   timeout: 3600000,
-  description: "Brief description"
+  description: "Breve descripción"
 })
 ```
 
-**Model Parameter Notes**:
-- No extra model flag is needed for `--backend antigravity` or `--backend codex`; `codeagent-wrapper` picks each backend's default model.
+**Notas sobre Parámetros del Modelo**:
+- No se requiere ningún indicador extra de modelo para `--backend antigravity` o `--backend codex`; `codeagent-wrapper` selecciona el modelo por defecto de cada backend.
 
-**Role Prompts**:
+**Prompts de Roles**:
 
-| Phase | Codex | Antigravity |
-|-------|-------|--------|
-| Analysis | `~/.claude/.ccg/prompts/codex/analyzer.md` | `~/.claude/.ccg/prompts/antigravity/analyzer.md` |
-| Planning | `~/.claude/.ccg/prompts/codex/architect.md` | `~/.claude/.ccg/prompts/antigravity/architect.md` |
+| Fase | Codex | Antigravity |
+|-------|-------|-------------|
+| Análisis | `~/.claude/.ccg/prompts/codex/analyzer.md` | `~/.claude/.ccg/prompts/antigravity/analyzer.md` |
+| Planificación | `~/.claude/.ccg/prompts/codex/architect.md` | `~/.claude/.ccg/prompts/antigravity/architect.md` |
 
-**Session Reuse**: Each call returns `SESSION_ID: xxx` (typically output by wrapper), **MUST save** for subsequent `/ccg:execute` use.
+**Reutilización de Sesión**: Cada llamada devuelve `SESSION_ID: xxx` (habitualmente emitido por el wrapper), **DEBE guardarse** para su posterior uso en `/ccg:execute`.
 
-**Wait for Background Tasks** (max timeout 600000ms = 10 minutes):
+**Espera de Tareas en Segundo Plano** (tiempo de espera máximo 600000ms = 10 minutos):
 
 ```
 TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 ```
 
-**IMPORTANT**:
-- Must specify `timeout: 600000`, otherwise default 30 seconds will cause premature timeout
-- If still incomplete after 10 minutes, continue polling with `TaskOutput`, **NEVER kill the process**
-- If waiting is skipped due to timeout, **MUST call `AskUserQuestion` to ask user whether to continue waiting or kill task**
+**IMPORTANTE**:
+- Debe especificarse `timeout: 600000`, de lo contrario el valor predeterminado de 30 segundos provocará un tiempo de espera prematuro.
+- Si aún no se completa tras 10 minutos, continúa consultando con `TaskOutput`, **NUNCA finalices el proceso abruptamente**.
+- Si la espera se interrumpe por tiempo de espera, **DEBE llamarse a `AskUserQuestion` para consultar al usuario si continuar esperando o finalizar la tarea**.
 
 ---
 
-## Execution Workflow
+## Flujo de Trabajo de Ejecución
 
-**Planning Task**: $ARGUMENTS
+**Tarea de Planificación**: $ARGUMENTS
 
-### Phase 1: Full Context Retrieval
+### Fase 1: Recuperación Completa de Contexto
 
-`[Mode: Research]`
+`[Modo: Investigación]`
 
-#### 1.1 Prompt Enhancement (MUST execute first)
+#### 1.1 Mejora de Prompt (DEBE ejecutarse primero)
 
-**If ace-tool MCP is available**, call `mcp__ace-tool__enhance_prompt` tool:
+**Si el MCP ace-tool está disponible**, invoca la herramienta `mcp__ace-tool__enhance_prompt`:
 
 ```
 mcp__ace-tool__enhance_prompt({
   prompt: "$ARGUMENTS",
-  conversation_history: "<last 5-10 conversation turns>",
+  conversation_history: "<últimos 5-10 turnos de conversación>",
   project_root_path: "$PWD"
 })
 ```
 
-Wait for enhanced prompt, **replace original $ARGUMENTS with enhanced result** for all subsequent phases.
+Espera el prompt mejorado y **sustituye el $ARGUMENTS original por el resultado mejorado** para todas las fases siguientes.
 
-**If ace-tool MCP is NOT available**: Skip this step and use the original `$ARGUMENTS` as-is for all subsequent phases.
+**Si el MCP ace-tool NO está disponible**: Omite este paso y utiliza el `$ARGUMENTS` original tal como está para todas las fases posteriores.
 
-#### 1.2 Context Retrieval
+#### 1.2 Recuperación de Contexto
 
-**If ace-tool MCP is available**, call `mcp__ace-tool__search_context` tool:
+**Si el MCP ace-tool está disponible**, invoca la herramienta `mcp__ace-tool__search_context`:
 
 ```
 mcp__ace-tool__search_context({
-  query: "<semantic query based on enhanced requirement>",
+  query: "<consulta semántica basada en el requisito mejorado>",
   project_root_path: "$PWD"
 })
 ```
 
-- Build semantic query using natural language (Where/What/How)
-- **NEVER answer based on assumptions**
+- Construye la consulta semántica usando lenguaje natural (Dónde/Qué/Cómo)
+- **NUNCA respondas basándote en suposiciones**
 
-**If ace-tool MCP is NOT available**, use Claude Code built-in tools as fallback:
-1. **Glob**: Find relevant files by pattern (e.g., `Glob("**/*.ts")`, `Glob("src/**/*.py")`)
-2. **Grep**: Search for key symbols, function names, class definitions (e.g., `Grep("className|functionName")`)
-3. **Read**: Read the discovered files to gather complete context
-4. **Task (Explore agent)**: For deeper exploration, use `Task` with `subagent_type: "Explore"` to search across the codebase
+**Si el MCP ace-tool NO está disponible**, utiliza las herramientas nativas de Claude Code como alternativa:
+1. **Glob**: Encuentra archivos relevantes por patrón (ej., `Glob("**/*.ts")`, `Glob("src/**/*.py")`)
+2. **Grep**: Busca símbolos clave, nombres de función, definiciones de clase (ej., `Grep("className|functionName")`)
+3. **Read**: Lee los archivos detectados para reunir el contexto completo
+4. **Task (agente Explore)**: Para una exploración profunda, usa `Task` con `subagent_type: "Explore"` para rastrear el código base
 
-#### 1.3 Completeness Check
+#### 1.3 Verificación de Exhaustividad
 
-- Must obtain **complete definitions and signatures** for relevant classes, functions, variables
-- If context insufficient, trigger **recursive retrieval**
-- Prioritize output: entry file + line number + key symbol name; add minimal code snippets only when necessary to resolve ambiguity
+- Se deben obtener **definiciones y firmas completas** de las clases, funciones y variables pertinentes.
+- Si el contexto es insuficiente, activa una **recuperación recursiva**.
+- Prioriza en la salida: archivo de entrada + número de línea + nombre del símbolo clave; añade fragmentos mínimos de código solo cuando sea necesario resolver ambigüedades.
 
-#### 1.4 Requirement Alignment
+#### 1.4 Alineación de Requisitos
 
-- If requirements still have ambiguity, **MUST** output guiding questions for user
-- Until requirement boundaries are clear (no omissions, no redundancy)
+- Si los requisitos todavía presentan ambigüedad, **DEBES** plantear preguntas orientadoras al usuario.
+- Continuar hasta que los límites del requisito estén perfectamente delimitados (sin omisiones ni redundancias).
 
-### Phase 2: Multi-Model Collaborative Analysis
+### Fase 2: Análisis Colaborativo Multimodelo
 
-`[Mode: Analysis]`
+`[Modo: Análisis]`
 
-#### 2.1 Distribute Inputs
+#### 2.1 Distribuir Entradas
 
-**Parallel call** Codex and Antigravity (`run_in_background: true`):
+**Llamada en paralelo** a Codex y Antigravity (`run_in_background: true`):
 
-Distribute **original requirement** (without preset opinions) to both models:
+Distribuye el **requisito original** (sin opiniones preestablecidas) a ambos modelos:
 
-1. **Codex Backend Analysis**:
+1. **Análisis de Backend con Codex**:
    - ROLE_FILE: `~/.claude/.ccg/prompts/codex/analyzer.md`
-   - Focus: Technical feasibility, architecture impact, performance considerations, potential risks
-   - OUTPUT: Multi-perspective solutions + pros/cons analysis
+   - Enfoque: Factibilidad técnica, impacto en la arquitectura, consideraciones de rendimiento, riesgos potenciales
+   - SALIDA: Soluciones desde múltiples perspectivas + análisis de pros y contras
 
-2. **Antigravity Frontend Analysis**:
+2. **Análisis de Frontend con Antigravity**:
    - ROLE_FILE: `~/.claude/.ccg/prompts/antigravity/analyzer.md`
-   - Focus: UI/UX impact, user experience, visual design
-   - OUTPUT: Multi-perspective solutions + pros/cons analysis
+   - Enfoque: Impacto en UI/UX, experiencia de usuario, diseño visual
+   - SALIDA: Soluciones desde múltiples perspectivas + análisis de pros y contras
 
-Wait for both models' complete results with `TaskOutput`. **Save SESSION_ID** (`CODEX_SESSION` and `ANTIGRAVITY_SESSION`).
+Espera los resultados completos de ambos modelos con `TaskOutput`. **Guarda el SESSION_ID** (`CODEX_SESSION` y `ANTIGRAVITY_SESSION`).
 
-#### 2.2 Cross-Validation
+#### 2.2 Validación Cruzada
 
-Integrate perspectives and iterate for optimization:
+Integra perspectivas e itera para optimizar:
 
-1. **Identify consensus** (strong signal)
-2. **Identify divergence** (needs weighing)
-3. **Complementary strengths**: Backend logic follows Codex, Frontend design follows Antigravity
-4. **Logical reasoning**: Eliminate logical gaps in solutions
+1. **Identificar consensos** (señal sólida)
+2. **Identificar divergencias** (requiere sopesar alternativas)
+3. **Fortalezas complementarias**: La lógica de backend sigue a Codex, el diseño de frontend sigue a Antigravity
+4. **Razonamiento lógico**: Elimina brechas lógicas en las soluciones propuestas
 
-#### 2.3 (Optional but Recommended) Dual-Model Plan Draft
+#### 2.3 (Opcional pero Recomendado) Borrador de Plan con Doble Modelo
 
-To reduce risk of omissions in Claude's synthesized plan, can parallel have both models output "plan drafts" (still **NOT allowed** to modify files):
+Para mitigar el riesgo de omisiones en el plan sintetizado por Claude, se puede solicitar en paralelo a ambos modelos un "borrador de plan" (aún con **PROHIBICIÓN TOTAL** de modificar archivos):
 
-1. **Codex Plan Draft** (Backend authority):
+1. **Borrador de Plan Codex** (Autoridad en Backend):
    - ROLE_FILE: `~/.claude/.ccg/prompts/codex/architect.md`
-   - OUTPUT: Step-by-step plan + pseudo-code (focus: data flow/edge cases/error handling/test strategy)
+   - SALIDA: Plan paso a paso + pseudocódigo (enfoque: flujo de datos / casos extremos / manejo de errores / estrategia de pruebas)
 
-2. **Antigravity Plan Draft** (Frontend authority):
+2. **Borrador de Plan Antigravity** (Autoridad en Frontend):
    - ROLE_FILE: `~/.claude/.ccg/prompts/antigravity/architect.md`
-   - OUTPUT: Step-by-step plan + pseudo-code (focus: information architecture/interaction/accessibility/visual consistency)
+   - SALIDA: Plan paso a paso + pseudocódigo (enfoque: arquitectura de información / interacción / accesibilidad / consistencia visual)
 
-Wait for both models' complete results with `TaskOutput`, record key differences in their suggestions.
+Espera los resultados completos de ambos modelos con `TaskOutput`, registrando las diferencias clave entre sus sugerencias.
 
-#### 2.4 Generate Implementation Plan (Claude Final Version)
+#### 2.4 Generar el Plan de Implementación (Versión Final de Claude)
 
-Synthesize both analyses, generate **Step-by-step Implementation Plan**:
+Sintetiza ambos análisis y genera el **Plan de Implementación Paso a Paso**:
 
 ```markdown
-## Implementation Plan: <Task Name>
+## Plan de Implementación: <Nombre de la Tarea>
 
-### Task Type
+### Tipo de Tarea
 - [ ] Frontend (→ Antigravity)
 - [ ] Backend (→ Codex)
-- [ ] Fullstack (→ Parallel)
+- [ ] Fullstack (→ Paralelo)
 
-### Technical Solution
-<Optimal solution synthesized from Codex + Antigravity analysis>
+### Solución Técnica
+<Solución óptima sintetizada del análisis conjunto de Codex + Antigravity>
 
-### Implementation Steps
-1. <Step 1> - Expected deliverable
-2. <Step 2> - Expected deliverable
+### Pasos de Implementación
+1. <Paso 1> - Entregable esperado
+2. <Paso 2> - Entregable esperado
 ...
 
-### Key Files
-| File | Operation | Description |
-|------|-----------|-------------|
-| path/to/file.ts:L10-L50 | Modify | Description |
+### Archivos Clave
+| Archivo | Operación | Descripción |
+|---------|-----------|-------------|
+| ruta/al/archivo.ts:L10-L50 | Modificar | Descripción |
 
-### Risks and Mitigation
-| Risk | Mitigation |
-|------|------------|
+### Riesgos y Mitigación
+| Riesgo | Mitigación |
+|--------|------------|
 
-### SESSION_ID (for /ccg:execute use)
+### SESSION_ID (para uso de /ccg:execute)
 - CODEX_SESSION: <session_id>
 - ANTIGRAVITY_SESSION: <session_id>
 ```
 
-### Phase 2 End: Plan Delivery (Not Execution)
+### Fin de la Fase 2: Entrega del Plan (Sin Ejecución)
 
-**`/ccg:plan` responsibilities end here, MUST execute the following actions**:
+**Las responsabilidades de `/ccg:plan` concluyen aquí; se DEBEN ejecutar las siguientes acciones**:
 
-1. Present complete implementation plan to user (including pseudo-code)
-2. Save plan to `.claude/plan/<feature-name>.md` (extract feature name from requirement, e.g., `user-auth`, `payment-module`)
-3. Output prompt in **bold text** (MUST use actual saved file path):
+1. Presentar el plan de implementación completo al usuario (incluyendo pseudocódigo)
+2. Guardar el plan en `.claude/plan/<nombre-caracteristica>.md` (extrae el nombre de la característica a partir del requisito, ej., `user-auth`, `payment-module`)
+3. Mostrar el aviso en **texto en negrita** (DEBE usarse la ruta real del archivo guardado):
 
 ---
-**Plan generated and saved to `.claude/plan/actual-feature-name.md`**
+**Plan generado y guardado en `.claude/plan/nombre-real-caracteristica.md`**
 
-**Please review the plan above. You can:**
-- **Modify plan**: Tell me what needs adjustment, I'll update the plan
-- **Execute plan**: Copy the following command to a new session
+**Por favor revisa el plan anterior. Puedes:**
+- **Modificar el plan**: Indícame qué ajustes necesitas y actualizaré el plan
+- **Ejecutar el plan**: Copia el siguiente comando en una nueva sesión
 
 ```
-/ccg:execute .claude/plan/actual-feature-name.md
+/ccg:execute .claude/plan/nombre-real-caracteristica.md
 ```
 ---
 
-**NOTE**: The `actual-feature-name.md` above MUST be replaced with the actual saved filename!
+**NOTA**: ¡El `nombre-real-caracteristica.md` anterior DEBE reemplazarse por el nombre de archivo real guardado!
 
-4. **Immediately terminate current response** (Stop here. No more tool calls.)
+4. **Finalizar inmediatamente la respuesta actual** (Detenerse aquí. Sin más llamadas a herramientas.)
 
-**ABSOLUTELY FORBIDDEN**:
-- Ask user "Y/N" then auto-execute (execution is `/ccg:execute`'s responsibility)
-- Any write operations to production code
-- Automatically call `/ccg:execute` or any implementation actions
-- Continue triggering model calls when user hasn't explicitly requested modifications
-
----
-
-## Plan Saving
-
-After planning completes, save plan to:
-
-- **First planning**: `.claude/plan/<feature-name>.md`
-- **Iteration versions**: `.claude/plan/<feature-name>-v2.md`, `.claude/plan/<feature-name>-v3.md`...
-
-Plan file write should complete before presenting plan to user.
+**TOTALMENTE PROHIBIDO**:
+- Preguntar al usuario "S/N" y luego auto-ejecutar (la ejecución es responsabilidad exclusiva de `/ccg:execute`)
+- Cualquier operación de escritura en código de producción
+- Invocar automáticamente `/ccg:execute` o cualquier acción de implementación
+- Seguir disparando llamadas a modelos si el usuario no ha solicitado explícitamente modificaciones
 
 ---
 
-## Plan Modification Flow
+## Guardado de Planes
 
-If user requests plan modifications:
+Una vez completada la planificación, guarda el plan en:
 
-1. Adjust plan content based on user feedback
-2. Update `.claude/plan/<feature-name>.md` file
-3. Re-present modified plan
-4. Prompt user to review or execute again
+- **Primera planificación**: `.claude/plan/<nombre-caracteristica>.md`
+- **Versiones iterativas**: `.claude/plan/<nombre-caracteristica>-v2.md`, `.claude/plan/<nombre-caracteristica>-v3.md`...
+
+La escritura del archivo del plan debe completarse antes de presentarlo al usuario.
 
 ---
 
-## Next Steps
+## Flujo de Modificación del Plan
 
-After user approves, **manually** execute:
+Si el usuario solicita modificaciones al plan:
+
+1. Ajusta el contenido del plan basándote en la retroalimentación del usuario
+2. Actualiza el archivo `.claude/plan/<nombre-caracteristica>.md`
+3. Vuelve a presentar el plan modificado
+4. Solicita nuevamente al usuario que lo revise o ejecute
+
+---
+
+## Siguientes Pasos
+
+Una vez aprobado por el usuario, ejecuta **manualmente**:
 
 ```bash
-/ccg:execute .claude/plan/<feature-name>.md
+/ccg:execute .claude/plan/<nombre-caracteristica>.md
 ```
 
 ---
 
-## Key Rules
+## Reglas Clave
 
-1. **Plan only, no implementation** – This command does not execute any code changes
-2. **No Y/N prompts** – Only present plan, let user decide next steps
-3. **Trust Rules** – Backend follows Codex, Frontend follows Antigravity
-4. External models have **zero filesystem write access**
-5. **SESSION_ID Handoff** – Plan must include `CODEX_SESSION` / `ANTIGRAVITY_SESSION` at end (for `/ccg:execute resume <SESSION_ID>` use)
+1. **Solo planificar, sin implementación** – Este comando no ejecuta ningún cambio de código
+2. **Sin preguntas de confirmación S/N** – Solo presenta el plan y deja que el usuario decida el siguiente paso
+3. **Reglas de Confianza** – El Backend sigue a Codex, el Frontend sigue a Antigravity
+4. Los modelos externos tienen **cero acceso de escritura en el sistema de archivos**
+5. **Paso de SESSION_ID** – El plan debe incluir `CODEX_SESSION` / `ANTIGRAVITY_SESSION` al final (para uso con `/ccg:execute resume <SESSION_ID>`)

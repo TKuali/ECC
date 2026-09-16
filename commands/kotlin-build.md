@@ -1,54 +1,54 @@
 ---
-description: Fix Kotlin/Gradle build errors, compiler warnings, and dependency issues incrementally. Invokes the kotlin-build-resolver agent for minimal, surgical fixes.
+description: Corrige incrementalmente errores de compilación de Kotlin/Gradle, advertencias del compilador y problemas de dependencias. Invoca al agente kotlin-build-resolver para correcciones quirúrgicas mínimas.
 ---
 
-# Kotlin Build and Fix
+# Compilación y Corrección de Kotlin
 
-This command invokes the **kotlin-build-resolver** agent to incrementally fix Kotlin build errors with minimal changes.
+Este comando invoca al agente **kotlin-build-resolver** para corregir incrementalmente errores de compilación de Kotlin con cambios mínimos.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Run Diagnostics**: Execute `./gradlew build`, `detekt`, `ktlintCheck`
-2. **Parse Errors**: Group by file and sort by severity
-3. **Fix Incrementally**: One error at a time
-4. **Verify Each Fix**: Re-run build after each change
-5. **Report Summary**: Show what was fixed and what remains
+1. **Ejecutar diagnósticos**: Ejecuta `./gradlew build`, `detekt`, `ktlintCheck`
+2. **Analizar errores**: Agrupa por archivo y ordena por severidad
+3. **Corregir incrementalmente**: Un error a la vez
+4. **Verificar cada corrección**: Vuelve a compilar tras cada cambio
+5. **Reportar resumen**: Muestra lo que se corrigió y lo que queda pendiente
 
-## When to Use
+## Cuándo usarlo
 
-Use `/kotlin-build` when:
-- `./gradlew build` fails with errors
-- Kotlin compiler reports errors
-- `./gradlew detekt` reports violations
-- Gradle dependency resolution fails
-- After pulling changes that break the build
+Usa `/kotlin-build` cuando:
+- `./gradlew build` falle con errores
+- El compilador de Kotlin reporte errores
+- `./gradlew detekt` reporte violaciones
+- La resolución de dependencias de Gradle falle
+- Después de traer cambios (pull) que rompen la compilación
 
-## Diagnostic Commands Run
+## Comandos de diagnóstico ejecutados
 
 ```bash
-# Primary build check
+# Verificación principal de compilación
 ./gradlew build 2>&1
 
-# Static analysis
-./gradlew detekt 2>&1 || echo "detekt not configured"
-./gradlew ktlintCheck 2>&1 || echo "ktlint not configured"
+# Análisis estático
+./gradlew detekt 2>&1 || echo "detekt no configurado"
+./gradlew ktlintCheck 2>&1 || echo "ktlint no configurado"
 
-# Dependency issues
+# Problemas de dependencias
 ./gradlew dependencies --configuration runtimeClasspath 2>&1 | head -100
 
-# Optional deep refresh when caches or dependency metadata are suspect
+# Actualización profunda opcional cuando los cachés o metadatos de dependencias sean sospechosos
 ./gradlew build --refresh-dependencies
 ```
 
-## Example Session
+## Ejemplo de Sesión
 
 ````text
-User: /kotlin-build
+Usuario: /kotlin-build
 
-Agent:
-# Kotlin Build Resolution
+Agente:
+# Resolución de Compilación Kotlin
 
-## Initial Diagnostics
+## Diagnósticos Iniciales
 
 ```bash
 $ ./gradlew build
@@ -57,118 +57,118 @@ e: src/main/kotlin/com/example/routes/UserRoutes.kt:42:9 Type mismatch: inferred
 e: src/main/kotlin/com/example/routes/UserRoutes.kt:58:5 'when' expression must be exhaustive
 ```
 
-Errors found: 3
+Errores encontrados: 3
 
-## Fix 1: Unresolved Reference
+## Corrección 1: Referencia no resuelta
 
-File: src/main/kotlin/com/example/service/UserService.kt:25
+Archivo: src/main/kotlin/com/example/service/UserService.kt:25
 Error: Unresolved reference: UserRepository
-Cause: Missing import
+Causa: Importación faltante
 
 ```kotlin
-// Added import
+// Importación añadida
 import com.example.repository.UserRepository
 ```
 
 ```bash
 $ ./gradlew build
-# 2 errors remaining
+# 2 errores restantes
 ```
 
-## Fix 2: Type Mismatch
+## Corrección 2: Discordancia de tipos
 
-File: src/main/kotlin/com/example/routes/UserRoutes.kt:42
+Archivo: src/main/kotlin/com/example/routes/UserRoutes.kt:42
 Error: Type mismatch: inferred type is String but Int was expected
 
 ```kotlin
-// Changed
+// Cambiado
 val count = call.parameters["count"]
-// To
+// A
 val count = call.parameters["count"]?.toIntOrNull()
     ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid count")
 ```
 
 ```bash
 $ ./gradlew build
-# 1 error remaining
+# 1 error restante
 ```
 
-## Fix 3: Non-Exhaustive When
+## Corrección 3: Expresión When no exhaustiva
 
-File: src/main/kotlin/com/example/routes/UserRoutes.kt:58
+Archivo: src/main/kotlin/com/example/routes/UserRoutes.kt:58
 Error: 'when' expression must be exhaustive
 
 ```kotlin
-// Added missing branch
+// Rama faltante añadida
 when (user.role) {
     Role.ADMIN -> handleAdmin(user)
     Role.USER -> handleUser(user)
-    Role.MODERATOR -> handleModerator(user) // Added
+    Role.MODERATOR -> handleModerator(user) // Añadido
 }
 ```
 
 ```bash
 $ ./gradlew build
-# Build successful!
+# ¡Compilación exitosa!
 ```
 
-## Final Verification
+## Verificación Final
 
 ```bash
 $ ./gradlew detekt
-# No issues
+# Sin problemas
 
 $ ./gradlew test
-# All tests passed
+# Todas las pruebas pasaron
 ```
 
-## Summary
+## Resumen
 
-| Metric | Count |
-|--------|-------|
-| Build errors fixed | 3 |
-| Detekt issues fixed | 0 |
-| Files modified | 2 |
-| Remaining issues | 0 |
+| Métrica | Cantidad |
+|---------|----------|
+| Errores de compilación corregidos | 3 |
+| Problemas de detekt corregidos | 0 |
+| Archivos modificados | 2 |
+| Problemas restantes | 0 |
 
-Build Status: PASS: SUCCESS
+Estado de compilación: PASS: ÉXITO
 ````
 
-## Common Errors Fixed
+## Errores Comunes Corregidos
 
-| Error | Typical Fix |
-|-------|-------------|
-| `Unresolved reference: X` | Add import or dependency |
-| `Type mismatch` | Fix type conversion or assignment |
-| `'when' must be exhaustive` | Add missing sealed class branches |
-| `Suspend function can only be called from coroutine` | Add `suspend` modifier |
-| `Smart cast impossible` | Use local `val` or `let` |
-| `None of the following candidates is applicable` | Fix argument types |
-| `Could not resolve dependency` | Fix version or add repository |
+| Error | Solución Típica |
+|-------|-----------------|
+| `Unresolved reference: X` | Añadir import o dependencia |
+| `Type mismatch` | Corregir conversión de tipo o asignación |
+| `'when' must be exhaustive` | Añadir ramas faltantes de clases selladas |
+| `Suspend function can only be called from coroutine` | Añadir modificador `suspend` |
+| `Smart cast impossible` | Usar `val` local o `let` |
+| `None of the following candidates is applicable` | Corregir tipos de argumentos |
+| `Could not resolve dependency` | Corregir versión o añadir repositorio |
 
-## Fix Strategy
+## Estrategia de Corrección
 
-1. **Build errors first** - Code must compile
-2. **Detekt violations second** - Fix code quality issues
-3. **ktlint warnings third** - Fix formatting
-4. **One fix at a time** - Verify each change
-5. **Minimal changes** - Don't refactor, just fix
+1. **Errores de compilación primero** - El código debe compilar
+2. **Violaciones de detekt segundo** - Corregir problemas de calidad de código
+3. **Advertencias de ktlint tercero** - Corregir formato
+4. **Una corrección a la vez** - Verificar cada cambio
+5. **Cambios mínimos** - No refactorizar, solo corregir
 
-## Stop Conditions
+## Condiciones de Parada
 
-The agent will stop and report if:
-- Same error persists after 3 attempts
-- Fix introduces more errors
-- Requires architectural changes
-- Missing external dependencies
+El agente se detendrá y reportará si:
+- El mismo error persiste tras 3 intentos
+- La solución introduce más errores
+- Requiere cambios arquitectónicos
+- Faltan dependencias externas
 
-## Related Commands
+## Comandos Relacionados
 
-- `/kotlin-test` - Run tests after build succeeds
-- `/kotlin-review` - Review code quality
-- `verification-loop` skill - Full verification loop
+- `/kotlin-test` - Ejecuta pruebas tras compilar con éxito
+- `/kotlin-review` - Revisa la calidad del código
+- Skill `verification-loop` - Bucle completo de verificación
 
-## Related
+## Relacionado
 
-- Agent: `agents/kotlin-build-resolver.md`
+- Agente: `agents/kotlin-build-resolver.md`
 - Skill: `skills/kotlin-patterns/`

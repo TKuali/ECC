@@ -1,47 +1,47 @@
 ---
-description: Enforce TDD workflow for Rust. Write tests first, then implement. Verify 80%+ coverage with cargo-llvm-cov.
+description: Aplica el flujo de trabajo de TDD para Rust. Escribe pruebas primero, luego implementa. Verifica más del 80% de cobertura con cargo-llvm-cov.
 ---
 
-# Rust TDD Command
+# Comando TDD para Rust
 
-This command enforces test-driven development methodology for Rust code using `#[test]`, rstest, proptest, and mockall.
+Este comando aplica la metodología de desarrollo guiado por pruebas (TDD) para código Rust utilizando `#[test]`, rstest, proptest y mockall.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Define Types/Traits**: Scaffold function signatures with `todo!()`
-2. **Write Tests**: Create comprehensive test module (RED)
-3. **Run Tests**: Verify tests fail for the right reason
-4. **Implement Code**: Write minimal code to pass (GREEN)
-5. **Refactor**: Improve while keeping tests green
-6. **Check Coverage**: Ensure 80%+ coverage with cargo-llvm-cov
+1. **Definir Tipos/Traits**: Estructura las firmas de funciones con `todo!()`
+2. **Escribir Pruebas**: Crea un módulo de pruebas exhaustivo (ROJO / RED)
+3. **Ejecutar Pruebas**: Verifica que las pruebas fallen por el motivo correcto
+4. **Implementar Código**: Escribe el código mínimo necesario para pasar (VERDE / GREEN)
+5. **Refactorizar**: Mejora el código manteniendo las pruebas en verde
+6. **Verificar Cobertura**: Asegura un 80%+ de cobertura con cargo-llvm-cov
 
-## When to Use
+## Cuándo usarlo
 
-Use `/rust-test` when:
-- Implementing new Rust functions, methods, or traits
-- Adding test coverage to existing Rust code
-- Fixing bugs (write failing test first)
-- Building critical business logic
-- Learning TDD workflow in Rust
+Usa `/rust-test` cuando:
+- Estés implementando nuevas funciones, métodos o traits en Rust
+- Agregues cobertura de pruebas a código Rust existente
+- Corrijas errores (escribe primero la prueba fallida)
+- Construyas lógica de negocio crítica
+- Aprendas o apliques el flujo de trabajo de TDD en Rust
 
-## TDD Cycle
+## Ciclo TDD
 
 ```
-RED     -> Write failing test first
-GREEN   -> Implement minimal code to pass
-REFACTOR -> Improve code, tests stay green
-REPEAT  -> Next test case
+ROJO (RED)     -> Escribir prueba fallida primero
+VERDE (GREEN)  -> Implementar código mínimo para pasar
+REFACTOR       -> Mejorar el código manteniendo las pruebas en verde
+REPETIR        -> Siguiente caso de prueba
 ```
 
-## Example Session
+## Ejemplo de Sesión
 
 ````text
-User: /rust-test I need a function to validate user registration
+Usuario: /rust-test Necesito una función para validar el registro de usuarios
 
-Agent:
-# TDD Session: Registration Validator
+Agente:
+# Sesión TDD: Validador de Registro
 
-## Step 1: Define Interface
+## Paso 1: Definir Interfaz
 
 ```rust
 // src/validator.rs
@@ -61,7 +61,7 @@ pub fn validate_registration(request: &RegistrationRequest) -> ValidationResult 
 }
 ```
 
-## Step 2: Write Tests (RED)
+## Paso 2: Escribir Pruebas (ROJO)
 
 ```rust
 #[cfg(test)]
@@ -121,7 +121,7 @@ mod tests {
 }
 ```
 
-## Step 3: Run Tests — Verify FAIL
+## Paso 3: Ejecutar Pruebas — Verificar FALLA
 
 ```bash
 $ cargo test
@@ -132,9 +132,9 @@ test tests::invalid_email_returns_invalid ... FAILED
 test tests::short_password_returns_invalid ... FAILED
 ```
 
-Tests fail as expected (todo! panic).
+Las pruebas fallan como se esperaba (pánico de todo!).
 
-## Step 4: Implement Minimal Code (GREEN)
+## Paso 4: Implementar Código Mínimo (VERDE)
 
 ```rust
 pub fn validate_registration(request: &RegistrationRequest) -> ValidationResult {
@@ -158,7 +158,7 @@ pub fn validate_registration(request: &RegistrationRequest) -> ValidationResult 
 }
 ```
 
-## Step 5: Run Tests — Verify PASS
+## Paso 5: Ejecutar Pruebas — Verificar ÉXITO
 
 ```bash
 $ cargo test
@@ -171,23 +171,23 @@ test tests::short_password_returns_invalid ... ok
 test result: ok. 4 passed; 0 failed
 ```
 
-All tests passing!
+¡Todas las pruebas pasaron!
 
-## Step 6: Check Coverage
+## Paso 6: Verificar Cobertura
 
 ```bash
 $ cargo llvm-cov
 Coverage: 100.0% of lines
 ```
 
-Coverage: 100%
+Cobertura: 100%
 
-## TDD Complete!
+## ¡TDD Completado!
 ````
 
-## Test Patterns
+## Patrones de Prueba
 
-### Unit Tests
+### Pruebas Unitarias
 
 ```rust
 #[cfg(test)]
@@ -208,7 +208,7 @@ mod tests {
 }
 ```
 
-### Parameterized Tests with rstest
+### Pruebas Parametrizadas con rstest
 
 ```rust
 use rstest::{rstest, fixture};
@@ -222,7 +222,7 @@ fn test_string_length(#[case] input: &str, #[case] expected: usize) {
 }
 ```
 
-### Async Tests
+### Pruebas Asíncronas
 
 ```rust
 #[tokio::test]
@@ -233,7 +233,7 @@ async fn fetches_data_successfully() {
 }
 ```
 
-### Property-Based Tests
+### Pruebas Basadas en Propiedades
 
 ```rust
 use proptest::prelude::*;
@@ -248,61 +248,61 @@ proptest! {
 }
 ```
 
-## Coverage Commands
+## Comandos de Cobertura
 
 ```bash
-# Summary report
+# Reporte resumido
 cargo llvm-cov
 
-# HTML report
+# Reporte HTML
 cargo llvm-cov --html
 
-# Fail if below threshold
+# Fallar si está por debajo del umbral
 cargo llvm-cov --fail-under-lines 80
 
-# Run specific test
+# Ejecutar prueba específica
 cargo test test_name
 
-# Run with output
+# Ejecutar mostrando la salida
 cargo test -- --nocapture
 
-# Run without stopping on first failure
+# Ejecutar sin detenerse en el primer fallo
 cargo test --no-fail-fast
 ```
 
-## Coverage Targets
+## Objetivos de Cobertura
 
-| Code Type | Target |
-|-----------|--------|
-| Critical business logic | 100% |
-| Public API | 90%+ |
-| General code | 80%+ |
-| Generated / FFI bindings | Exclude |
+| Tipo de Código | Objetivo |
+|----------------|----------|
+| Lógica de negocio crítica | 100% |
+| API pública | 90%+ |
+| Código general | 80%+ |
+| Generado / bindings FFI | Excluir |
 
-## TDD Best Practices
+## Mejores Prácticas de TDD
 
-**DO:**
-- Write test FIRST, before any implementation
-- Run tests after each change
-- Use `assert_eq!` over `assert!` for better error messages
-- Use `?` in tests that return `Result` for cleaner output
-- Test behavior, not implementation
-- Include edge cases (empty, boundary, error paths)
+**QUÉ HACER:**
+- Escribir la prueba PRIMERO, antes de cualquier implementación
+- Ejecutar pruebas tras cada cambio
+- Usar `assert_eq!` en lugar de `assert!` para obtener mejores mensajes de error
+- Usar `?` en pruebas que devuelven `Result` para salidas más limpias
+- Probar el comportamiento, no la implementación
+- Incluir casos límite (vacío, límites, rutas de error)
 
-**DON'T:**
-- Write implementation before tests
-- Skip the RED phase
-- Use `#[should_panic]` when `Result::is_err()` works
-- Use `sleep()` in tests — use channels or `tokio::time::pause()`
-- Mock everything — prefer integration tests when feasible
+**QUÉ NO HACER:**
+- Escribir implementación antes de las pruebas
+- Saltar la fase ROJA
+- Usar `#[should_panic]` cuando `Result::is_err()` funcione
+- Usar `sleep()` en pruebas — usar canales o `tokio::time::pause()`
+- Mockear todo — preferir pruebas de integración cuando sea factible
 
-## Related Commands
+## Comandos Relacionados
 
-- `/rust-build` - Fix build errors
-- `/rust-review` - Review code after implementation
-- `verification-loop` skill - Run full verification loop
+- `/rust-build` - Corrige errores de compilación
+- `/rust-review` - Revisa el código tras la implementación
+- Skill `verification-loop` - Ejecuta el bucle de verificación completo
 
-## Related
+## Relacionado
 
 - Skill: `skills/rust-testing/`
 - Skill: `skills/rust-patterns/`

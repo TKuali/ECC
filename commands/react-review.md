@@ -1,134 +1,134 @@
 ---
-description: Comprehensive React/JSX code review for hook correctness, render performance, server/client component boundaries, accessibility, and React-specific security. Invokes the react-reviewer agent (and typescript-reviewer alongside on TSX/JSX changes).
+description: Revisión exhaustiva de código React/JSX para corrección de hooks, rendimiento de renderizado, límites de componentes servidor/cliente, accesibilidad y seguridad específica de React. Invoca al agente react-reviewer (y a typescript-reviewer de forma conjunta en cambios TSX/JSX).
 ---
 
-# React Code Review
+# Revisión de Código React
 
-This command invokes the **react-reviewer** agent for React-specific code review. For pull requests touching `.tsx`/`.jsx` files, both `react-reviewer` and `typescript-reviewer` should run — each owns a distinct lane.
+Este comando invoca al agente **react-reviewer** para una revisión de código especializada en React. Para pull requests que modifiquen archivos `.tsx`/`.jsx`, deben ejecutarse tanto `react-reviewer` como `typescript-reviewer` — cada uno posee un ámbito de responsabilidad diferenciado.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Identify React Changes**: Find modified `.tsx`/`.jsx` files (and React-containing `.ts`/`.js` files) via `git diff`
-2. **Run Lint**: Execute `eslint` with `eslint-plugin-react-hooks` and `eslint-plugin-jsx-a11y`
-3. **Typecheck**: Run `tsc --noEmit` or the project's canonical typecheck command
-4. **Review React Lanes Only**: Hook rules, RSC boundaries, accessibility, render performance, React-specific security
-5. **Generate Report**: Categorize issues by severity (CRITICAL / HIGH / MEDIUM)
+1. **Identificar Cambios en React**: Encuentra archivos modificados `.tsx`/`.jsx` (y archivos `.ts`/`.js` que contengan React) mediante `git diff`
+2. **Ejecutar Lint**: Ejecuta `eslint` con `eslint-plugin-react-hooks` y `eslint-plugin-jsx-a11y`
+3. **Comprobar Tipos**: Ejecuta `tsc --noEmit` o el comando canónico de verificación de tipos del proyecto
+4. **Revisar Ámbitos Específicos de React**: Reglas de hooks, límites de RSC, accesibilidad, rendimiento de renderizado y seguridad específica de React
+5. **Generar Reporte**: Categoriza los problemas por severidad (CRITICAL / HIGH / MEDIUM)
 
-## When to Use
+## Cuándo usarlo
 
-Use `/react-review` when:
+Usa `/react-review` cuando:
 
-- A PR or commit touches `.tsx`/`.jsx` files
-- After writing or modifying React components, custom hooks, or pages
-- Before merging React code
-- Auditing accessibility on UI components
-- Reviewing a new hook for rules-of-hooks and dependency correctness
-- Auditing a Next.js App Router server/client component boundary
+- Un PR o commit toque archivos `.tsx`/`.jsx`
+- Después de escribir o modificar componentes React, hooks personalizados o páginas
+- Antes de fusionar código React
+- Al auditar accesibilidad en componentes de interfaz de usuario
+- Al revisar un hook nuevo en cuanto a las reglas de hooks y dependencias correctas
+- Al auditar los límites entre componentes de servidor y cliente en Next.js App Router
 
-For pure `.ts`/`.js` changes with no React imports, use `/code-review` (general) or invoke `typescript-reviewer` directly.
+Para cambios puros en `.ts`/`.js` sin imports de React, usa `/code-review` (general) o invoca a `typescript-reviewer` directamente.
 
-## Scope vs `/code-review` and TypeScript Review
+## Alcance frente a `/code-review` y Revisión de TypeScript
 
-| Tool | Scope |
+| Herramienta | Alcance |
 |---|---|
-| `react-reviewer` (this command) | Hooks rules, JSX, RSC, a11y, React-specific security, render perf |
-| `typescript-reviewer` | Generic TS/JS — `any` abuse, async correctness, Node security |
-| `security-reviewer` | Project-wide security audit |
-| `/code-review` | Generic uncommitted-changes or PR review |
+| `react-reviewer` (este comando) | Reglas de hooks, JSX, RSC, a11y, seguridad específica de React, rendimiento de renderizado |
+| `typescript-reviewer` | TS/JS genérico — abuso de `any`, corrección asíncrona, seguridad en Node |
+| `security-reviewer` | Auditoría de seguridad a nivel de todo el proyecto |
+| `/code-review` | Revisión genérica de cambios sin confirmar o de PRs |
 
-On a TSX/JSX PR, invoke both `react-reviewer` and `typescript-reviewer`. Findings from each are non-overlapping by design.
+En un PR con TSX/JSX, invoca tanto a `react-reviewer` como a `typescript-reviewer`. Los hallazgos de cada uno no se solapan por diseño.
 
-## Review Categories
+## Categorías de Revisión
 
-### CRITICAL (Must Fix)
+### CRÍTICO (Debe Corregirse)
 
-- `dangerouslySetInnerHTML` with unsanitized input
-- `href`/`src` with unvalidated user URLs (`javascript:`, `data:`)
-- Server Action without input validation
-- Secret in client bundle (`NEXT_PUBLIC_*`, `VITE_*`, `REACT_APP_*`)
-- `localStorage`/`sessionStorage` for session tokens
-- Conditional hook calls (violates Rules of Hooks)
-- Direct state mutation
-- Hook called outside a component or custom hook
+- `dangerouslySetInnerHTML` con entradas sin sanitizar
+- `href`/`src` con URLs de usuario no validadas (`javascript:`, `data:`)
+- Server Actions sin validación de entradas
+- Secretos expuestos en el bundle del cliente (`NEXT_PUBLIC_*`, `VITE_*`, `REACT_APP_*`)
+- `localStorage`/`sessionStorage` para tokens de sesión
+- Llamadas condicionales a hooks (viola las Reglas de los Hooks)
+- Mutación directa del estado
+- Hook llamado fuera de un componente o hook personalizado
 
-### HIGH (Should Fix)
+### ALTO (Debería Corregirse)
 
-- Missing `useEffect`/`useMemo`/`useCallback` deps (disabled `exhaustive-deps` without justification)
-- Effect for derived state
-- Effect missing cleanup
-- Stale closures in handlers/intervals
-- Server-only imports in Client Components
-- Sensitive data leaked via props to Client Components
-- Server Actions without auth checks
-- Accessibility violations (missing labels, non-semantic interactive elements, ARIA misuse)
-- `key={index}` in dynamic lists
-- Duplicated state, useEffect chains
+- Dependencias faltantes en `useEffect`/`useMemo`/`useCallback` (deshabilitar `exhaustive-deps` sin justificación)
+- Efecto utilizado para calcular estado derivado
+- Efecto sin función de limpieza (cleanup)
+- Cierres obsoletos (stale closures) en manejadores o intervalos
+- Importaciones exclusivas de servidor en componentes cliente
+- Datos sensibles filtrados a través de props a componentes cliente
+- Server Actions sin comprobaciones de autenticación
+- Violaciones de accesibilidad (etiquetas faltantes, elementos interactivos no semánticos, mal uso de ARIA)
+- `key={index}` en listas dinámicas
+- Estado duplicado o cadenas de `useEffect`
 
-### MEDIUM (Consider)
+### MEDIO (A Considerar)
 
-- Over-memoization without measured win
-- Inline new object/function as prop to memoized child
-- Suspense at route root only (no progressive reveal)
-- Long lists without virtualization
-- High-frequency value via `useContext`
-- Roll-your-own validation in non-trivial forms
-- Prop drilling beyond 3 levels
-- Component over 200 lines
-- Class components in new code
+- Sobre-memorización sin ganancia medida
+- Creación de nuevo objeto o función inline como prop para un hijo memorizado
+- Suspense únicamente en la raíz de la ruta (sin revelación progresiva)
+- Listas largas sin virtualización
+- Valores de alta frecuencia leídos mediante `useContext`
+- Validación casera en formularios no triviales
+- Prop drilling más allá de 3 niveles
+- Componentes de más de 200 líneas
+- Componentes de clase en código nuevo
 
-## Automated Checks Run
+## Comprobaciones Automatizadas Ejecutadas
 
 ```bash
-# Lint (required for any meaningful review)
+# Lint (requerido para cualquier revisión significativa)
 npx eslint . --ext .tsx,.jsx,.ts,.js
 
-# Typecheck (skip cleanly for JS-only projects)
+# Comprobación de tipos (se omite limpiamente en proyectos solo JS)
 npm run typecheck --if-present
 [ -f tsconfig.json ] && tsc --noEmit -p tsconfig.json
 
-# Targeted a11y rules
+# Reglas específicas de a11y
 npx eslint . --rule 'jsx-a11y/alt-text: error' \
               --rule 'jsx-a11y/anchor-is-valid: error' \
               --rule 'jsx-a11y/click-events-have-key-events: error'
 
-# Supply-chain
+# Seguridad de dependencias
 npm audit
 ```
 
-If `eslint-plugin-react-hooks` or `eslint-plugin-jsx-a11y` is not configured, the review will flag the gap as a HIGH config issue and continue.
+Si `eslint-plugin-react-hooks` o `eslint-plugin-jsx-a11y` no están configurados, la revisión marcará la carencia como un problema de configuración HIGH y continuará.
 
-## Example Usage
+## Ejemplo de Uso
 
 ````text
-User: /react-review
+Usuario: /react-review
 
-Agent:
-# React Code Review Report
+Agente:
+# Reporte de Revisión de Código React
 
-## Files Reviewed
-- src/components/UserCard.tsx (modified)
-- src/hooks/useUser.ts (new)
+## Archivos Revisados
+- src/components/UserCard.tsx (modificado)
+- src/hooks/useUser.ts (nuevo)
 
-## Lint Results
-PASS: eslint clean
-PASS: typecheck clean
+## Resultados de Lint
+PASS: eslint limpio
+PASS: comprobación de tipos limpia
 
-## Issues Found
+## Problemas Encontrados
 
-[CRITICAL] Unsanitized dangerouslySetInnerHTML
-File: src/components/UserCard.tsx:42
-Issue: User-controlled bio rendered as raw HTML.
-Why: XSS via stored script tags in user input.
-Fix: Sanitize with DOMPurify or render as text:
+[CRITICAL] dangerouslySetInnerHTML sin sanitizar
+Archivo: src/components/UserCard.tsx:42
+Problema: Biografía controlada por el usuario renderizada como HTML crudo.
+Motivo: Riesgo de XSS mediante etiquetas script almacenadas en la entrada del usuario.
+Solución: Sanitizar con DOMPurify o renderizar como texto plano:
 ```tsx
 import DOMPurify from "isomorphic-dompurify";
 <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(user.bio) }} />
 ```
 
-[HIGH] Effect cleanup missing
-File: src/hooks/useUser.ts:18
-Issue: `fetch` call without AbortController; setState on unmounted component possible.
-Fix: Add AbortController and cleanup:
+[HIGH] Falta limpieza de efecto
+Archivo: src/hooks/useUser.ts:18
+Problema: Llamada a `fetch` sin AbortController; riesgo de ejecutar setState en un componente desmontado.
+Solución: Añadir AbortController y su limpieza:
 ```ts
 useEffect(() => {
   const ac = new AbortController();
@@ -139,32 +139,32 @@ useEffect(() => {
 }, [id]);
 ```
 
-## Summary
+## Resumen
 - CRITICAL: 1
 - HIGH: 1
 - MEDIUM: 0
 
-Recommendation: FAIL: Block merge until CRITICAL issue is fixed
+Recomendación: FAIL: Bloquear fusión hasta corregir el problema CRITICAL
 ````
 
-## Approval Criteria
+## Criterios de Aprobación
 
-| Status | Condition |
+| Estado | Condición |
 |---|---|
-| PASS: Approve | No CRITICAL or HIGH issues |
-| WARNING: Warning | Only MEDIUM issues (merge with caution) |
-| FAIL: Block | CRITICAL or HIGH issues found |
+| PASS: Aprobar | Sin problemas CRITICAL o HIGH |
+| WARNING: Advertencia | Solo problemas MEDIUM (fusionar con precaución) |
+| FAIL: Bloquear | Problemas CRITICAL o HIGH encontrados |
 
-## Integration with Other Commands
+## Integración con Otros Comandos
 
-- Run `/react-build` first if the build is broken
-- Run `/react-test` to ensure component tests pass
-- Run `/react-review` before merging
-- Use `/code-review` for non-React-specific concerns on the same PR
+- Ejecuta `/react-build` primero si la compilación está rota
+- Ejecuta `/react-test` para asegurar que las pruebas de componentes pasen
+- Ejecuta `/react-review` antes de fusionar
+- Usa `/code-review` para aspectos generales no específicos de React en el mismo PR
 
-## Related
+## Relacionado
 
-- Agent: `agents/react-reviewer.md`
-- Companion agent: `agents/typescript-reviewer.md` (run alongside for TSX/JSX PRs)
+- Agente: `agents/react-reviewer.md`
+- Agente complementario: `agents/typescript-reviewer.md` (ejecutar conjuntamente en PRs de TSX/JSX)
 - Skills: `skills/react-patterns/`, `skills/react-testing/`, `skills/accessibility/`
-- Rules: `rules/react/`
+- Reglas: `rules/react/`

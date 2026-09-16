@@ -1,42 +1,42 @@
 ---
-description: Run a backend-focused multi-model workflow for APIs, algorithms, data, and business logic.
+description: Ejecuta un flujo de trabajo multimodelo centrado en backend para APIs, algoritmos, datos y lógica de negocio.
 ---
 
-# Backend - Backend-Focused Development
+# Backend - Desarrollo Centrado en Backend
 
-Backend-focused workflow (Research → Ideation → Plan → Execute → Optimize → Review), Codex-led.
+Flujo de trabajo centrado en backend (Investigación → Ideación → Plan → Ejecución → Optimización → Revisión), liderado por Codex.
 
-> **Prerequisite:** Requires the external `ccg-workflow` runtime, which is **not** part of the base ECC install. Initialize it with `npx ccg-workflow` to provision `~/.claude/bin/codeagent-wrapper` and the `~/.claude/.ccg/prompts/*` role files this command depends on. Without that runtime, this command will not run correctly.
+> **Prerrequisito:** Requiere el entorno de ejecución externo `ccg-workflow`, el cual **no** forma parte de la instalación base de ECC. Inicialízalo con `npx ccg-workflow` para aprovisionar `~/.claude/bin/codeagent-wrapper` y los archivos de rol `~/.claude/.ccg/prompts/*` de los que depende este comando. Sin ese entorno, este comando no funcionará correctamente.
 
-## Usage
+## Uso
 
 ```bash
-/backend <backend task description>
+/backend <descripción de la tarea de backend>
 ```
 
-## Context
+## Contexto
 
-- Backend task: $ARGUMENTS
-- Codex-led, Gemini for auxiliary reference
-- Applicable: API design, algorithm implementation, database optimization, business logic
+- Tarea de backend: $ARGUMENTS
+- Liderado por Codex, Gemini para referencia auxiliar
+- Aplicable: Diseño de APIs, implementación de algoritmos, optimización de base de datos, lógica de negocio
 
-## Your Role
+## Tu Rol
 
-You are the **Backend Orchestrator**, coordinating multi-model collaboration for server-side tasks (Research → Ideation → Plan → Execute → Optimize → Review).
+Eres el **Orquestador de Backend**, coordinando la colaboración multimodelo para tareas del lado del servidor (Investigación → Ideación → Plan → Ejecución → Optimización → Revisión).
 
-**Collaborative Models**:
-- **Codex** – Backend logic, algorithms (**Backend authority, trustworthy**)
-- **Gemini** – Frontend perspective (**Backend opinions for reference only**)
-- **Claude (self)** – Orchestration, planning, execution, delivery
+**Modelos Colaboradores**:
+- **Codex** – Lógica de backend, algoritmos (**Autoridad en backend, confiable**)
+- **Gemini** – Perspectiva de frontend (**Opiniones de backend solo como referencia**)
+- **Claude (uno mismo)** – Orquestación, planificación, ejecución y entrega
 
 ---
 
-## Multi-Model Call Specification
+## Especificación de Llamadas Multimodelo
 
-**Call Syntax**:
+**Sintaxis de Llamada**:
 
 ```
-# New session call
+# Llamada de nueva sesión
 Bash({
   command: "~/.claude/bin/codeagent-wrapper {{LITE_MODE_FLAG}}--backend codex - \"$PWD\" <<'EOF'
 ROLE_FILE: <role prompt path>
@@ -48,10 +48,10 @@ OUTPUT: Expected output format
 EOF",
   run_in_background: false,
   timeout: 3600000,
-  description: "Brief description"
+  description: "Breve descripción"
 })
 
-# Resume session call
+# Llamada para reanudar sesión
 Bash({
   command: "~/.claude/bin/codeagent-wrapper {{LITE_MODE_FLAG}}--backend codex resume <SESSION_ID> - \"$PWD\" <<'EOF'
 ROLE_FILE: <role prompt path>
@@ -63,102 +63,102 @@ OUTPUT: Expected output format
 EOF",
   run_in_background: false,
   timeout: 3600000,
-  description: "Brief description"
+  description: "Breve descripción"
 })
 ```
 
-**Role Prompts**:
+**Prompts de Roles**:
 
-| Phase | Codex |
-|-------|-------|
-| Analysis | `~/.claude/.ccg/prompts/codex/analyzer.md` |
-| Planning | `~/.claude/.ccg/prompts/codex/architect.md` |
-| Review | `~/.claude/.ccg/prompts/codex/reviewer.md` |
+| Fase | Codex |
+|------|-------|
+| Análisis | `~/.claude/.ccg/prompts/codex/analyzer.md` |
+| Planificación | `~/.claude/.ccg/prompts/codex/architect.md` |
+| Revisión | `~/.claude/.ccg/prompts/codex/reviewer.md` |
 
-**Session Reuse**: Each call returns `SESSION_ID: xxx`, use `resume xxx` for subsequent phases. Save `CODEX_SESSION` in Phase 2, use `resume` in Phases 3 and 5.
-
----
-
-## Communication Guidelines
-
-1. Start responses with mode label `[Mode: X]`, initial is `[Mode: Research]`
-2. Follow strict sequence: `Research → Ideation → Plan → Execute → Optimize → Review`
-3. Use `AskUserQuestion` tool for user interaction when needed (e.g., confirmation/selection/approval)
+**Reutilización de Sesión**: Cada llamada devuelve `SESSION_ID: xxx`, usa `resume xxx` para fases posteriores. Guarda `CODEX_SESSION` en la Fase 2, usa `resume` en las Fases 3 y 5.
 
 ---
 
-## Core Workflow
+## Directrices de Comunicación
 
-### Phase 0: Prompt Enhancement (Optional)
+1. Comienza las respuestas con la etiqueta de modo `[Modo: X]`, la inicial es `[Modo: Investigación]`
+2. Sigue la secuencia estricta: `Investigación → Ideación → Plan → Ejecución → Optimización → Revisión`
+3. Usa la herramienta `AskUserQuestion` para interactuar con el usuario cuando sea necesario (ej. confirmación/selección/aprobación)
 
-`[Mode: Prepare]` - If ace-tool MCP available, call `mcp__ace-tool__enhance_prompt`, **replace original $ARGUMENTS with enhanced result for subsequent Codex calls**. If unavailable, use `$ARGUMENTS` as-is.
+---
 
-### Phase 1: Research
+## Flujo de Trabajo Principal
 
-`[Mode: Research]` - Understand requirements and gather context
+### Fase 0: Mejora de Prompt (Opcional)
 
-1. **Code Retrieval** (if ace-tool MCP available): Call `mcp__ace-tool__search_context` to retrieve existing APIs, data models, service architecture. If unavailable, use built-in tools: `Glob` for file discovery, `Grep` for symbol/API search, `Read` for context gathering, `Task` (Explore agent) for deeper exploration.
-2. Requirement completeness score (0-10): >=7 continue, <7 stop and supplement
+`[Modo: Preparación]` - Si el MCP ace-tool está disponible, invoca `mcp__ace-tool__enhance_prompt`, **sustituye el $ARGUMENTS original por el resultado mejorado para las llamadas posteriores a Codex**. Si no está disponible, utiliza `$ARGUMENTS` tal como está.
 
-### Phase 2: Ideation
+### Fase 1: Investigación
 
-`[Mode: Ideation]` - Codex-led analysis
+`[Modo: Investigación]` - Comprender requisitos y recopilar contexto
 
-**MUST call Codex** (follow call specification above):
+1. **Recuperación de Código** (si el MCP ace-tool está disponible): Invoca `mcp__ace-tool__search_context` para recuperar APIs existentes, modelos de datos y arquitectura de servicios. Si no está disponible, utiliza herramientas nativas: `Glob` para descubrir archivos, `Grep` para búsqueda de símbolos/APIs, `Read` para reunir contexto, `Task` (agente Explore) para exploración profunda.
+2. Puntuación de completitud de requisitos (0-10): >=7 continuar, <7 detenerse y complementar
+
+### Fase 2: Ideación
+
+`[Modo: Ideación]` - Análisis liderado por Codex
+
+**DEBE llamarse a Codex** (seguir la especificación de llamada anterior):
 - ROLE_FILE: `~/.claude/.ccg/prompts/codex/analyzer.md`
-- Requirement: Enhanced requirement (or $ARGUMENTS if not enhanced)
-- Context: Project context from Phase 1
-- OUTPUT: Technical feasibility analysis, recommended solutions (at least 2), risk assessment
+- Requirement: Requisito mejorado (o $ARGUMENTS si no fue mejorado)
+- Context: Contexto del proyecto de la Fase 1
+- OUTPUT: Análisis de viabilidad técnica, soluciones recomendadas (al menos 2), evaluación de riesgos
 
-**Save SESSION_ID** (`CODEX_SESSION`) for subsequent phase reuse.
+**Guarda SESSION_ID** (`CODEX_SESSION`) para su reutilización en fases posteriores.
 
-Output solutions (at least 2), wait for user selection.
+Muestra las soluciones (al menos 2) y espera la selección del usuario.
 
-### Phase 3: Planning
+### Fase 3: Planificación
 
-`[Mode: Plan]` - Codex-led planning
+`[Modo: Plan]` - Planificación liderada por Codex
 
-**MUST call Codex** (use `resume <CODEX_SESSION>` to reuse session):
+**DEBE llamarse a Codex** (usar `resume <CODEX_SESSION>` para reutilizar la sesión):
 - ROLE_FILE: `~/.claude/.ccg/prompts/codex/architect.md`
-- Requirement: User's selected solution
-- Context: Analysis results from Phase 2
-- OUTPUT: File structure, function/class design, dependency relationships
+- Requirement: Solución seleccionada por el usuario
+- Context: Resultados del análisis de la Fase 2
+- OUTPUT: Estructura de archivos, diseño de funciones/clases, relaciones de dependencia
 
-Claude synthesizes plan, save to `.claude/plan/task-name.md` after user approval.
+Claude sintetiza el plan y lo guarda en `.claude/plan/task-name.md` tras la aprobación del usuario.
 
-### Phase 4: Implementation
+### Fase 4: Implementación
 
-`[Mode: Execute]` - Code development
+`[Modo: Ejecución]` - Desarrollo del código
 
-- Strictly follow approved plan
-- Follow existing project code standards
-- Ensure error handling, security, performance optimization
+- Seguir estrictamente el plan aprobado
+- Cumplir con los estándares de código del proyecto existente
+- Asegurar manejo de errores, seguridad y optimización de rendimiento
 
-### Phase 5: Optimization
+### Fase 5: Optimización
 
-`[Mode: Optimize]` - Codex-led review
+`[Modo: Optimización]` - Revisión liderada por Codex
 
-**MUST call Codex** (follow call specification above):
+**DEBE llamarse a Codex** (seguir la especificación de llamada anterior):
 - ROLE_FILE: `~/.claude/.ccg/prompts/codex/reviewer.md`
-- Requirement: Review the following backend code changes
-- Context: git diff or code content
-- OUTPUT: Security, performance, error handling, API compliance issues list
+- Requirement: Revisar los siguientes cambios en código de backend
+- Context: git diff o contenido del código
+- OUTPUT: Lista de problemas de seguridad, rendimiento, manejo de errores y cumplimiento de API
 
-Integrate review feedback, execute optimization after user confirmation.
+Integra las observaciones de la revisión y ejecuta la optimización tras la confirmación del usuario.
 
-### Phase 6: Quality Review
+### Fase 6: Revisión de Calidad
 
-`[Mode: Review]` - Final evaluation
+`[Modo: Revisión]` - Evaluación final
 
-- Check completion against plan
-- Run tests to verify functionality
-- Report issues and recommendations
+- Verificar la finalización frente al plan
+- Ejecutar pruebas para verificar funcionalidad
+- Reportar problemas y recomendaciones
 
 ---
 
-## Key Rules
+## Reglas Clave
 
-1. **Codex backend opinions are trustworthy**
-2. **Gemini backend opinions for reference only**
-3. External models have **zero filesystem write access**
-4. Claude handles all code writes and file operations
+1. **Las opiniones de backend de Codex son confiables**
+2. **Las opiniones de backend de Gemini son solo para referencia**
+3. Los modelos externos tienen **cero acceso de escritura en el sistema de archivos**
+4. Claude se encarga de todas las escrituras de código y operaciones de archivos

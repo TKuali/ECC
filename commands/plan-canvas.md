@@ -1,45 +1,37 @@
 ---
-description: Open a plan or HTML artifact in the browser Plan Canvas for annotate-and-approve review
-argument-hint: "[path/to/artifact.plan.md | path/to/artifact.html]"
+description: Abre un plan o artefacto HTML en el Plan Canvas del navegador para una revisión interactiva con anotaciones y aprobación.
+argument-hint: "[ruta/al/artefacto.plan.md | ruta/al/artefacto.html]"
 ---
 
-# Plan Canvas Command
+# Comando Plan Canvas
 
-Opens a local artifact in the Plan Canvas — ECC's browser review surface —
-where the user annotates elements, chats with you, and approves the plan or
-requests changes without leaving the page.
+Abre un artefacto local en el Plan Canvas —la interfaz de revisión en el navegador de ECC— donde el usuario puede anotar elementos, chatear contigo y aprobar el plan o solicitar cambios sin salir de la página.
 
-This command is a thin entry point over the `plan-canvas` skill. Follow that
-skill for the full workflow and rules.
+Este comando es un punto de entrada liviano sobre la skill `plan-canvas`. Consulta esa skill para ver el flujo de trabajo completo y las reglas.
 
-## What This Command Does
+## Qué hace este comando
 
-1. Resolve the artifact: the given path, else the most recently modified
-   `.claude/plans/*.plan.md`, else ask what to review.
-2. `ecc-plan-canvas open <artifact>` — opens the user's browser.
-3. `ecc-plan-canvas await <artifact>` — block until feedback,
-   verdict, or session end; leave it running.
-4. Apply feedback to the artifact file (the canvas live-reloads), answer with
-   `await <artifact> --reply "..."`, and repeat until the user approves or
-   ends the session.
+1. Resuelve el artefacto: la ruta indicada, de lo contrario el archivo más reciente en `.claude/plans/*.plan.md`, o pregunta qué revisar.
+2. `ecc-plan-canvas open <artifact>` — abre el navegador del usuario.
+3. `ecc-plan-canvas await <artifact>` — espera hasta recibir retroalimentación, veredicto o fin de sesión; se mantiene en ejecución.
+4. Aplica las observaciones al archivo del artefacto (el canvas se recarga en vivo), responde con `await <artifact> --reply "..."`, y repite hasta que el usuario apruebe o termine la sesión.
 
-An `approve` verdict counts as plan confirmation for `/plan`-style gates:
-stop polling, `end` the session, and begin implementation.
+Un veredicto `approve` cuenta como confirmación del plan para controles estilo `/plan`: detén la espera, finaliza la sesión con `end` y comienza la implementación.
 
-## Example
+## Ejemplo
 
 ```
-User: /plan-canvas .claude/plans/notifications.plan.md
+Usuario: /plan-canvas .claude/plans/notificaciones.plan.md
 
-Assistant: (runs open + await, browser opens)
-...user clicks "Request changes" with two annotations...
-Assistant: (edits the plan, replies in-canvas, awaits again)
-...user clicks "Approve plan"...
-Assistant: Plan approved in the canvas — starting implementation.
+Asistente: (ejecuta open + await, se abre el navegador)
+...el usuario hace clic en "Solicitar cambios" con dos anotaciones...
+Asistente: (edita el plan, responde en el canvas, espera nuevamente)
+...el usuario hace clic en "Aprobar plan"...
+Asistente: Plan aprobado en el canvas — comenzando la implementación.
 ```
 
-## Related
+## Relacionado
 
-- `plan-canvas` skill — full workflow, feedback JSON shapes, rules
-- `/plan` — produces the plan artifacts this reviews
-- Source: `scripts/plan-canvas.js`, `scripts/lib/plan-canvas/`
+- Skill `plan-canvas` — flujo completo, estructuras JSON de retroalimentación y reglas
+- `/plan` — genera los artefactos de planes que este comando revisa
+- Fuentes: `scripts/plan-canvas.js`, `scripts/lib/plan-canvas/`

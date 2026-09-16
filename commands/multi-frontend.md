@@ -1,42 +1,42 @@
 ---
-description: Run a frontend-focused multi-model workflow for components, layouts, animation, and UI polish.
+description: Ejecuta un flujo de trabajo multimodelo centrado en frontend para componentes, maquetación, animación y pulido de interfaz de usuario.
 ---
 
-# Frontend - Frontend-Focused Development
+# Frontend - Desarrollo Centrado en Frontend
 
-Frontend-focused workflow (Research → Ideation → Plan → Execute → Optimize → Review), Antigravity-led.
+Flujo de trabajo centrado en frontend (Investigación → Ideación → Plan → Ejecución → Optimización → Revisión), liderado por Antigravity.
 
-> **Prerequisite:** Requires the external `ccg-workflow` runtime, which is **not** part of the base ECC install. Initialize it with `npx ccg-workflow` to provision `~/.claude/bin/codeagent-wrapper` and the `~/.claude/.ccg/prompts/*` role files this command depends on. Without that runtime, this command will not run correctly.
+> **Prerrequisito:** Requiere el entorno de ejecución externo `ccg-workflow`, el cual **no** forma parte de la instalación base de ECC. Inicialízalo con `npx ccg-workflow` para aprovisionar `~/.claude/bin/codeagent-wrapper` y los archivos de rol `~/.claude/.ccg/prompts/*` de los que depende este comando. Sin ese entorno, este comando no funcionará correctamente.
 
-## Usage
+## Uso
 
 ```bash
-/frontend <UI task description>
+/frontend <descripción de la tarea de interfaz>
 ```
 
-## Context
+## Contexto
 
-- Frontend task: $ARGUMENTS
-- Antigravity-led, Codex for auxiliary reference
-- Applicable: Component design, responsive layout, UI animations, style optimization
+- Tarea de frontend: $ARGUMENTS
+- Liderado por Antigravity, Codex para referencia auxiliar
+- Aplicable: Diseño de componentes, maquetación adaptativa (responsive), animaciones de interfaz, optimización de estilos
 
-## Your Role
+## Tu Rol
 
-You are the **Frontend Orchestrator**, coordinating multi-model collaboration for UI/UX tasks (Research → Ideation → Plan → Execute → Optimize → Review).
+Eres el **Orquestador de Frontend**, coordinando la colaboración multimodelo para tareas de UI/UX (Investigación → Ideación → Plan → Ejecución → Optimización → Revisión).
 
-**Collaborative Models**:
-- **Antigravity** – Frontend UI/UX (**Frontend authority, trustworthy**)
-- **Codex** – Backend perspective (**Frontend opinions for reference only**)
-- **Claude (self)** – Orchestration, planning, execution, delivery
+**Modelos Colaboradores**:
+- **Antigravity** – UI/UX de frontend (**Autoridad en frontend, confiable**)
+- **Codex** – Perspectiva de backend (**Opiniones de frontend solo como referencia**)
+- **Claude (uno mismo)** – Orquestación, planificación, ejecución y entrega
 
 ---
 
-## Multi-Model Call Specification
+## Especificación de Llamadas Multimodelo
 
-**Call Syntax**:
+**Sintaxis de Llamada**:
 
 ```
-# New session call
+# Llamada de nueva sesión
 Bash({
   command: "~/.claude/bin/codeagent-wrapper {{LITE_MODE_FLAG}}--backend antigravity - \"$PWD\" <<'EOF'
 ROLE_FILE: <role prompt path>
@@ -48,10 +48,10 @@ OUTPUT: Expected output format
 EOF",
   run_in_background: false,
   timeout: 3600000,
-  description: "Brief description"
+  description: "Breve descripción"
 })
 
-# Resume session call
+# Llamada para reanudar sesión
 Bash({
   command: "~/.claude/bin/codeagent-wrapper {{LITE_MODE_FLAG}}--backend antigravity resume <SESSION_ID> - \"$PWD\" <<'EOF'
 ROLE_FILE: <role prompt path>
@@ -63,102 +63,102 @@ OUTPUT: Expected output format
 EOF",
   run_in_background: false,
   timeout: 3600000,
-  description: "Brief description"
+  description: "Breve descripción"
 })
 ```
 
-**Role Prompts**:
+**Prompts de Roles**:
 
-| Phase | Antigravity |
-|-------|--------|
-| Analysis | `~/.claude/.ccg/prompts/antigravity/analyzer.md` |
-| Planning | `~/.claude/.ccg/prompts/antigravity/architect.md` |
-| Review | `~/.claude/.ccg/prompts/antigravity/reviewer.md` |
+| Fase | Antigravity |
+|------|-------------|
+| Análisis | `~/.claude/.ccg/prompts/antigravity/analyzer.md` |
+| Planificación | `~/.claude/.ccg/prompts/antigravity/architect.md` |
+| Revisión | `~/.claude/.ccg/prompts/antigravity/reviewer.md` |
 
-**Session Reuse**: Each call returns `SESSION_ID: xxx`, use `resume xxx` for subsequent phases. Save `ANTIGRAVITY_SESSION` in Phase 2, use `resume` in Phases 3 and 5.
-
----
-
-## Communication Guidelines
-
-1. Start responses with mode label `[Mode: X]`, initial is `[Mode: Research]`
-2. Follow strict sequence: `Research → Ideation → Plan → Execute → Optimize → Review`
-3. Use `AskUserQuestion` tool for user interaction when needed (e.g., confirmation/selection/approval)
+**Reutilización de Sesión**: Cada llamada devuelve `SESSION_ID: xxx`, usa `resume xxx` para fases posteriores. Guarda `ANTIGRAVITY_SESSION` en la Fase 2, usa `resume` en las Fases 3 y 5.
 
 ---
 
-## Core Workflow
+## Directrices de Comunicación
 
-### Phase 0: Prompt Enhancement (Optional)
+1. Comienza las respuestas con la etiqueta de modo `[Modo: X]`, la inicial es `[Modo: Investigación]`
+2. Sigue la secuencia estricta: `Investigación → Ideación → Plan → Ejecución → Optimización → Revisión`
+3. Usa la herramienta `AskUserQuestion` para interactuar con el usuario cuando sea necesario (ej. confirmación/selección/aprobación)
 
-`[Mode: Prepare]` - If ace-tool MCP available, call `mcp__ace-tool__enhance_prompt`, **replace original $ARGUMENTS with enhanced result for subsequent Antigravity calls**. If unavailable, use `$ARGUMENTS` as-is.
+---
 
-### Phase 1: Research
+## Flujo de Trabajo Principal
 
-`[Mode: Research]` - Understand requirements and gather context
+### Fase 0: Mejora de Prompt (Opcional)
 
-1. **Code Retrieval** (if ace-tool MCP available): Call `mcp__ace-tool__search_context` to retrieve existing components, styles, design system. If unavailable, use built-in tools: `Glob` for file discovery, `Grep` for component/style search, `Read` for context gathering, `Task` (Explore agent) for deeper exploration.
-2. Requirement completeness score (0-10): >=7 continue, <7 stop and supplement
+`[Modo: Preparación]` - Si el MCP ace-tool está disponible, invoca `mcp__ace-tool__enhance_prompt`, **sustituye el $ARGUMENTS original por el resultado mejorado para las llamadas posteriores a Antigravity**. Si no está disponible, utiliza `$ARGUMENTS` tal como está.
 
-### Phase 2: Ideation
+### Fase 1: Investigación
 
-`[Mode: Ideation]` - Antigravity-led analysis
+`[Modo: Investigación]` - Comprender requisitos y recopilar contexto
 
-**MUST call Antigravity** (follow call specification above):
+1. **Recuperación de Código** (si el MCP ace-tool está disponible): Invoca `mcp__ace-tool__search_context` para recuperar componentes existentes, estilos y sistema de diseño. Si no está disponible, utiliza herramientas nativas: `Glob` para descubrir archivos, `Grep` para búsqueda de componentes/estilos, `Read` para reunir contexto, `Task` (agente Explore) para exploración profunda.
+2. Puntuación de completitud de requisitos (0-10): >=7 continuar, <7 detenerse y complementar
+
+### Fase 2: Ideación
+
+`[Modo: Ideación]` - Análisis liderado por Antigravity
+
+**DEBE llamarse a Antigravity** (seguir la especificación de llamada anterior):
 - ROLE_FILE: `~/.claude/.ccg/prompts/antigravity/analyzer.md`
-- Requirement: Enhanced requirement (or $ARGUMENTS if not enhanced)
-- Context: Project context from Phase 1
-- OUTPUT: UI feasibility analysis, recommended solutions (at least 2), UX evaluation
+- Requirement: Requisito mejorado (o $ARGUMENTS si no fue mejorado)
+- Context: Contexto del proyecto de la Fase 1
+- OUTPUT: Análisis de viabilidad de interfaz, soluciones recomendadas (al menos 2), evaluación de UX
 
-**Save SESSION_ID** (`ANTIGRAVITY_SESSION`) for subsequent phase reuse.
+**Guarda SESSION_ID** (`ANTIGRAVITY_SESSION`) para su reutilización en fases posteriores.
 
-Output solutions (at least 2), wait for user selection.
+Muestra las soluciones (al menos 2) y espera la selección del usuario.
 
-### Phase 3: Planning
+### Fase 3: Planificación
 
-`[Mode: Plan]` - Antigravity-led planning
+`[Modo: Plan]` - Planificación liderada por Antigravity
 
-**MUST call Antigravity** (use `resume <ANTIGRAVITY_SESSION>` to reuse session):
+**DEBE llamarse a Antigravity** (usar `resume <ANTIGRAVITY_SESSION>` para reutilizar la sesión):
 - ROLE_FILE: `~/.claude/.ccg/prompts/antigravity/architect.md`
-- Requirement: User's selected solution
-- Context: Analysis results from Phase 2
-- OUTPUT: Component structure, UI flow, styling approach
+- Requirement: Solución seleccionada por el usuario
+- Context: Resultados del análisis de la Fase 2
+- OUTPUT: Estructura de componentes, flujo de interfaz, enfoque de estilos
 
-Claude synthesizes plan, save to `.claude/plan/task-name.md` after user approval.
+Claude sintetiza el plan y lo guarda en `.claude/plan/task-name.md` tras la aprobación del usuario.
 
-### Phase 4: Implementation
+### Fase 4: Implementación
 
-`[Mode: Execute]` - Code development
+`[Modo: Ejecución]` - Desarrollo del código
 
-- Strictly follow approved plan
-- Follow existing project design system and code standards
-- Ensure responsiveness, accessibility
+- Seguir estrictamente el plan aprobado
+- Cumplir con el sistema de diseño y estándares de código del proyecto existente
+- Asegurar responsividad y accesibilidad
 
-### Phase 5: Optimization
+### Fase 5: Optimización
 
-`[Mode: Optimize]` - Antigravity-led review
+`[Modo: Optimización]` - Revisión liderada por Antigravity
 
-**MUST call Antigravity** (follow call specification above):
+**DEBE llamarse a Antigravity** (seguir la especificación de llamada anterior):
 - ROLE_FILE: `~/.claude/.ccg/prompts/antigravity/reviewer.md`
-- Requirement: Review the following frontend code changes
-- Context: git diff or code content
-- OUTPUT: Accessibility, responsiveness, performance, design consistency issues list
+- Requirement: Revisar los siguientes cambios en código de frontend
+- Context: git diff o contenido del código
+- OUTPUT: Lista de problemas de accesibilidad, responsividad, rendimiento y consistencia de diseño
 
-Integrate review feedback, execute optimization after user confirmation.
+Integra las observaciones de la revisión y ejecuta la optimización tras la confirmación del usuario.
 
-### Phase 6: Quality Review
+### Fase 6: Revisión de Calidad
 
-`[Mode: Review]` - Final evaluation
+`[Modo: Revisión]` - Evaluación final
 
-- Check completion against plan
-- Verify responsiveness and accessibility
-- Report issues and recommendations
+- Verificar la finalización frente al plan
+- Verificar responsividad y accesibilidad
+- Reportar problemas y recomendaciones
 
 ---
 
-## Key Rules
+## Reglas Clave
 
-1. **Antigravity frontend opinions are trustworthy**
-2. **Codex frontend opinions for reference only**
-3. External models have **zero filesystem write access**
-4. Claude handles all code writes and file operations
+1. **Las opiniones de frontend de Antigravity son confiables**
+2. **Las opiniones de frontend de Codex son solo para referencia**
+3. Los modelos externos tienen **cero acceso de escritura en el sistema de archivos**
+4. Claude se encarga de todas las escrituras de código y operaciones de archivos

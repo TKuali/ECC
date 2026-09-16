@@ -1,67 +1,67 @@
 ---
-description: Analyze a project and generate PM2 service commands for detected frontend, backend, or database services.
+description: Analiza un proyecto y genera comandos de servicio PM2 para servicios detectados de frontend, backend o base de datos.
 ---
 
-# PM2 Init
+# Inicialización de PM2 (PM2 Init)
 
-Auto-analyze project and generate PM2 service commands.
+Autoanaliza el proyecto y genera comandos de servicio de PM2.
 
-**Command**: `$ARGUMENTS`
-
----
-
-## Workflow
-
-1. Check PM2 (install via `npm install -g pm2` if missing)
-2. Scan project to identify services (frontend/backend/database)
-3. Generate config files and individual command files
+**Comando**: `$ARGUMENTS`
 
 ---
 
-## Service Detection
+## Flujo de Trabajo
 
-| Type | Detection | Default Port |
-|------|-----------|--------------|
+1. Verificar PM2 (instalar vía `npm install -g pm2` si no existe)
+2. Escanear el proyecto para identificar servicios (frontend/backend/base de datos)
+3. Generar archivos de configuración y archivos de comandos individuales
+
+---
+
+## Detección de Servicios
+
+| Tipo | Detección | Puerto por Defecto |
+|---|---|---|
 | Vite | vite.config.* | 5173 |
 | Next.js | next.config.* | 3000 |
 | Nuxt | nuxt.config.* | 3000 |
-| CRA | react-scripts in package.json | 3000 |
-| Express/Node | server/backend/api directory + package.json | 3000 |
+| CRA | react-scripts en package.json | 3000 |
+| Express/Node | directorio server/backend/api + package.json | 3000 |
 | FastAPI/Flask | requirements.txt / pyproject.toml | 8000 |
 | Go | go.mod / main.go | 8080 |
 
-**Port Detection Priority**: User specified > .env > config file > scripts args > default port
+**Prioridad de Detección de Puertos**: Especificado por usuario > .env > archivo de configuración > argumentos de scripts > puerto por defecto
 
 ---
 
-## Generated Files
+## Archivos Generados
 
 ```
 project/
-├── ecosystem.config.cjs              # PM2 config
-├── {backend}/start.cjs               # Python wrapper (if applicable)
+├── ecosystem.config.cjs              # Configuración de PM2
+├── {backend}/start.cjs               # Wrapper de Python (si aplica)
 └── .claude/
     ├── commands/
-    │   ├── pm2-all.md                # Start all + monit
-    │   ├── pm2-all-stop.md           # Stop all
-    │   ├── pm2-all-restart.md        # Restart all
-    │   ├── pm2-{port}.md             # Start single + logs
-    │   ├── pm2-{port}-stop.md        # Stop single
-    │   ├── pm2-{port}-restart.md     # Restart single
-    │   ├── pm2-logs.md               # View all logs
-    │   └── pm2-status.md             # View status
+    │   ├── pm2-all.md                # Iniciar todos + monitor
+    │   ├── pm2-all-stop.md           # Detener todos
+    │   ├── pm2-all-restart.md        # Reiniciar todos
+    │   ├── pm2-{port}.md             # Iniciar individual + logs
+    │   ├── pm2-{port}-stop.md        # Detener individual
+    │   ├── pm2-{port}-restart.md     # Reiniciar individual
+    │   ├── pm2-logs.md               # Ver todos los logs
+    │   └── pm2-status.md             # Ver estado
     └── scripts/
-        ├── pm2-logs-{port}.ps1       # Single service logs
-        └── pm2-monit.ps1             # PM2 monitor
+        ├── pm2-logs-{port}.ps1       # Logs de servicio individual
+        └── pm2-monit.ps1             # Monitor de PM2
 ```
 
 ---
 
-## Windows Configuration (IMPORTANT)
+## Configuración en Windows (IMPORTANTE)
 
 ### ecosystem.config.cjs
 
-**Must use `.cjs` extension**
+**Debe usar extensión `.cjs`**
 
 ```javascript
 module.exports = {
@@ -87,16 +87,16 @@ module.exports = {
 }
 ```
 
-**Framework script paths:**
+**Rutas de scripts por framework:**
 
 | Framework | script | args |
-|-----------|--------|------|
+|---|---|---|
 | Vite | `node_modules/vite/bin/vite.js` | `--port {port}` |
 | Next.js | `node_modules/next/dist/bin/next` | `dev -p {port}` |
 | Nuxt | `node_modules/nuxt/bin/nuxt.mjs` | `dev --port {port}` |
-| Express | `src/index.js` or `server.js` | - |
+| Express | `src/index.js` o `server.js` | - |
 
-### Python Wrapper Script (start.cjs)
+### Script Wrapper de Python (start.cjs)
 
 ```javascript
 const { spawn } = require('child_process');
@@ -108,11 +108,11 @@ proc.on('close', (code) => process.exit(code));
 
 ---
 
-## Command File Templates (Minimal Content)
+## Plantillas de Archivos de Comando (Contenido Mínimo)
 
-### pm2-all.md (Start all + monit)
+### pm2-all.md (Iniciar todos + monitor)
 ````markdown
-Start all services and open PM2 monitor.
+Inicia todos los servicios y abre el monitor de PM2.
 ```bash
 cd "{PROJECT_ROOT}" && pm2 start ecosystem.config.cjs && start wt.exe -d "{PROJECT_ROOT}" pwsh -NoExit -c "pm2 monit"
 ```
@@ -120,7 +120,7 @@ cd "{PROJECT_ROOT}" && pm2 start ecosystem.config.cjs && start wt.exe -d "{PROJE
 
 ### pm2-all-stop.md
 ````markdown
-Stop all services.
+Detiene todos los servicios.
 ```bash
 cd "{PROJECT_ROOT}" && pm2 stop all
 ```
@@ -128,15 +128,15 @@ cd "{PROJECT_ROOT}" && pm2 stop all
 
 ### pm2-all-restart.md
 ````markdown
-Restart all services.
+Reinicia todos los servicios.
 ```bash
 cd "{PROJECT_ROOT}" && pm2 restart all
 ```
 ````
 
-### pm2-{port}.md (Start single + logs)
+### pm2-{port}.md (Iniciar individual + logs)
 ````markdown
-Start {name} ({port}) and open logs.
+Inicia {name} ({port}) y abre los logs.
 ```bash
 cd "{PROJECT_ROOT}" && pm2 start ecosystem.config.cjs --only {name} && start wt.exe -d "{PROJECT_ROOT}" pwsh -NoExit -c "pm2 logs {name}"
 ```
@@ -144,7 +144,7 @@ cd "{PROJECT_ROOT}" && pm2 start ecosystem.config.cjs --only {name} && start wt.
 
 ### pm2-{port}-stop.md
 ````markdown
-Stop {name} ({port}).
+Detiene {name} ({port}).
 ```bash
 cd "{PROJECT_ROOT}" && pm2 stop {name}
 ```
@@ -152,7 +152,7 @@ cd "{PROJECT_ROOT}" && pm2 stop {name}
 
 ### pm2-{port}-restart.md
 ````markdown
-Restart {name} ({port}).
+Reinicia {name} ({port}).
 ```bash
 cd "{PROJECT_ROOT}" && pm2 restart {name}
 ```
@@ -160,7 +160,7 @@ cd "{PROJECT_ROOT}" && pm2 restart {name}
 
 ### pm2-logs.md
 ````markdown
-View all PM2 logs.
+Ver todos los logs de PM2.
 ```bash
 cd "{PROJECT_ROOT}" && pm2 logs
 ```
@@ -168,19 +168,19 @@ cd "{PROJECT_ROOT}" && pm2 logs
 
 ### pm2-status.md
 ````markdown
-View PM2 status.
+Ver estado de PM2.
 ```bash
 cd "{PROJECT_ROOT}" && pm2 status
 ```
 ````
 
-### PowerShell Scripts (pm2-logs-{port}.ps1)
+### Scripts PowerShell (pm2-logs-{port}.ps1)
 ```powershell
 Set-Location "{PROJECT_ROOT}"
 pm2 logs {name}
 ```
 
-### PowerShell Scripts (pm2-monit.ps1)
+### Scripts PowerShell (pm2-monit.ps1)
 ```powershell
 Set-Location "{PROJECT_ROOT}"
 pm2 monit
@@ -188,89 +188,89 @@ pm2 monit
 
 ---
 
-## Key Rules
+## Reglas Clave
 
-1. **Config file**: `ecosystem.config.cjs` (not .js)
-2. **Node.js**: Specify bin path directly + interpreter
-3. **Python**: Node.js wrapper script + `windowsHide: true`
-4. **Open new window**: `start wt.exe -d "{path}" pwsh -NoExit -c "command"`
-5. **Minimal content**: Each command file has only 1-2 lines description + bash block
-6. **Direct execution**: No AI parsing needed, just run the bash command
-
----
-
-## Execute
-
-Based on `$ARGUMENTS`, execute init:
-
-1. Scan project for services
-2. Generate `ecosystem.config.cjs`
-3. Generate `{backend}/start.cjs` for Python services (if applicable)
-4. Generate command files in `.claude/commands/`
-5. Generate script files in `.claude/scripts/`
-6. **Update project CLAUDE.md** with PM2 info (see below)
-7. **Display completion summary** with terminal commands
+1. **Archivo de configuración**: `ecosystem.config.cjs` (no .js)
+2. **Node.js**: Especificar la ruta de bin directamente + intérprete
+3. **Python**: Script wrapper en Node.js + `windowsHide: true`
+4. **Abrir nueva ventana**: `start wt.exe -d "{path}" pwsh -NoExit -c "comando"`
+5. **Contenido mínimo**: Cada archivo de comando contiene solo 1-2 líneas de descripción + bloque bash
+6. **Ejecución directa**: Sin análisis de IA necesario, solo ejecutar el comando bash
 
 ---
 
-## Post-Init: Update CLAUDE.md
+## Ejecutar
 
-After generating files, append PM2 section to project's `CLAUDE.md` (create if not exists):
+Según `$ARGUMENTS`, ejecutar la inicialización:
+
+1. Escanear el proyecto en busca de servicios
+2. Generar `ecosystem.config.cjs`
+3. Generar `{backend}/start.cjs` para servicios Python (si aplica)
+4. Generar archivos de comando en `.claude/commands/`
+5. Generar archivos de script en `.claude/scripts/`
+6. **Actualizar el archivo CLAUDE.md del proyecto** con información de PM2 (ver a continuación)
+7. **Mostrar resumen de finalización** con comandos de terminal
+
+---
+
+## Post-Inicialización: Actualizar CLAUDE.md
+
+Tras generar los archivos, anexar la sección de PM2 al `CLAUDE.md` del proyecto (crearlo si no existe):
 
 ````markdown
-## PM2 Services
+## Servicios PM2
 
-| Port | Name | Type |
-|------|------|------|
+| Puerto | Nombre | Tipo |
+|---|---|---|
 | {port} | {name} | {type} |
 
-**Terminal Commands:**
+**Comandos de Terminal:**
 ```bash
-pm2 start ecosystem.config.cjs   # First time
-pm2 start all                    # After first time
+pm2 start ecosystem.config.cjs   # Primera vez
+pm2 start all                    # Después de la primera vez
 pm2 stop all / pm2 restart all
 pm2 start {name} / pm2 stop {name}
 pm2 logs / pm2 status / pm2 monit
-pm2 save                         # Save process list
-pm2 resurrect                    # Restore saved list
+pm2 save                         # Guardar lista de procesos
+pm2 resurrect                    # Restaurar lista guardada
 ```
 ````
 
-**Rules for CLAUDE.md update:**
-- If PM2 section exists, replace it
-- If not exists, append to end
-- Keep content minimal and essential
+**Reglas para actualizar CLAUDE.md:**
+- Si la sección de PM2 ya existe, reemplazarla
+- Si no existe, anexar al final
+- Mantener el contenido esencial y conciso
 
 ---
 
-## Post-Init: Display Summary
+## Post-Inicialización: Mostrar Resumen
 
-After all files generated, output:
+Tras generar todos los archivos, mostrar:
 
 ```
-## PM2 Init Complete
+## PM2 Init Completado
 
-**Services:**
+**Servicios:**
 
-| Port | Name | Type |
-|------|------|------|
+| Puerto | Nombre | Tipo |
+|---|---|---|
 | {port} | {name} | {type} |
 
-**Claude Commands:** /pm2-all, /pm2-all-stop, /pm2-{port}, /pm2-{port}-stop, /pm2-logs, /pm2-status
+**Comandos de Claude:** /pm2-all, /pm2-all-stop, /pm2-{port}, /pm2-{port}-stop, /pm2-logs, /pm2-status
 
-**Terminal Commands:**
-## First time (with config file)
+**Comandos de Terminal:**
+## Primera vez (con archivo de configuración)
 pm2 start ecosystem.config.cjs && pm2 save
 
-## After first time (simplified)
-pm2 start all          # Start all
-pm2 stop all           # Stop all
-pm2 restart all        # Restart all
-pm2 start {name}       # Start single
-pm2 stop {name}        # Stop single
-pm2 logs               # View logs
-pm2 monit              # Monitor panel
-pm2 resurrect          # Restore saved processes
+## Después de la primera vez (simplificado)
+pm2 start all          # Iniciar todos
+pm2 stop all           # Detener todos
+pm2 restart all        # Reiniciar todos
+pm2 start {name}       # Iniciar individual
+pm2 stop {name}        # Detener individual
+pm2 logs               # Ver logs
+pm2 monit              # Panel de monitor
+pm2 resurrect          # Restaurar procesos guardados
 
-**Tip:** Run `pm2 save` after first start to enable simplified commands.
+**Consejo:** Ejecuta `pm2 save` después del primer inicio para habilitar los comandos simplificados.
 ```

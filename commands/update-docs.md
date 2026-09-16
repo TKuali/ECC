@@ -1,88 +1,88 @@
 ---
-description: Sync documentation from source-of-truth files such as scripts, schemas, routes, and exports.
+description: Sincroniza la documentación a partir de fuentes fidedignas de código como scripts, esquemas, rutas y exportaciones.
 ---
 
-# Update Documentation
+# Actualizar Documentación (Update Documentation)
 
-Sync documentation with the codebase, generating from source-of-truth files.
+Sincroniza la documentación con la base de código, generándola a partir de los archivos que representan la fuente de la verdad.
 
-## Step 1: Identify Sources of Truth
+## Paso 1: Identificar las Fuentes de la Verdad
 
-| Source | Generates |
-|--------|-----------|
-| `package.json` scripts | Available commands reference |
-| `.env.example` | Environment variable documentation |
-| `openapi.yaml` / route files | API endpoint reference |
-| Source code exports | Public API documentation |
-| `Dockerfile` / `docker-compose.yml` | Infrastructure setup docs |
+| Fuente | Genera |
+|---|---|
+| Scripts en `package.json` | Referencia de comandos disponibles |
+| `.env.example` | Documentación de variables de entorno |
+| `openapi.yaml` / archivos de rutas | Referencia de endpoints de la API |
+| Exportaciones de código fuente | Documentación de la API pública |
+| `Dockerfile` / `docker-compose.yml` | Documentación de configuración de infraestructura |
 
-## Step 2: Generate Script Reference
+## Paso 2: Generar Referencia de Scripts
 
-1. Read `package.json` (or `Makefile`, `Cargo.toml`, `pyproject.toml`)
-2. Extract all scripts/commands with their descriptions
-3. Generate a reference table:
-
-```markdown
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server with hot reload |
-| `npm run build` | Production build with type checking |
-| `npm test` | Run test suite with coverage |
-```
-
-## Step 3: Generate Environment Documentation
-
-1. Read `.env.example` (or `.env.template`, `.env.sample`)
-2. Extract all variables with their purposes
-3. Categorize as required vs optional
-4. Document expected format and valid values
+1. Leer `package.json` (o `Makefile`, `Cargo.toml`, `pyproject.toml`)
+2. Extraer todos los scripts/comandos con sus descripciones
+3. Generar una tabla de referencia:
 
 ```markdown
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string | `postgres://user:pass@host:5432/db` |
-| `LOG_LEVEL` | No | Logging verbosity (default: info) | `debug`, `info`, `warn`, `error` |
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Iniciar servidor de desarrollo con recarga en caliente |
+| `npm run build` | Compilación de producción con comprobación de tipos |
+| `npm test` | Ejecutar suite de pruebas con cobertura |
 ```
 
-## Step 4: Update Contributing Guide
+## Paso 3: Generar Documentación de Entorno
 
-Generate or update `docs/CONTRIBUTING.md` with:
-- Development environment setup (prerequisites, install steps)
-- Available scripts and their purposes
-- Testing procedures (how to run, how to write new tests)
-- Code style enforcement (linter, formatter, pre-commit hooks)
-- PR submission checklist
+1. Leer `.env.example` (o `.env.template`, `.env.sample`)
+2. Extraer todas las variables con sus propósitos
+3. Categorizar como obligatorias u opcionales
+4. Documentar el formato esperado y valores válidos
 
-## Step 5: Update Runbook
+```markdown
+| Variable | Obligatoria | Descripción | Ejemplo |
+|---|---|---|---|
+| `DATABASE_URL` | Sí | Cadena de conexión PostgreSQL | `postgres://user:pass@host:5432/db` |
+| `LOG_LEVEL` | No | Verbosidad de logs (por defecto: info) | `debug`, `info`, `warn`, `error` |
+```
 
-Generate or update `docs/RUNBOOK.md` with:
-- Deployment procedures (step-by-step)
-- Health check endpoints and monitoring
-- Common issues and their fixes
-- Rollback procedures
-- Alerting and escalation paths
+## Paso 4: Actualizar Guía de Contribución
 
-## Step 6: Staleness Check
+Generar o actualizar `docs/CONTRIBUTING.md` con:
+- Configuración del entorno de desarrollo (prerrequisitos, pasos de instalación)
+- Scripts disponibles y sus objetivos
+- Procedimientos de prueba (cómo ejecutar y escribir nuevas pruebas)
+- Cumplimiento de estilo de código (linter, formateador, hooks de pre-commit)
+- Lista de verificación para envío de PRs
 
-1. Find documentation files not modified in 90+ days
-2. Cross-reference with recent source code changes
-3. Flag potentially outdated docs for manual review
+## Paso 5: Actualizar Runbook
 
-## Step 7: Show Summary
+Generar o actualizar `docs/RUNBOOK.md` con:
+- Procedimientos de despliegue (paso a paso)
+- Endpoints de comprobación de salud y monitorización
+- Problemas comunes y sus soluciones
+- Procedimientos de reversión (rollback)
+- Canales de alerta y vías de escalado
+
+## Paso 6: Verificación de Desactualización (Staleness)
+
+1. Encontrar archivos de documentación no modificados en más de 90 días
+2. Cruzar con los cambios recientes en el código fuente
+3. Marcar documentos potencialmente obsoletos para revisión manual
+
+## Paso 7: Mostrar Resumen
 
 ```
-Documentation Update
+Actualización de Documentación
 ──────────────────────────────
-Updated:  docs/CONTRIBUTING.md (scripts table)
-Updated:  docs/ENV.md (3 new variables)
-Flagged:  docs/DEPLOY.md (142 days stale)
-Skipped:  docs/API.md (no changes detected)
+Actualizado: docs/CONTRIBUTING.md (tabla de scripts)
+Actualizado: docs/ENV.md (3 variables nuevas)
+Marcado:     docs/DEPLOY.md (desactualizado hace 142 días)
+Omitido:     docs/API.md (no se detectaron cambios)
 ──────────────────────────────
 ```
 
-## Rules
+## Reglas
 
-- **Single source of truth**: Always generate from code, never manually edit generated sections
-- **Preserve manual sections**: Only update generated sections; leave hand-written prose intact
-- **Mark generated content**: Use `<!-- AUTO-GENERATED -->` markers around generated sections
-- **Don't create docs unprompted**: Only create new doc files if the command explicitly requests it
+- **Fuente única de la verdad**: Generar siempre a partir de código, nunca editar manualmente secciones generadas
+- **Preservar secciones manuales**: Actualizar solo las secciones autogeneradas; mantener intacto el texto redactado a mano
+- **Marcar contenido generado**: Usar marcadores `<!-- AUTO-GENERATED -->` alrededor de secciones generadas
+- **No crear documentación sin solicitud**: Crear nuevos archivos de documentación únicamente si el comando lo solicita explícitamente

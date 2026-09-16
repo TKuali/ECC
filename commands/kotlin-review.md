@@ -1,140 +1,140 @@
 ---
-description: Comprehensive Kotlin code review for idiomatic patterns, null safety, coroutine safety, and security. Invokes the kotlin-reviewer agent.
+description: Revisión exhaustiva de código Kotlin en cuanto a patrones idiomáticos, seguridad ante nulos, concurrencia con corrutinas y seguridad. Invoca al agente kotlin-reviewer.
 ---
 
-# Kotlin Code Review
+# Revisión de Código Kotlin
 
-This command invokes the **kotlin-reviewer** agent for comprehensive Kotlin-specific code review.
+Este comando invoca al agente **kotlin-reviewer** para una revisión de código exhaustiva y especializada en Kotlin.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Identify Kotlin Changes**: Find modified `.kt` and `.kts` files via `git diff`
-2. **Run Build & Static Analysis**: Execute `./gradlew build`, `detekt`, `ktlintCheck`
-3. **Security Scan**: Check for SQL injection, command injection, hardcoded secrets
-4. **Null Safety Review**: Analyze `!!` usage, platform type handling, unsafe casts
-5. **Coroutine Review**: Check structured concurrency, dispatcher usage, cancellation
-6. **Generate Report**: Categorize issues by severity
+1. **Identificar cambios en Kotlin**: Encuentra archivos `.kt` y `.kts` modificados mediante `git diff`
+2. **Compilar y ejecutar análisis estático**: Ejecuta `./gradlew build`, `detekt`, `ktlintCheck`
+3. **Escaneo de seguridad**: Busca inyecciones SQL/comandos y credenciales hardcodeadas
+4. **Revisión de seguridad nula**: Analiza el uso de `!!`, manejo de tipos de plataforma y conversiones inseguras
+5. **Revisión de corrutinas**: Comprueba concurrencia estructurada, uso de dispatchers y cancelación
+6. **Generar reporte**: Categoriza problemas por severidad
 
-## When to Use
+## Cuándo usarlo
 
-Use `/kotlin-review` when:
-- After writing or modifying Kotlin code
-- Before committing Kotlin changes
-- Reviewing pull requests with Kotlin code
-- Onboarding to a new Kotlin codebase
-- Learning idiomatic Kotlin patterns
+Usa `/kotlin-review` cuando:
+- Después de escribir o modificar código Kotlin
+- Antes de confirmar cambios (commit) en Kotlin
+- Al revisar pull requests con código Kotlin
+- Al incorporarse a un nuevo proyecto en Kotlin
+- Para aprender patrones idiomáticos de Kotlin
 
-## Review Categories
+## Categorías de Revisión
 
-### CRITICAL (Must Fix)
-- SQL/Command injection vulnerabilities
-- Force-unwrap `!!` without justification
-- Platform type null safety violations
-- GlobalScope usage (structured concurrency violation)
-- Hardcoded credentials
-- Unsafe deserialization
+### CRÍTICO (Debe Corregirse)
+- Vulnerabilidades de inyección SQL o de comandos
+- Desenvolvimiento forzado `!!` sin justificación
+- Violaciones de seguridad nula en tipos de plataforma
+- Uso de `GlobalScope` (violación de concurrencia estructurada)
+- Credenciales hardcodeadas
+- Deserialización insegura
 
-### HIGH (Should Fix)
-- Mutable state where immutable suffices
-- Blocking calls inside coroutine context
-- Missing cancellation checks in long loops
-- Non-exhaustive `when` on sealed types
-- Large functions (>50 lines)
-- Deep nesting (>4 levels)
+### ALTO (Debería Corregirse)
+- Estado mutable donde baste el inmutable
+- Llamadas bloqueantes dentro del contexto de corrutinas
+- Falta de comprobaciones de cancelación en bucles largos
+- Expresión `when` no exhaustiva en tipos sellados
+- Funciones extensas (>50 líneas)
+- Anidamiento profundo (>4 niveles)
 
-### MEDIUM (Consider)
-- Non-idiomatic Kotlin (Java-style patterns)
-- Missing trailing commas
-- Scope function misuse or nesting
-- Missing sequence for large collection chains
-- Redundant explicit types
+### MEDIO (A Considerar)
+- Código Kotlin no idiomático (patrones estilo Java)
+- Comas finales faltantes (trailing commas)
+- Mal uso o anidamiento de funciones de alcance (scope functions)
+- Falta de `Sequence` para cadenas largas de operaciones en colecciones
+- Tipos explícitos redundantes
 
-## Automated Checks Run
+## Comprobaciones Automatizadas Ejecutadas
 
 ```bash
-# Build check
+# Comprobación de compilación
 ./gradlew build
 
-# Static analysis
+# Análisis estático
 ./gradlew detekt
 
-# Formatting check
+# Comprobación de formato
 ./gradlew ktlintCheck
 
-# Tests
+# Pruebas
 ./gradlew test
 ```
 
-## Example Usage
+## Ejemplo de Uso
 
 ````text
-User: /kotlin-review
+Usuario: /kotlin-review
 
-Agent:
-# Kotlin Code Review Report
+Agente:
+# Reporte de Revisión de Código Kotlin
 
-## Files Reviewed
-- src/main/kotlin/com/example/service/UserService.kt (modified)
-- src/main/kotlin/com/example/routes/UserRoutes.kt (modified)
+## Archivos Revisados
+- src/main/kotlin/com/example/service/UserService.kt (modificado)
+- src/main/kotlin/com/example/routes/UserRoutes.kt (modificado)
 
-## Static Analysis Results
-✓ Build: Successful
-✓ detekt: No issues
-WARNING: ktlint: 2 formatting warnings
+## Resultados de Análisis Estático
+✓ Compilación: Exitosa
+✓ detekt: Sin problemas
+ADVERTENCIA: ktlint: 2 advertencias de formato
 
-## Issues Found
+## Problemas Encontrados
 
-[CRITICAL] Force-Unwrap Null Safety
-File: src/main/kotlin/com/example/service/UserService.kt:28
-Issue: Using !! on nullable repository result
+[CRITICAL] Seguridad Nula con Desenvolvimiento Forzado
+Archivo: src/main/kotlin/com/example/service/UserService.kt:28
+Problema: Uso de !! en resultado nullable del repositorio
 ```kotlin
-val user = repository.findById(id)!!  // NPE risk
+val user = repository.findById(id)!!  // Riesgo de NullPointerException
 ```
-Fix: Use safe call with error handling
+Solución: Usar llamada segura con manejo de errores
 ```kotlin
 val user = repository.findById(id)
     ?: throw UserNotFoundException("User $id not found")
 ```
 
-[HIGH] GlobalScope Usage
-File: src/main/kotlin/com/example/routes/UserRoutes.kt:45
-Issue: Using GlobalScope breaks structured concurrency
+[HIGH] Uso de GlobalScope
+Archivo: src/main/kotlin/com/example/routes/UserRoutes.kt:45
+Problema: Usar GlobalScope rompe la concurrencia estructurada
 ```kotlin
 GlobalScope.launch {
     notificationService.sendWelcome(user)
 }
 ```
-Fix: Use the call's coroutine scope
+Solución: Usar el scope de corrutina de la llamada
 ```kotlin
 launch {
     notificationService.sendWelcome(user)
 }
 ```
 
-## Summary
+## Resumen
 - CRITICAL: 1
 - HIGH: 1
 - MEDIUM: 0
 
-Recommendation: FAIL: Block merge until CRITICAL issue is fixed
+Recomendación: FAIL: Bloquear fusión hasta corregir problemas CRITICAL
 ````
 
-## Approval Criteria
+## Criterios de Aprobación
 
-| Status | Condition |
+| Estado | Condición |
 |--------|-----------|
-| PASS: Approve | No CRITICAL or HIGH issues |
-| WARNING: Warning | Only MEDIUM issues (merge with caution) |
-| FAIL: Block | CRITICAL or HIGH issues found |
+| PASS: Aprobar | Sin problemas CRITICAL o HIGH |
+| WARNING: Advertencia | Solo problemas MEDIUM (fusionar con precaución) |
+| FAIL: Bloquear | Problemas CRITICAL o HIGH encontrados |
 
-## Integration with Other Commands
+## Integración con Otros Comandos
 
-- Use `/kotlin-test` first to ensure tests pass
-- Use `/kotlin-build` if build errors occur
-- Use `/kotlin-review` before committing
-- Use `/code-review` for non-Kotlin-specific concerns
+- Usa `/kotlin-test` primero para asegurar que las pruebas pasen
+- Usa `/kotlin-build` si ocurren errores de compilación
+- Usa `/kotlin-review` antes de hacer commit
+- Usa `/code-review` para aspectos generales independientes del lenguaje
 
-## Related
+## Relacionado
 
-- Agent: `agents/kotlin-reviewer.md`
+- Agente: `agents/kotlin-reviewer.md`
 - Skills: `skills/kotlin-patterns/`, `skills/kotlin-testing/`

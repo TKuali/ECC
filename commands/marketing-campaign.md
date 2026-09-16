@@ -1,44 +1,44 @@
 ---
-description: Plan and execute a full marketing campaign. Accepts a product brief and returns positioning, landing page copy, email sequence, social posts, ad variants, video scripts, and a content calendar. Can also review existing copy for conversion quality.
+description: Planifica y ejecuta una campaña completa de marketing. Acepta un brief de producto y devuelve posicionamiento, texto para landing page, secuencia de emails, posts para redes, variantes de anuncios, guiones de video y un calendario de contenidos. También puede auditar textos existentes para evaluar su conversión.
 allowed-tools: ["Read", "Grep", "Glob", "WebSearch", "WebFetch", "Write"]
 ---
 
 # /marketing-campaign
 
-Plan and execute a marketing campaign from brief to full content suite.
+Planifica y ejecuta una campaña de marketing desde el brief inicial hasta el conjunto completo de contenidos.
 
-## Usage
+## Uso
 
 ```
-/marketing-campaign                          # Prompt for brief interactively
-/marketing-campaign [product brief]          # Full campaign from inline brief
-/marketing-campaign copy [type]              # Single deliverable only
-/marketing-campaign review [file-or-brief]   # Copy audit for conversion and brand consistency
+/marketing-campaign                          # Solicitar el brief interactivamente
+/marketing-campaign [brief de producto]       # Campaña completa desde brief en línea
+/marketing-campaign copy [tipo]              # Entregable individual únicamente
+/marketing-campaign review [archivo-o-brief] # Auditoría de textos para conversión y consistencia de marca
 ```
 
-## What It Does
+## Qué Hace
 
-1. **Research** — Profiles the target audience and maps competitors before writing anything
-2. **Positioning** — Locks the campaign angle and tone profile first
-3. **Copy production** — Generates the full content suite in the right order (landing page → emails → social → ads → video scripts → calendar)
-4. **Review** — Gates all output through a conversion and brand consistency checklist
+1. **Investigación** — Perfila al público objetivo y mapea competidores antes de escribir nada
+2. **Posicionamiento** — Fija el ángulo de la campaña y el perfil de tono primero
+3. **Producción de Textos** — Genera todo el conjunto de contenido en el orden correcto (landing page → emails → redes → anuncios → guiones de video → calendario)
+4. **Revisión** — Pasa toda la salida por una lista de verificación de conversión y consistencia de marca
 
-## Modes
+## Modos
 
-### Full Campaign Mode
+### Modo Campaña Completa
 
-Provide a product brief containing:
-- Product name and description
-- Target audience (specific, not generic)
-- Core problem the product solves
-- Core benefit / outcome
-- Tone guidance
-- Channels required
-- Launch goal or timeline
+Proporciona un brief de producto que contenga:
+- Nombre y descripción del producto
+- Público objetivo (específico, no genérico)
+- Problema central que resuelve el producto
+- Beneficio principal / resultado
+- Pautas de tono
+- Canales requeridos
+- Meta de lanzamiento o cronograma
 
-The agent returns all campaign deliverables in order, with a copy review summary at the end.
+El agente devuelve todos los entregables de la campaña en orden, con un resumen de revisión de copy al final.
 
-### Single Deliverable Mode
+### Modo Entregable Individual
 
 ```
 /marketing-campaign copy landing-page
@@ -48,39 +48,39 @@ The agent returns all campaign deliverables in order, with a copy review summary
 /marketing-campaign copy video-scripts
 ```
 
-Requires positioning to be defined first. Run full mode or provide the angle before requesting a single deliverable.
+Requiere que el posicionamiento esté definido previamente. Ejecuta el modo completo o proporciona el ángulo antes de solicitar un entregable individual.
 
-### Copy Review Mode
+### Modo Revisión de Copy
 
 ```
-/marketing-campaign review path/to/copy.md
-/marketing-campaign review "paste copy here"
+/marketing-campaign review ruta/a/copy.md
+/marketing-campaign review "pega el texto aqui"
 ```
 
-Returns a structured audit against:
-- 5-second clarity test (above-fold copy)
-- CTA quality (specific, earned, one per piece)
-- Brand tone consistency
-- Claim specificity and supportability
-- Platform-native fit
-- Cross-channel consistency
+Devuelve una auditoría estructurada evaluando:
+- Prueba de claridad de 5 segundos (contenido sobre el pliegue / above-the-fold)
+- Calidad de los llamados a la acción (CTA) (específicos, ganados, uno por pieza)
+- Consistencia del tono de marca
+- Especificidad y respaldo de las afirmaciones
+- Adecuación nativa a la plataforma
+- Consistencia multicanal
 
-## Brief Template
+### Plantilla de Brief
 
 ```markdown
-Product: [name]
-Description: [1-3 sentences on what it does]
-Audience: [who, specifically]
-Problem: [the specific pain the product solves]
-Benefit: [the outcome the user gets]
-Tone: [adjectives + what to avoid]
-Channels: [landing page, email, LinkedIn, X, ads, video]
-Goal: [launch, waitlist, signups, awareness — and timeline]
+Producto: [nombre]
+Descripción: [1-3 oraciones sobre lo que hace]
+Audiencia: [quién, específicamente]
+Problema: [el dolor específico que resuelve el producto]
+Beneficio: [el resultado que obtiene el usuario]
+Tono: [adjetivos + qué evitar]
+Canales: [landing page, email, LinkedIn, X, anuncios, video]
+Meta: [lanzamiento, lista de espera, registros, visibilidad — y cronograma]
 ```
 
-## Output Location
+### Ubicación de Salida
 
-When saving campaign assets, the convention is `.claude/campaigns/{campaign-name}/`:
+Al guardar los activos de la campaña, la convención es `.claude/campaigns/{campaign-name}/`:
 
 ```
 .claude/campaigns/product-launch/
@@ -93,12 +93,12 @@ When saving campaign assets, the convention is `.claude/campaigns/{campaign-name
 └── content-calendar.md
 ```
 
-Confirm the save location before writing files.
+Confirmar la ubicación de guardado antes de escribir archivos.
 
-## Examples
+### Ejemplos
 
 ```
-/marketing-campaign Build a 7-day launch campaign for an AI career platform for UK university students.
+/marketing-campaign Construye una campaña de lanzamiento de 7 días para una plataforma de carreras con IA para estudiantes universitarios del Reino Unido.
 ```
 
 ```
@@ -109,21 +109,21 @@ Confirm the save location before writing files.
 /marketing-campaign review .claude/campaigns/the-key/landing-page.md
 ```
 
-## Agent Delegation
+## Delegación de Agentes
 
-This command invokes:
-- `marketing-agent` — campaign planning and copy production
-- `brand-voice` — voice capture when tone needs locking across multiple outputs
-- `content-engine` — platform-native social content production
-- `crosspost` — multi-platform distribution
-- `market-research` — deep audience or competitive intelligence
+Este comando invoca:
+- `marketing-agent` — planificación de campañas y producción de textos
+- `brand-voice` — captura de voz cuando se necesita fijar el tono en múltiples salidas
+- `content-engine` — producción de contenido social nativo para cada plataforma
+- `crosspost` — distribución multiplataforma
+- `market-research` — inteligencia competitiva o de audiencia profunda
 
-## Related Commands
+## Comandos Relacionados
 
-- `/plan` — Strategic planning before a campaign
-- `/plan-prd` — Product requirements document before briefing a campaign
-- `/code-review` — Review code behind a landing page implementation
+- `/plan` — Planificación estratégica antes de una campaña
+- `/plan-prd` — Documento de requisitos de producto antes de armar el brief
+- `/code-review` — Revisar el código tras la implementación de una landing page
 
 ---
 
-*Part of [Everything Claude Code](https://github.com/affaan-m/everything-claude-code)*
+*Parte de [Everything Claude Code](https://github.com/affaan-m/everything-claude-code)*

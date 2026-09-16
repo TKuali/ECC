@@ -1,47 +1,47 @@
 ---
-description: Enforce TDD workflow for C++. Write GoogleTest tests first, then implement. Verify coverage with gcov/lcov.
+description: Aplica el flujo de trabajo de TDD para C++. Escribe pruebas de GoogleTest primero, luego implementa. Verifica la cobertura con gcov/lcov.
 ---
 
-# C++ TDD Command
+# Comando TDD para C++
 
-This command enforces test-driven development methodology for C++ code using GoogleTest/GoogleMock with CMake/CTest.
+Este comando aplica la metodología de desarrollo guiado por pruebas (TDD) para código C++ utilizando GoogleTest/GoogleMock junto con CMake/CTest.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Define Interfaces**: Scaffold class/function signatures first
-2. **Write Tests**: Create comprehensive GoogleTest test cases (RED)
-3. **Run Tests**: Verify tests fail for the right reason
-4. **Implement Code**: Write minimal code to pass (GREEN)
-5. **Refactor**: Improve while keeping tests green
-6. **Check Coverage**: Ensure 80%+ coverage
+1. **Definir Interfaces**: Estructura primero las firmas de clases y funciones
+2. **Escribir Pruebas**: Crea casos de prueba completos con GoogleTest (ROJO / RED)
+3. **Ejecutar Pruebas**: Verifica que las pruebas fallen por la razón correcta
+4. **Implementar Código**: Escribe el código mínimo necesario para pasar (VERDE / GREEN)
+5. **Refactorizar**: Mejora el código manteniendo las pruebas en verde
+6. **Verificar Cobertura**: Asegura un 80%+ de cobertura
 
-## When to Use
+## Cuándo usarlo
 
-Use `/cpp-test` when:
-- Implementing new C++ functions or classes
-- Adding test coverage to existing code
-- Fixing bugs (write failing test first)
-- Building critical business logic
-- Learning TDD workflow in C++
+Usa `/cpp-test` cuando:
+- Estés implementando nuevas funciones o clases en C++
+- Agregues cobertura de pruebas a código existente
+- Corrijas errores (escribe la prueba que falla primero)
+- Construyas lógica de negocio crítica
+- Aprendas o apliques el flujo de trabajo de TDD en C++
 
-## TDD Cycle
+## Ciclo TDD
 
 ```
-RED     → Write failing GoogleTest test
-GREEN   → Implement minimal code to pass
-REFACTOR → Improve code, tests stay green
-REPEAT  → Next test case
+ROJO (RED)     → Escribir prueba con GoogleTest que falle
+VERDE (GREEN)  → Implementar el código mínimo para pasar
+REFACTOR       → Mejorar el código manteniendo las pruebas en verde
+REPETIR        → Siguiente caso de prueba
 ```
 
-## Example Session
+## Ejemplo de Sesión
 
-````
-User: /cpp-test I need a function to validate email addresses
+````text
+Usuario: /cpp-test Necesito una función para validar direcciones de correo electrónico
 
-Agent:
-# TDD Session: Email Validator
+Agente:
+# Sesión TDD: Validador de Correo
 
-## Step 1: Define Interface
+## Paso 1: Definir Interfaz
 
 ```cpp
 // validator/email.hpp
@@ -57,7 +57,7 @@ enum class EmailError {
 std::expected<void, EmailError> validate_email(const std::string& email);
 ```
 
-## Step 2: Write Tests (RED)
+## Paso 2: Escribir Pruebas (ROJO)
 
 ```cpp
 // validator/email_test.cpp
@@ -96,7 +96,7 @@ TEST(ValidateEmail, RejectsNoLocalPart) {
 }
 ```
 
-## Step 3: Run Tests - Verify FAIL
+## Paso 3: Ejecutar Pruebas - Verificar FALLA
 
 ```bash
 $ cmake --build build && ctest --test-dir build --output-on-failure
@@ -107,9 +107,9 @@ $ cmake --build build && ctest --test-dir build --output-on-failure
 FAIL
 ```
 
-✓ Tests fail as expected (unimplemented).
+✓ Las pruebas fallan como se esperaba (no implementado).
 
-## Step 4: Implement Minimal Code (GREEN)
+## Paso 4: Implementar Código Mínimo (VERDE)
 
 ```cpp
 // validator/email.cpp
@@ -128,7 +128,7 @@ std::expected<void, EmailError> validate_email(const std::string& email) {
 }
 ```
 
-## Step 5: Run Tests - Verify PASS
+## Paso 5: Ejecutar Pruebas - Verificar ÉXITO
 
 ```bash
 $ cmake --build build && ctest --test-dir build --output-on-failure
@@ -138,9 +138,9 @@ $ cmake --build build && ctest --test-dir build --output-on-failure
 100% tests passed.
 ```
 
-✓ All tests passing!
+✓ ¡Todas las pruebas pasan!
 
-## Step 6: Check Coverage
+## Paso 6: Verificar Cobertura
 
 ```bash
 $ cmake -DCMAKE_CXX_FLAGS="--coverage" -B build && cmake --build build
@@ -151,14 +151,14 @@ $ lcov --list coverage.info
 validator/email.cpp     | 100%
 ```
 
-✓ Coverage: 100%
+✓ Cobertura: 100%
 
-## TDD Complete!
+## ¡TDD Completado!
 ````
 
-## Test Patterns
+## Patrones de Prueba
 
-### Basic Tests
+### Pruebas Básicas
 ```cpp
 TEST(SuiteName, TestName) {
     EXPECT_EQ(add(2, 3), 5);
@@ -168,7 +168,7 @@ TEST(SuiteName, TestName) {
 }
 ```
 
-### Fixtures
+### Accesorios de Prueba (Fixtures)
 ```cpp
 class DatabaseTest : public ::testing::Test {
 protected:
@@ -183,7 +183,7 @@ TEST_F(DatabaseTest, InsertsRecord) {
 }
 ```
 
-### Parameterized Tests
+### Pruebas Parametrizadas
 ```cpp
 class PrimeTest : public ::testing::TestWithParam<std::pair<int, bool>> {};
 
@@ -199,53 +199,53 @@ INSTANTIATE_TEST_SUITE_P(Primes, PrimeTest, ::testing::Values(
 ));
 ```
 
-## Coverage Commands
+## Comandos de Cobertura
 
 ```bash
-# Build with coverage
+# Compilar con cobertura
 cmake -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage" -B build
 
-# Run tests
+# Ejecutar pruebas
 cmake --build build && ctest --test-dir build
 
-# Generate coverage report
+# Generar reporte de cobertura
 lcov --capture --directory build --output-file coverage.info
 lcov --remove coverage.info '/usr/*' --output-file coverage.info
 genhtml coverage.info --output-directory coverage_html
 ```
 
-## Coverage Targets
+## Objetivos de Cobertura
 
-| Code Type | Target |
-|-----------|--------|
-| Critical business logic | 100% |
-| Public APIs | 90%+ |
-| General code | 80%+ |
-| Generated code | Exclude |
+| Tipo de Código | Objetivo |
+|----------------|----------|
+| Lógica de negocio crítica | 100% |
+| APIs públicas | 90%+ |
+| Código general | 80%+ |
+| Código generado | Excluir |
 
-## TDD Best Practices
+## Mejores Prácticas de TDD
 
-**DO:**
-- Write test FIRST, before any implementation
-- Run tests after each change
-- Use `EXPECT_*` (continues) over `ASSERT_*` (stops) when appropriate
-- Test behavior, not implementation details
-- Include edge cases (empty, null, max values, boundary conditions)
+**QUÉ HACER:**
+- Escribir la prueba PRIMERO, antes de cualquier implementación
+- Ejecutar pruebas después de cada cambio
+- Usar `EXPECT_*` (continúa la ejecución) sobre `ASSERT_*` (se detiene) cuando sea apropiado
+- Probar el comportamiento, no los detalles de implementación
+- Incluir casos extremos (vacío, nulo, valores máximos, condiciones de borde)
 
-**DON'T:**
-- Write implementation before tests
-- Skip the RED phase
-- Test private methods directly (test through public API)
-- Use `sleep` in tests
-- Ignore flaky tests
+**QUÉ NO HACER:**
+- Escribir implementación antes de las pruebas
+- Saltar la fase ROJA
+- Probar métodos privados directamente (probar a través de la API pública)
+- Usar `sleep` en pruebas
+- Ignorar pruebas intermitentes (flaky tests)
 
-## Related Commands
+## Comandos Relacionados
 
-- `/cpp-build` - Fix build errors
-- `/cpp-review` - Review code after implementation
-- `verification-loop` skill - Run full verification loop
+- `/cpp-build` - Corrige errores de compilación
+- `/cpp-review` - Revisa el código después de implementar
+- Skill `verification-loop` - Ejecuta el bucle de verificación completo
 
-## Related
+## Relacionado
 
 - Skill: `skills/cpp-testing/`
 - Skill: `skills/tdd-workflow/`

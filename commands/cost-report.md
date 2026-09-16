@@ -1,35 +1,28 @@
 ---
-description: Generate a local Claude Code cost report from the ECC cost-tracker metrics log.
+description: Genera un reporte de costos local de Claude Code a partir del registro de métricas de cost-tracker de ECC.
 argument-hint: [csv]
 ---
 
-# Cost Report
+# Reporte de Costos (Cost Report)
 
-Summarize local Claude Code spend by day, model, and session from the metrics
-log that ECC's `stop:cost-tracker` hook writes.
+Resume el gasto local de Claude Code por día, modelo y sesión a partir del registro de métricas generado por el hook `stop:cost-tracker` de ECC.
 
-## Where the data lives
+## Dónde viven los datos
 
-The tracker appends one JSON object per session-stop to
-`~/.claude/metrics/costs.jsonl`. Each row is a **cumulative snapshot for that
-session**, so the report takes the **latest row per `session_id`** and sums
-across sessions (summing every row would multiply-count).
+El rastreador añade un objeto JSON por cada finalización de sesión en `~/.claude/metrics/costs.jsonl`. Cada fila es una **captura acumulativa para esa sesión**, por lo que el informe toma la **última fila por cada `session_id`** y suma a través de las sesiones (sumar cada fila contaría varias veces).
 
-Row schema:
+Esquema de fila:
 `{ timestamp, session_id, transcript_path, model, input_tokens, output_tokens, cache_write_tokens, cache_read_tokens, estimated_cost_usd }`
 
-## What this command does
+## Qué hace este comando
 
-1. Check that `~/.claude/metrics/costs.jsonl` exists. If it does not, tell the
-   user the tracker is not set up yet (it populates after the first session ends
-   with the `stop:cost-tracker` hook enabled).
-2. Reduce rows to the latest snapshot per session and aggregate.
-3. Present a compact report, or export recent rows as CSV when the argument is `csv`.
+1. Verifica que exista `~/.claude/metrics/costs.jsonl`. Si no existe, informa al usuario que el rastreador aún no está configurado (se llena tras finalizar la primera sesión con el hook `stop:cost-tracker` habilitado).
+2. Reduce las filas a la captura más reciente por sesión y realiza la agregación.
+3. Presenta un reporte compacto, o exporta las filas recientes como CSV cuando el argumento es `csv`.
 
-`node` is used instead of `sqlite3`/`jq` so this works identically on macOS,
-Linux, and Windows.
+Se utiliza `node` en lugar de `sqlite3`/`jq` para que funcione de manera idéntica en macOS, Linux y Windows.
 
-## Report
+## Reporte
 
 ```bash
 node -e '
@@ -58,7 +51,7 @@ const days=new Map();for(const r of latest){const k=day(r);days.set(k,(days.get(
 '
 ```
 
-## CSV export (`/cost-report csv`)
+## Exportación CSV (`/cost-report csv`)
 
 ```bash
 node -e '
@@ -71,11 +64,10 @@ for(const r of rows)console.log([r.timestamp,r.session_id,r.model,r.input_tokens
 '
 ```
 
-## Report format
+## Formato del Reporte
 
-1. Summary: today, yesterday, total, session count.
-2. By model: models ranked by total cost.
-3. Last seven days: date and cost.
+1. Resumen: hoy, ayer, total, conteo de sesiones.
+2. Por modelo: modelos ordenados por costo total.
+3. Últimos siete días: fecha y costo.
 
-Rely on the precomputed `estimated_cost_usd` values written by the tracker; do
-not re-estimate pricing from raw tokens here.
+Confía en los valores precalculados de `estimated_cost_usd` registrados por el rastreador; no reestimes precios a partir de tokens brutos aquí.

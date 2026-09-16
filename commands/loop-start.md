@@ -1,36 +1,36 @@
 ---
-description: Start a managed autonomous loop pattern with safety defaults and explicit stop conditions.
+description: Inicia un patrón de bucle autónomo gestionado con valores de seguridad por defecto y condiciones de parada explícitas.
 ---
 
-# Loop Start Command
+# Comando Loop Start
 
-Start a managed autonomous loop pattern with safety defaults.
+Inicia un patrón de bucle autónomo gestionado con valores de seguridad predeterminados.
 
-## Usage
+## Uso
 
 `/loop-start [pattern] [--mode safe|fast]`
 
 - `pattern`: `sequential`, `continuous-pr`, `rfc-dag`, `infinite`
 - `--mode`:
-  - `safe` (default): strict quality gates and checkpoints
-  - `fast`: reduced gates for speed
+  - `safe` (por defecto): barreras de calidad estrictas y puntos de control (checkpoints)
+  - `fast`: barreras reducidas para mayor velocidad
 
-## Flow
+## Flujo
 
-1. Confirm repository state and branch strategy.
-2. Select loop pattern and model tier strategy.
-3. Enable required hooks/profile for the chosen mode.
-4. Create loop plan and write runbook under `.claude/plans/`.
-5. Print commands to start and monitor the loop.
+1. Confirmar el estado del repositorio y la estrategia de ramas.
+2. Seleccionar el patrón de bucle y la estrategia de niveles de modelo.
+3. Habilitar los hooks/perfiles requeridos para el modo elegido.
+4. Crear el plan del bucle y escribir el runbook en `.claude/plans/`.
+5. Mostrar los comandos para iniciar y supervisar el bucle.
 
-## Required Safety Checks
+## Comprobaciones de Seguridad Obligatorias
 
-- Verify tests pass before first loop iteration.
-- Ensure `ECC_HOOK_PROFILE` is not disabled globally.
-- Ensure loop has explicit stop condition.
+- Verificar que las pruebas pasen antes de la primera iteración del bucle.
+- Asegurar que `ECC_HOOK_PROFILE` no esté deshabilitado globalmente.
+- Asegurar que el bucle tenga una condición de parada explícita.
 
-## Arguments
+## Argumentos
 
 $ARGUMENTS:
-- `<pattern>` optional (`sequential|continuous-pr|rfc-dag|infinite`)
-- `--mode safe|fast` optional
+- `<pattern>` opcional (`sequential|continuous-pr|rfc-dag|infinite`)
+- `--mode safe|fast` opcional

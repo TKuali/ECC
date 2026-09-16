@@ -1,23 +1,23 @@
 ---
-description: Mark epic review requested, approved, or changes requested.
+description: Marca la revisión de la épica como solicitada, aprobada o con cambios requeridos.
 ---
 
 # /epic-review
 
-Coordinate review state for an epic issue.
+Coordina el estado de revisión para un issue de épica.
 
 ```bash
 node scripts/github-coordination.js review <issue-number> --repo <owner/repo> --review approved
 ```
 
-What this does:
+Qué hace este comando:
 
-1. Updates the review state in the coordination block.
-2. Syncs review labels to GitHub.
-3. Records the review outcome in an audit comment.
-4. Keeps the local cache aligned with the issue body.
+1. Actualiza el estado de revisión en el bloque de coordinación.
+2. Sincroniza las etiquetas de revisión en GitHub.
+3. Registra el resultado de la revisión en un comentario de auditoría.
+4. Mantiene la caché local alineada con el cuerpo del issue.
 
-Compatibility aliases:
+Alias de compatibilidad:
 
 - `/review-pr`
 - `/code-review`

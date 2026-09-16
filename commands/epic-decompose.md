@@ -1,23 +1,23 @@
 ---
-description: Break an epic into task children without creating task branches.
+description: Desglosa una épica en tareas hijas sin crear ramas de tareas.
 ---
 
 # /epic-decompose
 
-Reconcile the task breakdown for one epic issue.
+Concilia el desglose de tareas para un issue de épica.
 
 ```bash
 node scripts/github-coordination.js decompose <issue-number> --repo <owner/repo>
 ```
 
-What this does:
+Qué hace este comando:
 
-1. Reads the epic issue body for task checklists and dependency references.
-2. Stores the decomposition in the coordination block.
-3. Leaves task branches out of the workflow.
-4. Appends a concise audit comment.
+1. Lee el cuerpo del issue de la épica en busca de listas de verificación de tareas y referencias de dependencias.
+2. Almacena la descomposición en el bloque de coordinación.
+3. Mantiene las ramas de tareas fuera del flujo de trabajo.
+4. Añade un comentario de auditoría conciso.
 
-Compatibility aliases:
+Alias de compatibilidad:
 
 - `/plan`
 - `/prp-plan`

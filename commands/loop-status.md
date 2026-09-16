@@ -1,77 +1,58 @@
 ---
-description: Inspect active loop state, progress, failure signals, and recommended intervention.
+description: Inspecciona el estado del bucle activo, progreso, señales de fallo e intervención recomendada.
 ---
 
-# Loop Status Command
+# Comando Loop Status
 
-Inspect active loop state, progress, and failure signals.
+Inspecciona el estado del bucle activo, su progreso y señales de fallo.
 
-This slash command can only run after the current session dequeues it. If you
-need to inspect a wedged or sibling session, run the packaged CLI from another
-terminal:
+Este comando de barra diagonal solo puede ejecutarse después de que la sesión actual lo desencole. Si necesitas inspeccionar una sesión atascada o secundaria, ejecuta el CLI empaquetado desde otra terminal:
 
 ```bash
 npx --package ecc-universal ecc loop-status --json
 ```
 
-The CLI scans local Claude transcript JSONL files under
-`~/.claude/projects/**` and reports stale `ScheduleWakeup` calls or `Bash`
-tool calls that have no matching `tool_result`.
+El CLI escanea los archivos JSONL de transcripción local de Claude en `~/.claude/projects/**` y reporta llamadas obsoletas a `ScheduleWakeup` o llamadas a la herramienta `Bash` que no tengan un `tool_result` coincidente.
 
-## Usage
+## Uso
 
 `/loop-status [--watch]`
 
-## What to Report
+## Qué Reportar
 
-- active loop pattern
-- current phase and last successful checkpoint
-- failing checks (if any)
-- estimated time/cost drift
-- recommended intervention (continue/pause/stop)
+- patrón de bucle activo
+- fase actual y último punto de control exitoso
+- comprobaciones fallidas (si las hay)
+- desviación estimada de tiempo/costo
+- intervención recomendada (continuar/pausar/detener)
 
-## Cross-Session CLI
+## CLI Multisesión
 
-- `ecc loop-status --json` emits machine-readable status for recent local
-  Claude transcripts.
-- `ecc loop-status --home <dir>` scans a different home directory when
-  inspecting another local profile or mounted workspace.
-- `ecc loop-status --transcript <session.jsonl>` inspects one transcript
-  directly.
-- `ecc loop-status --bash-timeout-seconds 1800` adjusts the stale Bash
-  threshold.
-- `ecc loop-status --exit-code` exits `2` when stale loop or tool signals are
-  found, or `1` when transcripts cannot be scanned.
-- `--exit-code` with `--watch` requires `--watch-count` so watchdog scripts do
-  not wait forever for a process exit.
-- `ecc loop-status --watch` refreshes status until interrupted.
-- `ecc loop-status --watch --watch-count 3 --exit-code` refreshes a bounded
-  number of times, then exits with the highest status seen.
-- `ecc loop-status --watch --watch-count 3` emits a bounded watch stream for
-  scripts and handoffs.
-- `ecc loop-status --watch --write-dir ~/.claude/loops` maintains
-  `index.json` and per-session JSON snapshots for sibling terminals or
-  watchdog scripts.
+- `ecc loop-status --json` emite un estado legible por máquina para las transcripciones locales recientes de Claude.
+- `ecc loop-status --home <dir>` escanea un directorio home diferente al inspeccionar otro perfil local o espacio de trabajo montado.
+- `ecc loop-status --transcript <session.jsonl>` inspecciona una transcripción directamente.
+- `ecc loop-status --bash-timeout-seconds 1800` ajusta el umbral de tiempo límite para Bash estancado.
+- `ecc loop-status --exit-code` finaliza con código `2` cuando se detectan señales de bucle o herramientas estancadas, o `1` cuando las transcripciones no se pueden escanear.
+- `--exit-code` con `--watch` requiere `--watch-count` para que los scripts de vigilancia no esperen indefinidamente la salida del proceso.
+- `ecc loop-status --watch` actualiza el estado periódicamente hasta ser interrumpido.
+- `ecc loop-status --watch --watch-count 3 --exit-code` actualiza un número acotado de veces y finaliza con el estado más alto observado.
+- `ecc loop-status --watch --watch-count 3` emite un flujo delimitado para scripts y traspasos de tareas.
+- `ecc loop-status --watch --write-dir ~/.claude/loops` mantiene `index.json` y capturas de estado en JSON por sesión para terminales secundarias o scripts de monitoreo.
 
-## Watch Mode
+## Modo Watch
 
-When `--watch` is present, refresh status periodically. With `--json`, each
-refresh is emitted as one JSON object per line so another terminal or script can
-consume the stream.
+Cuando `--watch` está presente, actualiza el estado periódicamente. Con `--json`, cada actualización se emite como un objeto JSON por línea para que otra terminal o script pueda consumir el flujo.
 
-## Snapshot Files
+## Archivos de Instantáneas (Snapshots)
 
-Use `--write-dir <dir>` when a separate process needs to inspect loop state
-without waiting for the current Claude session to dequeue `/loop-status`. The
-CLI writes:
+Usa `--write-dir <dir>` cuando un proceso independiente necesite inspeccionar el estado del bucle sin esperar a que la sesión actual de Claude desencole `/loop-status`. El CLI escribe:
 
-- `index.json` with one row per inspected session.
-- `<session-id>.json` with the full status payload for that session.
+- `index.json` con una fila por cada sesión inspeccionada.
+- `<session-id>.json` con la carga de estado completa para esa sesión.
 
-These files are snapshots of local transcript analysis. They do not control or
-timeout Claude Code runtime tool calls.
+Estos archivos son instantáneas del análisis de transcripciones locales. No controlan ni establecen tiempos límite en las llamadas a herramientas del runtime de Claude Code.
 
-## Arguments
+## Argumentos
 
 $ARGUMENTS:
-- `--watch` optional
+- `--watch` opcional

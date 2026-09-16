@@ -1,60 +1,60 @@
 ---
-description: Enforce TDD workflow for Go. Write table-driven tests first, then implement. Verify 80%+ coverage with go test -cover.
+description: Aplica el flujo de trabajo de TDD para Go. Escribe pruebas guiadas por tablas primero, luego implementa. Verifica más del 80% de cobertura con go test -cover.
 ---
 
-# Go TDD Command
+# Comando TDD para Go
 
-This command enforces test-driven development methodology for Go code using idiomatic Go testing patterns.
+Este comando aplica la metodología de desarrollo guiado por pruebas (TDD) para código Go utilizando patrones de pruebas idiomáticos de Go.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Define Types/Interfaces**: Scaffold function signatures first
-2. **Write Table-Driven Tests**: Create comprehensive test cases (RED)
-3. **Run Tests**: Verify tests fail for the right reason
-4. **Implement Code**: Write minimal code to pass (GREEN)
-5. **Refactor**: Improve while keeping tests green
-6. **Check Coverage**: Ensure 80%+ coverage
+1. **Definir Tipos/Interfaces**: Estructura primero las firmas de funciones
+2. **Escribir Pruebas Guiadas por Tablas**: Crea casos de prueba completos (ROJO / RED)
+3. **Ejecutar Pruebas**: Verifica que las pruebas fallen por la razón correcta
+4. **Implementar Código**: Escribe el código mínimo necesario para pasar (VERDE / GREEN)
+5. **Refactorizar**: Mejora el código manteniendo las pruebas en verde
+6. **Verificar Cobertura**: Asegura un 80%+ de cobertura
 
-## When to Use
+## Cuándo usarlo
 
-Use `/go-test` when:
-- Implementing new Go functions
-- Adding test coverage to existing code
-- Fixing bugs (write failing test first)
-- Building critical business logic
-- Learning TDD workflow in Go
+Usa `/go-test` cuando:
+- Estés implementando nuevas funciones en Go
+- Agregues cobertura de pruebas a código existente
+- Corrijas errores (escribe la prueba fallida primero)
+- Construyas lógica de negocio crítica
+- Aprendas o apliques el flujo de trabajo de TDD en Go
 
-## TDD Cycle
+## Ciclo TDD
 
 ```
-RED     → Write failing table-driven test
-GREEN   → Implement minimal code to pass
-REFACTOR → Improve code, tests stay green
-REPEAT  → Next test case
+ROJO (RED)     → Escribir prueba dirigida por tablas que falle
+VERDE (GREEN)  → Implementar el código mínimo para pasar
+REFACTOR       → Mejorar el código manteniendo las pruebas en verde
+REPETIR        → Siguiente caso de prueba
 ```
 
-## Example Session
+## Ejemplo de Sesión
 
-````
-User: /go-test I need a function to validate email addresses
+````text
+Usuario: /go-test Necesito una función para validar direcciones de correo electrónico
 
-Agent:
-# TDD Session: Email Validator
+Agente:
+# Sesión TDD: Validador de Correo
 
-## Step 1: Define Interface
+## Paso 1: Definir Interfaz
 
 ```go
 // validator/email.go
 package validator
 
-// ValidateEmail checks if the given string is a valid email address.
-// Returns nil if valid, error describing the issue otherwise.
+// ValidateEmail comprueba si la cadena dada es una dirección de correo válida.
+// Retorna nil si es válida, o un error que describe el problema en caso contrario.
 func ValidateEmail(email string) error {
     panic("not implemented")
 }
 ```
 
-## Step 2: Write Table-Driven Tests (RED)
+## Paso 2: Escribir Pruebas Guiadas por Tablas (ROJO)
 
 ```go
 // validator/email_test.go
@@ -70,37 +70,37 @@ func TestValidateEmail(t *testing.T) {
         email   string
         wantErr bool
     }{
-        // Valid emails
-        {"simple email", "user@example.com", false},
-        {"with subdomain", "user@mail.example.com", false},
-        {"with plus", "user+tag@example.com", false},
-        {"with dots", "first.last@example.com", false},
+        // Correos válidos
+        {"correo simple", "user@example.com", false},
+        {"con subdominio", "user@mail.example.com", false},
+        {"con signo más", "user+tag@example.com", false},
+        {"con puntos", "first.last@example.com", false},
 
-        // Invalid emails
-        {"empty string", "", true},
-        {"no at sign", "userexample.com", true},
-        {"no domain", "user@", true},
-        {"no local part", "@example.com", true},
-        {"double at", "user@@example.com", true},
-        {"spaces", "user @example.com", true},
-        {"no tld", "user@example", true},
+        // Correos inválidos
+        {"cadena vacía", "", true},
+        {"sin arroba", "userexample.com", true},
+        {"sin dominio", "user@", true},
+        {"sin parte local", "@example.com", true},
+        {"doble arroba", "user@@example.com", true},
+        {"espacios", "user @example.com", true},
+        {"sin tld", "user@example", true},
     }
 
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             err := ValidateEmail(tt.email)
             if tt.wantErr && err == nil {
-                t.Errorf("ValidateEmail(%q) = nil; want error", tt.email)
+                t.Errorf("ValidateEmail(%q) = nil; se esperaba error", tt.email)
             }
             if !tt.wantErr && err != nil {
-                t.Errorf("ValidateEmail(%q) = %v; want nil", tt.email, err)
+                t.Errorf("ValidateEmail(%q) = %v; se esperaba nil", tt.email, err)
             }
         })
     }
 }
 ```
 
-## Step 3: Run Tests - Verify FAIL
+## Paso 3: Ejecutar Pruebas - Verificar FALLA
 
 ```bash
 $ go test ./validator/...
@@ -112,9 +112,9 @@ $ go test ./validator/...
 FAIL
 ```
 
-✓ Tests fail as expected (panic).
+✓ Las pruebas fallan como se esperaba (panic).
 
-## Step 4: Implement Minimal Code (GREEN)
+## Paso 4: Implementar Código Mínimo (VERDE)
 
 ```go
 // validator/email.go
@@ -128,8 +128,8 @@ import (
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
 var (
-    ErrEmailEmpty   = errors.New("email cannot be empty")
-    ErrEmailInvalid = errors.New("email format is invalid")
+    ErrEmailEmpty   = errors.New("el correo electrónico no puede estar vacío")
+    ErrEmailInvalid = errors.New("el formato del correo electrónico no es válido")
 )
 
 func ValidateEmail(email string) error {
@@ -143,7 +143,7 @@ func ValidateEmail(email string) error {
 }
 ```
 
-## Step 5: Run Tests - Verify PASS
+## Paso 5: Ejecutar Pruebas - Verificar ÉXITO
 
 ```bash
 $ go test ./validator/...
@@ -152,9 +152,9 @@ PASS
 ok      project/validator    0.003s
 ```
 
-✓ All tests passing!
+✓ ¡Todas las pruebas pasaron!
 
-## Step 6: Check Coverage
+## Paso 6: Verificar Cobertura
 
 ```bash
 $ go test -cover ./validator/...
@@ -164,14 +164,14 @@ coverage: 100.0% of statements
 ok      project/validator    0.003s
 ```
 
-✓ Coverage: 100%
+✓ Cobertura: 100%
 
-## TDD Complete!
+## ¡TDD Completado!
 ````
 
-## Test Patterns
+## Patrones de Prueba
 
-### Table-Driven Tests
+### Pruebas Guiadas por Tablas
 ```go
 tests := []struct {
     name     string
@@ -179,30 +179,30 @@ tests := []struct {
     want     OutputType
     wantErr  bool
 }{
-    {"case 1", input1, want1, false},
-    {"case 2", input2, want2, true},
+    {"caso 1", input1, want1, false},
+    {"caso 2", input2, want2, true},
 }
 
 for _, tt := range tests {
     t.Run(tt.name, func(t *testing.T) {
         got, err := Function(tt.input)
-        // assertions
+        // aserciones
     })
 }
 ```
 
-### Parallel Tests
+### Pruebas en Paralelo
 ```go
 for _, tt := range tests {
-    tt := tt // Capture
+    tt := tt // Captura
     t.Run(tt.name, func(t *testing.T) {
         t.Parallel()
-        // test body
+        // cuerpo de la prueba
     })
 }
 ```
 
-### Test Helpers
+### Funciones Auxiliares de Prueba (Helpers)
 ```go
 func setupTestDB(t *testing.T) *sql.DB {
     t.Helper()
@@ -212,57 +212,57 @@ func setupTestDB(t *testing.T) *sql.DB {
 }
 ```
 
-## Coverage Commands
+## Comandos de Cobertura
 
 ```bash
-# Basic coverage
+# Cobertura básica
 go test -cover ./...
 
-# Coverage profile
+# Perfil de cobertura
 go test -coverprofile=coverage.out ./...
 
-# View in browser
+# Ver en el navegador
 go tool cover -html=coverage.out
 
-# Coverage by function
+# Cobertura por función
 go tool cover -func=coverage.out
 
-# With race detection
+# Con detección de condiciones de carrera
 go test -race -cover ./...
 ```
 
-## Coverage Targets
+## Objetivos de Cobertura
 
-| Code Type | Target |
-|-----------|--------|
-| Critical business logic | 100% |
-| Public APIs | 90%+ |
-| General code | 80%+ |
-| Generated code | Exclude |
+| Tipo de Código | Objetivo |
+|----------------|----------|
+| Lógica de negocio crítica | 100% |
+| APIs públicas | 90%+ |
+| Código general | 80%+ |
+| Código generado | Excluir |
 
-## TDD Best Practices
+## Mejores Prácticas de TDD
 
-**DO:**
-- Write test FIRST, before any implementation
-- Run tests after each change
-- Use table-driven tests for comprehensive coverage
-- Test behavior, not implementation details
-- Include edge cases (empty, nil, max values)
+**QUÉ HACER:**
+- Escribir la prueba PRIMERO, antes de cualquier implementación
+- Ejecutar pruebas tras cada cambio
+- Usar pruebas dirigidas por tablas para cobertura exhaustiva
+- Probar el comportamiento, no los detalles de implementación
+- Incluir casos límite (vacío, nil, valores máximos)
 
-**DON'T:**
-- Write implementation before tests
-- Skip the RED phase
-- Test private functions directly
-- Use `time.Sleep` in tests
-- Ignore flaky tests
+**QUÉ NO HACER:**
+- Escribir implementación antes de las pruebas
+- Saltar la fase ROJA
+- Probar funciones privadas directamente
+- Usar `time.Sleep` en pruebas
+- Ignorar pruebas intermitentes
 
-## Related Commands
+## Comandos Relacionados
 
-- `/go-build` - Fix build errors
-- `/go-review` - Review code after implementation
-- `verification-loop` skill - Run full verification loop
+- `/go-build` - Corrige errores de compilación
+- `/go-review` - Revisa el código tras la implementación
+- Skill `verification-loop` - Ejecuta el bucle de verificación completo
 
-## Related
+## Relacionado
 
 - Skill: `skills/golang-testing/`
 - Skill: `skills/tdd-workflow/`

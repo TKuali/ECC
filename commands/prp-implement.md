@@ -1,179 +1,179 @@
 ---
-description: Execute an implementation plan with rigorous validation loops
-argument-hint: <path/to/plan.md>
+description: Ejecuta un plan de implementación con rigurosos bucles de validación
+argument-hint: <ruta/hacia/plan.md>
 ---
 
-> Adapted from PRPs-agentic-eng by Wirasm. Part of the PRP workflow series.
+> Adaptado de PRPs-agentic-eng por Wirasm. Parte de la serie de flujos de trabajo PRP.
 
-# PRP Implement
+# Implementación PRP (PRP Implement)
 
-Execute a plan file step-by-step with continuous validation. Every change is verified immediately — never accumulate broken state.
+Ejecuta un archivo de plan paso a paso con validación continua. Cada cambio se verifica inmediatamente — nunca acumules un estado roto.
 
-**Core Philosophy**: Validation loops catch mistakes early. Run checks after every change. Fix issues immediately.
+**Filosofía Central**: Los bucles de validación detectan errores temprano. Ejecuta comprobaciones tras cada cambio. Corrige los problemas inmediatamente.
 
-**Golden Rule**: If a validation fails, fix it before moving on. Never accumulate broken state.
+**Regla de Oro**: Si una validación falla, corrígela antes de continuar. Nunca acumules un estado roto.
 
 ---
 
-## Phase 0 — DETECT
+## Fase 0 — DETECTAR
 
-### Package Manager Detection
+### Detección de Gestor de Paquetes
 
-| File Exists | Package Manager | Runner |
+| Archivo Existente | Gestor de Paquetes | Ejecutor |
 |---|---|---|
 | `bun.lockb` | bun | `bun run` |
 | `pnpm-lock.yaml` | pnpm | `pnpm run` |
 | `yarn.lock` | yarn | `yarn` |
 | `package-lock.json` | npm | `npm run` |
-| `pyproject.toml` or `requirements.txt` | uv / pip | `uv run` or `python -m` |
+| `pyproject.toml` o `requirements.txt` | uv / pip | `uv run` o `python -m` |
 | `Cargo.toml` | cargo | `cargo` |
 | `go.mod` | go | `go` |
 
-### Validation Scripts
+### Scripts de Validación
 
-Check `package.json` (or equivalent) for available scripts:
+Revisa `package.json` (o equivalente) para ver scripts disponibles:
 
 ```bash
-# For Node.js projects
+# Para proyectos Node.js
 cat package.json | grep -A 20 '"scripts"'
 ```
 
-Note available commands for: type-check, lint, test, build.
+Anota los comandos disponibles para: type-check, lint, test, build.
 
 ---
 
-## Phase 1 — LOAD
+## Fase 1 — CARGAR (LOAD)
 
-Read the plan file:
+Lee el archivo del plan:
 
 ```bash
 cat "$ARGUMENTS"
 ```
 
-Extract these sections from the plan:
-- **Summary** — What is being built
-- **Patterns to Mirror** — Code conventions to follow
-- **Files to Change** — What to create or modify
-- **Step-by-Step Tasks** — Implementation sequence
-- **Validation Commands** — How to verify correctness
-- **Acceptance Criteria** — Definition of done
+Extrae estas secciones del plan:
+- **Resumen** — Qué se está construyendo
+- **Patrones a Reflejar** — Convenciones de código a seguir
+- **Archivos a Modificar** — Qué crear o modificar
+- **Tareas Paso a Paso** — Secuencia de implementación
+- **Comandos de Validación** — Cómo verificar la corrección
+- **Criterios de Aceptación** — Definición de terminado (DoD)
 
-If the file doesn't exist or isn't a valid plan:
+Si el archivo no existe o no es un plan válido:
 ```
-Error: Plan file not found or invalid.
-Run /prp-plan <feature-description> to create a plan first.
+Error: Archivo de plan no encontrado o inválido.
+Ejecuta /prp-plan <descripción-de-característica> para crear un plan primero.
 ```
 
-**CHECKPOINT**: Plan loaded. All sections identified. Tasks extracted.
+**PUNTO DE CONTROL**: Plan cargado. Todas las secciones identificadas. Tareas extraídas.
 
 ---
 
-## Phase 2 — PREPARE
+## Fase 2 — PREPARAR (PREPARE)
 
-### Git State
+### Estado de Git
 
 ```bash
 git branch --show-current
 git status --porcelain
 ```
 
-### Branch Decision
+### Decisión de Rama
 
-| Current State | Action |
+| Estado Actual | Acción |
 |---|---|
-| On feature branch | Use current branch |
-| On main, clean working tree | Create feature branch: `git checkout -b feat/{plan-name}` |
-| On main, dirty working tree | **STOP** — Ask user to stash or commit first |
-| In a git worktree for this feature | Use the worktree |
+| En rama de característica | Usar la rama actual |
+| En main, árbol limpio | Crear rama de característica: `git checkout -b feat/{plan-name}` |
+| En main, árbol sucio | **DETENER** — Pedir al usuario guardar en stash o hacer commit primero |
+| En un worktree de git para esta característica | Usar el worktree |
 
-### Sync Remote
+### Sincronizar Remoto
 
 ```bash
 git pull --rebase origin $(git branch --show-current) 2>/dev/null || true
 ```
 
-**CHECKPOINT**: On correct branch. Working tree ready. Remote synced.
+**PUNTO DE CONTROL**: En la rama correcta. Árbol de trabajo listo. Remoto sincronizado.
 
 ---
 
-## Phase 3 — EXECUTE
+## Fase 3 — EJECUTAR (EXECUTE)
 
-Process each task from the plan sequentially.
+Procesa cada tarea del plan de manera secuencial.
 
-### Per-Task Loop
+### Bucle por Tarea
 
-For each task in **Step-by-Step Tasks**:
+Para cada tarea en **Tareas Paso a Paso**:
 
-1. **Read MIRROR reference** — Open the pattern file referenced in the task's MIRROR field. Understand the convention before writing code.
+1. **Leer referencia MIRROR** — Abre el archivo de patrón referenciado en el campo MIRROR de la tarea. Comprende la convención antes de escribir código.
 
-2. **Implement** — Write the code following the pattern exactly. Apply GOTCHA warnings. Use specified IMPORTS.
+2. **Implementar** — Escribe el código siguiendo el patrón con exactitud. Aplica las advertencias GOTCHA. Usa los IMPORTS especificados.
 
-3. **Validate immediately** — After EVERY file change:
+3. **Validar inmediatamente** — Tras CADA cambio de archivo:
    ```bash
-   # Run type-check (adjust command per project)
-   [type-check command from Phase 0]
+   # Ejecuta verificación de tipos (ajusta el comando según el proyecto)
+   [comando de type-check de la Fase 0]
    ```
-   If type-check fails → fix the error before moving to the next file.
+   Si el chequeo de tipos falla → corrige el error antes de pasar al siguiente archivo.
 
-4. **Track progress** — Log: `[done] Task N: [task name] — complete`
+4. **Registrar progreso** — Registra: `[hecho] Tarea N: [nombre de tarea] — completada`
 
-### Handling Deviations
+### Manejo de Desviaciones
 
-If implementation must deviate from the plan:
-- Note **WHAT** changed
-- Note **WHY** it changed
-- Continue with the corrected approach
-- These deviations will be captured in the report
+Si la implementación debe desviarse del plan:
+- Anota **QUÉ** cambió
+- Anota **POR QUÉ** cambió
+- Continúa con el enfoque corregido
+- Estas desviaciones se incluirán en el reporte final
 
-**CHECKPOINT**: All tasks executed. Deviations logged.
+**PUNTO DE CONTROL**: Todas las tareas ejecutadas. Desviaciones registradas.
 
 ---
 
-## Phase 4 — VALIDATE
+## Fase 4 — VALIDAR (VALIDATE)
 
-Run all validation levels from the plan. Fix issues at each level before proceeding.
+Ejecuta todos los niveles de validación del plan. Corrige problemas en cada nivel antes de avanzar.
 
-### Level 1: Static Analysis
+### Nivel 1: Análisis Estático
 
 ```bash
-# Type checking — zero errors required
-[project type-check command]
+# Comprobación de tipos — se requieren cero errores
+[comando de type-check del proyecto]
 
-# Linting — fix automatically where possible
-[project lint command]
-[project lint-fix command]
+# Linting — corregir automáticamente donde sea posible
+[comando de lint del proyecto]
+[comando de lint-fix del proyecto]
 ```
 
-If lint errors remain after auto-fix, fix manually.
+Si quedan errores de lint tras la corrección automática, corrígelos manualmente.
 
-### Level 2: Unit Tests
+### Nivel 2: Pruebas Unitarias
 
-Write tests for every new function (as specified in the plan's Testing Strategy).
+Escribe pruebas para cada nueva función (según lo indicado en la Estrategia de Pruebas del plan).
 
 ```bash
-[project test command for affected area]
+[comando de prueba del proyecto para el área afectada]
 ```
 
-- Every function needs at least one test
-- Cover edge cases listed in the plan
-- If a test fails → fix the implementation (not the test, unless the test is wrong)
+- Cada función necesita al menos una prueba
+- Cubre los casos límite listados en el plan
+- Si una prueba falla → corrige la implementación (no la prueba, a menos que la prueba sea incorrecta)
 
-### Level 3: Build Check
+### Nivel 3: Comprobación de Compilación
 
 ```bash
-[project build command]
+[comando de compilación del proyecto]
 ```
 
-Build must succeed with zero errors.
+La compilación debe tener éxito con cero errores.
 
-### Level 4: Integration Testing (if applicable)
+### Nivel 4: Pruebas de Integración (si corresponde)
 
 ```bash
-# Start server, run tests, stop server
-[project dev server command] &
+# Iniciar servidor, ejecutar pruebas, detener servidor
+[comando de servidor de desarrollo del proyecto] &
 SERVER_PID=$!
 
-# Wait for server to be ready (adjust port as needed)
+# Esperar a que el servidor esté listo (ajustar puerto según corresponda)
 SERVER_READY=0
 for i in $(seq 1 30); do
   if curl -sf http://localhost:PORT/health >/dev/null 2>&1; then
@@ -185,11 +185,11 @@ done
 
 if [ "$SERVER_READY" -ne 1 ]; then
   kill "$SERVER_PID" 2>/dev/null || true
-  echo "ERROR: Server failed to start within 30s" >&2
+  echo "ERROR: El servidor no inició en 30s" >&2
   exit 1
 fi
 
-[integration test command]
+[comando de pruebas de integración]
 TEST_EXIT=$?
 
 kill "$SERVER_PID" 2>/dev/null || true
@@ -198,188 +198,188 @@ wait "$SERVER_PID" 2>/dev/null || true
 exit "$TEST_EXIT"
 ```
 
-### Level 5: Edge Case Testing
+### Nivel 5: Pruebas de Casos Límite
 
-Run through edge cases from the plan's Testing Strategy checklist.
+Revisa los casos límite de la lista de verificación de la Estrategia de Pruebas del plan.
 
-**CHECKPOINT**: All 5 validation levels pass. Zero errors.
+**PUNTO DE CONTROL**: Los 5 niveles de validación aprobados. Cero errores.
 
 ---
 
-## Phase 5 — REPORT
+## Fase 5 — REPORTAR (REPORT)
 
-### Create Implementation Report
+### Crear Reporte de Implementación
 
 ```bash
 mkdir -p .claude/PRPs/reports
 ```
 
-Write report to `.claude/PRPs/reports/{plan-name}-report.md`:
+Escribe el reporte en `.claude/PRPs/reports/{plan-name}-report.md`:
 
 ```markdown
-# Implementation Report: [Feature Name]
+# Reporte de Implementación: [Nombre de la Característica]
 
-## Summary
-[What was implemented]
+## Resumen
+[Qué se implementó]
 
-## Assessment vs Reality
+## Estimación vs Realidad
 
-| Metric | Predicted (Plan) | Actual |
+| Métrica | Previsto (Plan) | Real |
 |---|---|---|
-| Complexity | [from plan] | [actual] |
-| Confidence | [from plan] | [actual] |
-| Files Changed | [from plan] | [actual count] |
+| Complejidad | [del plan] | [real] |
+| Confianza | [del plan] | [real] |
+| Archivos Modificados | [del plan] | [conteo real] |
 
-## Tasks Completed
+## Tareas Completadas
 
-| # | Task | Status | Notes |
+| # | Tarea | Estado | Notas |
 |---|---|---|---|
-| 1 | [task name] | [done] Complete | |
-| 2 | [task name] | [done] Complete | Deviated — [reason] |
+| 1 | [nombre de tarea] | [hecho] Completo | |
+| 2 | [nombre de tarea] | [hecho] Completo | Desviado — [motivo] |
 
-## Validation Results
+## Resultados de Validación
 
-| Level | Status | Notes |
+| Nivel | Estado | Notas |
 |---|---|---|
-| Static Analysis | [done] Pass | |
-| Unit Tests | [done] Pass | N tests written |
-| Build | [done] Pass | |
-| Integration | [done] Pass | or N/A |
-| Edge Cases | [done] Pass | |
+| Análisis Estático | [hecho] Aprobado | |
+| Pruebas Unitarias | [hecho] Aprobado | N pruebas escritas |
+| Compilación | [hecho] Aprobado | |
+| Integración | [hecho] Aprobado | o N/A |
+| Casos Límite | [hecho] Aprobado | |
 
-## Files Changed
+## Archivos Modificados
 
-| File | Action | Lines |
+| Archivo | Acción | Líneas |
 |---|---|---|
-| `path/to/file` | CREATED | +N |
-| `path/to/file` | UPDATED | +N / -M |
+| `ruta/al/archivo` | CREADO | +N |
+| `ruta/al/archivo` | ACTUALIZADO | +N / -M |
 
-## Deviations from Plan
-[List any deviations with WHAT and WHY, or "None"]
+## Desviaciones del Plan
+[Listar cualquier desviación con QUÉ y POR QUÉ, o "Ninguna"]
 
-## Issues Encountered
-[List any problems and how they were resolved, or "None"]
+## Problemas Encontrados
+[Listar cualquier problema y cómo se resolvió, o "Ninguno"]
 
-## Tests Written
+## Pruebas Escritas
 
-| Test File | Tests | Coverage |
+| Archivo de Prueba | Pruebas | Cobertura |
 |---|---|---|
-| `path/to/test` | N tests | [area covered] |
+| `ruta/a/prueba` | N pruebas | [área cubierta] |
 
-## Next Steps
-- [ ] Code review via `/code-review`
-- [ ] Create PR via `/prp-pr`
+## Siguientes Pasos
+- [ ] Revisión de código mediante `/code-review`
+- [ ] Crear PR mediante `/prp-pr`
 ```
 
-### Update PRD (if applicable)
+### Actualizar PRD (si corresponde)
 
-If this implementation was for a PRD phase:
-1. Update the phase status from `in-progress` to `complete`
-2. Add report path as reference
+Si esta implementación correspondió a una fase de un PRD:
+1. Actualiza el estado de la fase de `in-progress` a `complete`
+2. Añade la ruta del reporte como referencia
 
-### Archive Plan
+### Archivar Plan
 
 ```bash
 mkdir -p .claude/PRPs/plans/completed
 mv "$ARGUMENTS" .claude/PRPs/plans/completed/
 ```
 
-**CHECKPOINT**: Report created. PRD updated. Plan archived.
+**PUNTO DE CONTROL**: Reporte creado. PRD actualizado. Plan archivado.
 
 ---
 
-## Phase 6 — OUTPUT
+## Fase 6 — SALIDA
 
-Report to user:
+Informa al usuario:
 
 ```
-## Implementation Complete
+## Implementación Completada
 
-- **Plan**: [plan file path] → archived to completed/
-- **Branch**: [current branch name]
-- **Status**: [done] All tasks complete
+- **Plan**: [ruta del archivo de plan] → archivado en completed/
+- **Rama**: [nombre de la rama actual]
+- **Estado**: [hecho] Todas las tareas completadas
 
-### Validation Summary
+### Resumen de Validación
 
-| Check | Status |
+| Verificación | Estado |
 |---|---|
-| Type Check | [done] |
-| Lint | [done] |
-| Tests | [done] (N written) |
-| Build | [done] |
-| Integration | [done] or N/A |
+| Verificación de Tipos | [hecho] |
+| Lint | [hecho] |
+| Pruebas | [hecho] (N escritas) |
+| Compilación | [hecho] |
+| Integración | [hecho] o N/A |
 
-### Files Changed
-- [N] files created, [M] files updated
+### Archivos Modificados
+- [N] archivos creados, [M] archivos actualizados
 
-### Deviations
-[Summary or "None — implemented exactly as planned"]
+### Desviaciones
+[Resumen o "Ninguna — implementado exactamente según el plan"]
 
-### Artifacts
-- Report: `.claude/PRPs/reports/{name}-report.md`
-- Archived Plan: `.claude/PRPs/plans/completed/{name}.plan.md`
+### Artefactos
+- Reporte: `.claude/PRPs/reports/{name}-report.md`
+- Plan Archivado: `.claude/PRPs/plans/completed/{name}.plan.md`
 
-### PRD Progress (if applicable)
-| Phase | Status |
+### Progreso del PRD (si corresponde)
+| Fase | Estado |
 |---|---|
-| Phase 1 | [done] Complete |
-| Phase 2 | [next] |
+| Fase 1 | [hecho] Completo |
+| Fase 2 | [siguiente] |
 | ... | ... |
 
-> Next step: Run `/prp-pr` to create a pull request, or `/code-review` to review changes first.
+> Siguiente paso: Ejecuta `/prp-pr` para crear un pull request, o `/code-review` para revisar los cambios primero.
 ```
 
 ---
 
-## Handling Failures
+## Manejo de Fallos
 
-### Type Check Fails
-1. Read the error message carefully
-2. Fix the type error in the source file
-3. Re-run type-check
-4. Continue only when clean
+### Falla la Comprobación de Tipos
+1. Lee con atención el mensaje de error
+2. Corrige el error de tipo en el archivo fuente
+3. Vuelve a ejecutar la comprobación de tipos
+4. Continúa solo cuando esté limpio
 
-### Tests Fail
-1. Identify whether the bug is in the implementation or the test
-2. Fix the root cause (usually the implementation)
-3. Re-run tests
-4. Continue only when green
+### Fallan las Pruebas
+1. Identifica si el error está en la implementación o en la prueba
+2. Corrige la causa raíz (usualmente la implementación)
+3. Vuelve a ejecutar las pruebas
+4. Continúa solo cuando estén en verde
 
-### Lint Fails
-1. Run auto-fix first
-2. If errors remain, fix manually
-3. Re-run lint
-4. Continue only when clean
+### Falla el Lint
+1. Ejecuta la corrección automática primero
+2. Si persisten errores, corrígelos manualmente
+3. Vuelve a ejecutar lint
+4. Continúa solo cuando esté limpio
 
-### Build Fails
-1. Usually a type or import issue — check error message
-2. Fix the offending file
-3. Re-run build
-4. Continue only when successful
+### Falla la Compilación
+1. Usualmente es un problema de tipos o importaciones — revisa el mensaje de error
+2. Corrige el archivo afectado
+3. Vuelve a compilar
+4. Continúa solo cuando sea exitoso
 
-### Integration Test Fails
-1. Check server started correctly
-2. Verify endpoint/route exists
-3. Check request format matches expected
-4. Fix and re-run
-
----
-
-## Success Criteria
-
-- **TASKS_COMPLETE**: All tasks from the plan executed
-- **TYPES_PASS**: Zero type errors
-- **LINT_PASS**: Zero lint errors
-- **TESTS_PASS**: All tests green, new tests written
-- **BUILD_PASS**: Build succeeds
-- **REPORT_CREATED**: Implementation report saved
-- **PLAN_ARCHIVED**: Plan moved to `completed/`
+### Fallan las Pruebas de Integración
+1. Verifica que el servidor haya iniciado correctamente
+2. Verifica que el endpoint/ruta exista
+3. Comprueba que el formato de la solicitud coincida con el esperado
+4. Corrige y vuelve a ejecutar
 
 ---
 
-## Next Steps
+## Criterios de Éxito
 
-- Run `/code-review` to review changes before committing
-- Run `/prp-commit` to commit with a descriptive message
-- Run `/prp-pr` to create a pull request
-- Run `/prp-plan <next-phase>` if the PRD has more phases
+- **TAREAS_COMPLETAS**: Todas las tareas del plan ejecutadas
+- **TIPOS_PASAN**: Cero errores de tipos
+- **LINT_PASA**: Cero errores de lint
+- **PRUEBAS_PASAN**: Todas las pruebas en verde, nuevas pruebas escritas
+- **COMPILACIÓN_PASA**: Compilación exitosa
+- **REPORTE_CREADO**: Reporte de implementación guardado
+- **PLAN_ARCHIVADO**: Plan movido a `completed/`
+
+---
+
+## Siguientes Pasos
+
+- Ejecuta `/code-review` para revisar cambios antes de hacer commit
+- Ejecuta `/prp-commit` para hacer commit con un mensaje descriptivo
+- Ejecuta `/prp-pr` para crear un pull request
+- Ejecuta `/prp-plan <siguiente-fase>` si el PRD contiene más fases

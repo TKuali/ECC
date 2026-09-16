@@ -1,51 +1,51 @@
 ---
-description: Fix C++ build errors, CMake issues, and linker problems incrementally. Invokes the cpp-build-resolver agent for minimal, surgical fixes.
+description: Corrige incrementalmente errores de compilación de C++, problemas de CMake y de enlazador. Invoca al agente cpp-build-resolver para correcciones quirúrgicas mínimas.
 ---
 
-# C++ Build and Fix
+# Compilación y Corrección de C++
 
-This command invokes the **cpp-build-resolver** agent to incrementally fix C++ build errors with minimal changes.
+Este comando invoca al agente **cpp-build-resolver** para corregir incrementalmente errores de compilación de C++ con cambios mínimos.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Run Diagnostics**: Execute `cmake --build`, `clang-tidy`, `cppcheck`
-2. **Parse Errors**: Group by file and sort by severity
-3. **Fix Incrementally**: One error at a time
-4. **Verify Each Fix**: Re-run build after each change
-5. **Report Summary**: Show what was fixed and what remains
+1. **Ejecutar diagnósticos**: Ejecuta `cmake --build`, `clang-tidy`, `cppcheck`
+2. **Analizar errores**: Agrupa por archivo y ordena por severidad
+3. **Corregir incrementalmente**: Un error a la vez
+4. **Verificar cada corrección**: Vuelve a compilar después de cada cambio
+5. **Reportar resumen**: Muestra lo que se corrigió y lo que queda pendiente
 
-## When to Use
+## Cuándo usarlo
 
-Use `/cpp-build` when:
-- `cmake --build build` fails with errors
-- Linker errors (undefined references, multiple definitions)
-- Template instantiation failures
-- Include/dependency issues
-- After pulling changes that break the build
+Usa `/cpp-build` cuando:
+- `cmake --build build` falla con errores
+- Hay errores de enlazador (referencias no definidas, definiciones múltiples)
+- Fallas de instanciación de plantillas (templates)
+- Problemas de includes/dependencias
+- Después de traer cambios (pull) que rompen la compilación
 
-## Diagnostic Commands Run
+## Comandos de diagnóstico ejecutados
 
 ```bash
-# CMake configure
+# Configuración de CMake
 cmake -B build -S .
 
-# Build
+# Compilación
 cmake --build build 2>&1 | head -100
 
-# Static analysis (if available)
+# Análisis estático (si está disponible)
 clang-tidy src/*.cpp -- -std=c++17
 cppcheck --enable=all src/
 ```
 
-## Example Session
+## Ejemplo de Sesión
 
 ```text
-User: /cpp-build
+Usuario: /cpp-build
 
-Agent:
-# C++ Build Resolution
+Agente:
+# Resolución de Compilación C++
 
-## Initial Diagnostics
+## Diagnósticos Iniciales
 
 ```bash
 $ cmake --build build
@@ -54,44 +54,44 @@ src/handler/api.cpp:42:9: error: no matching function for call to 'process'
 src/handler/api.cpp:58:1: error: non-void function does not return a value
 ```
 
-Errors found: 3
+Errores encontrados: 3
 
-## Fix 1: Undeclared Identifier
+## Corrección 1: Identificador no declarado
 
-File: src/service/user.cpp:25
-Error: use of undeclared identifier 'UserRepository'
-Cause: Missing include
+Archivo: src/service/user.cpp:25
+Error: uso de identificador no declarado 'UserRepository'
+Causa: Include faltante
 
 ```cpp
-// Added include
+// Include añadido
 #include "repository/user_repository.hpp"
 ```
 
 ```bash
 $ cmake --build build
-# 2 errors remaining
+# 2 errores restantes
 ```
 
-## Fix 2: No Matching Function
+## Corrección 2: Función no coincidente
 
-File: src/handler/api.cpp:42
+Archivo: src/handler/api.cpp:42
 Error: no matching function for call to 'process'
 
 ```cpp
-// Changed
+// Cambiado
 process(params.get("count"));
-// To
+// A
 process(std::stoi(params.get("count")));
 ```
 
 ```bash
 $ cmake --build build
-# 1 error remaining
+# 1 error restante
 ```
 
-## Fix 3: Missing Return
+## Corrección 3: Retorno faltante
 
-File: src/handler/api.cpp:58
+Archivo: src/handler/api.cpp:58
 Error: non-void function does not return a value
 
 ```cpp
@@ -100,74 +100,74 @@ std::optional<User> getUser(const std::string& id) {
         return std::nullopt;
     }
     auto user = findUser(id);
-    // Added missing return
+    // Retorno faltante añadido
     return user;
 }
 ```
 
 ```bash
 $ cmake --build build
-# Build successful!
+# ¡Compilación exitosa!
 ```
 
-## Final Verification
+## Verificación Final
 
 ```bash
 $ ctest --test-dir build --output-on-failure
 Test project build
     1/5 Test #1: unit_tests ........   Passed    0.02 sec
     2/5 Test #2: integration_tests    Passed    0.15 sec
-All tests passed.
+Todos los tests pasaron.
 ```
 
-## Summary
+## Resumen
 
-| Metric | Count |
-|--------|-------|
-| Build errors fixed | 3 |
-| Linker errors fixed | 0 |
-| Files modified | 2 |
-| Remaining issues | 0 |
+| Métrica | Cantidad |
+|---------|----------|
+| Errores de compilación corregidos | 3 |
+| Errores de enlazador corregidos | 0 |
+| Archivos modificados | 2 |
+| Problemas restantes | 0 |
 
-Build Status: PASS: SUCCESS
+Estado de compilación: PASS: ÉXITO
 ```
 
-## Common Errors Fixed
+## Errores Comunes Corregidos
 
-| Error | Typical Fix |
-|-------|-------------|
-| `undeclared identifier` | Add `#include` or fix typo |
-| `no matching function` | Fix argument types or add overload |
-| `undefined reference` | Link library or add implementation |
-| `multiple definition` | Use `inline` or move to .cpp |
-| `incomplete type` | Replace forward decl with `#include` |
-| `no member named X` | Fix member name or include |
-| `cannot convert X to Y` | Add appropriate cast |
-| `CMake Error` | Fix CMakeLists.txt configuration |
+| Error | Solución Típica |
+|-------|-----------------|
+| `undeclared identifier` | Añadir `#include` o corregir error tipográfico |
+| `no matching function` | Corregir tipos de argumentos o añadir sobrecarga |
+| `undefined reference` | Enlazar librería o añadir implementación |
+| `multiple definition` | Usar `inline` o mover al archivo .cpp |
+| `incomplete type` | Reemplazar declaración anticipada con `#include` |
+| `no member named X` | Corregir nombre del miembro o include |
+| `cannot convert X to Y` | Añadir conversión adecuada (cast) |
+| `CMake Error` | Corregir configuración en CMakeLists.txt |
 
-## Fix Strategy
+## Estrategia de Corrección
 
-1. **Compilation errors first** - Code must compile
-2. **Linker errors second** - Resolve undefined references
-3. **Warnings third** - Fix with `-Wall -Wextra`
-4. **One fix at a time** - Verify each change
-5. **Minimal changes** - Don't refactor, just fix
+1. **Errores de compilación primero** - El código debe compilar
+2. **Errores de enlazador segundo** - Resolver referencias indefinidas
+3. **Advertencias tercero** - Corregir con `-Wall -Wextra`
+4. **Una corrección a la vez** - Verificar cada cambio
+5. **Cambios mínimos** - No refactorizar, solo corregir
 
-## Stop Conditions
+## Condiciones de Parada
 
-The agent will stop and report if:
-- Same error persists after 3 attempts
-- Fix introduces more errors
-- Requires architectural changes
-- Missing external dependencies
+El agente se detendrá y reportará si:
+- El mismo error persiste tras 3 intentos
+- La solución introduce más errores
+- Requiere cambios arquitectónicos
+- Faltan dependencias externas
 
-## Related Commands
+## Comandos Relacionados
 
-- `/cpp-test` - Run tests after build succeeds
-- `/cpp-review` - Review code quality
-- `verification-loop` skill - Full verification loop
+- `/cpp-test` - Ejecuta pruebas después de compilar con éxito
+- `/cpp-review` - Revisa la calidad del código
+- Skill `verification-loop` - Bucle completo de verificación
 
-## Related
+## Relacionado
 
-- Agent: `agents/cpp-build-resolver.md`
+- Agente: `agents/cpp-build-resolver.md`
 - Skill: `skills/cpp-coding-standards/`

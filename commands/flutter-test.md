@@ -1,63 +1,63 @@
 ---
-description: Run Flutter/Dart tests, report failures, and incrementally fix test issues. Covers unit, widget, golden, and integration tests.
+description: Ejecuta pruebas de Flutter/Dart, informa fallas y corrige problemas de prueba incrementalmente. Cubre pruebas unitarias, de widgets, golden y de integración.
 ---
 
-# Flutter Test
+# Pruebas de Flutter (Flutter Test)
 
-This command runs the Flutter test suite and reports results. When failures occur, it diagnoses and fixes issues incrementally.
+Este comando ejecuta la suite de pruebas de Flutter y reporta los resultados. Cuando ocurren fallas, diagnostica y corrige los problemas de manera incremental.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Run Tests**: Execute `flutter test` (or scope to changed files)
-2. **Parse Failures**: Identify failing tests by type and cause
-3. **Fix Incrementally**: One failure at a time where possible
-4. **Verify**: Re-run after each fix
-5. **Report**: Show coverage summary and remaining failures
+1. **Ejecutar pruebas**: Ejecuta `flutter test` (o se limita a archivos modificados)
+2. **Analizar fallas**: Identifica pruebas fallidas por tipo y causa
+3. **Corregir incrementalmente**: Una falla a la vez donde sea posible
+4. **Verificar**: Vuelve a ejecutar tras cada corrección
+5. **Reportar**: Muestra un resumen de cobertura y las fallas restantes
 
-## When to Use
+## Cuándo usarlo
 
-Use `/flutter-test` when:
-- After implementing a feature to verify nothing broke
-- After running `/flutter-build` to ensure tests pass
-- To check test coverage on new code
-- When a specific test file is failing
-- Before submitting a PR
+Usa `/flutter-test` cuando:
+- Después de implementar una función para verificar que nada se haya roto
+- Después de ejecutar `/flutter-build` para asegurar que las pruebas pasen
+- Para comprobar la cobertura de pruebas en código nuevo
+- Cuando un archivo de prueba específico esté fallando
+- Antes de enviar un PR
 
-## Commands Run
+## Comandos ejecutados
 
 ```bash
-# Run all tests
+# Ejecutar todas las pruebas
 flutter test 2>&1
 
-# Run with coverage
+# Ejecutar con cobertura
 flutter test --coverage 2>&1
 
-# Run specific test file
+# Ejecutar archivo de prueba específico
 flutter test test/unit/domain/usecases/get_user_test.dart 2>&1
 
-# Run tests matching a name pattern
+# Ejecutar pruebas que coincidan con un patrón de nombre
 flutter test --name "CartBloc" 2>&1
 
-# Run integration tests (requires device/emulator)
+# Ejecutar pruebas de integración (requiere dispositivo/emulador)
 flutter test integration_test/ 2>&1
 
-# Update golden files when intentional visual changes are made
+# Actualizar archivos golden cuando se hagan cambios visuales intencionales
 flutter test --update-goldens 2>&1
 ```
 
-## Example Session
+## Ejemplo de Sesión
 
 ````text
-User: /flutter-test
+Usuario: /flutter-test
 
-Agent:
-# Flutter Test Run
+Agente:
+# Ejecución de Pruebas Flutter
 
-## Test Execution
+## Ejecución de Pruebas
 
 ```
 $ flutter test
-00:05 +42 -2: Some tests failed.
+00:05 +42 -2: Algunas pruebas fallaron.
 
 FAILED: test/unit/data/user_repository_test.dart
   UserRepository getById
@@ -72,73 +72,73 @@ FAILED: test/widget/cart_page_test.dart
     Found: no widget with text 'Your cart is empty'
 ```
 
-## Fix 1: Repository Test
+## Corrección 1: Prueba de Repositorio
 
-File: test/unit/data/user_repository_test.dart
-Failure: `getById` returns a user when it should return null for missing ID
+Archivo: test/unit/data/user_repository_test.dart
+Falla: `getById` retorna un usuario cuando debería retornar null para un ID inexistente
 
-Root cause: Test setup adds a user with ID 'test-id' but queries with 'missing-id'.
-Fix: Updated test to query with 'missing-id' — setup was correct, query was wrong.
+Causa raíz: La preparación de la prueba añade un usuario con ID 'test-id' pero consulta con 'missing-id'.
+Solución: Prueba actualizada para consultar con 'missing-id' — la preparación era correcta, la consulta errónea.
 
 ```
 $ flutter test test/unit/data/user_repository_test.dart
 1 test passed.
 ```
 
-## Fix 2: Widget Test
+## Corrección 2: Prueba de Widget
 
-File: test/widget/cart_page_test.dart
-Failure: Empty state text widget not found
+Archivo: test/widget/cart_page_test.dart
+Falla: Widget de texto de estado vacío no encontrado
 
-Root cause: Empty state message was renamed from 'Your cart is empty' to 'Cart is empty' in the widget.
-Fix: Updated test string to match current widget copy.
+Causa raíz: El mensaje de estado vacío fue renombrado de 'Your cart is empty' a 'Cart is empty' en el widget.
+Solución: Texto de la prueba actualizado para coincidir con el texto actual del widget.
 
 ```
 $ flutter test test/widget/cart_page_test.dart
 1 test passed.
 ```
 
-## Final Run
+## Ejecución Final
 
 ```
 $ flutter test --coverage
-All 44 tests passed.
-Coverage: 84.2% (target: 80%)
+Todas las 44 pruebas pasaron.
+Cobertura: 84.2% (objetivo: 80%)
 ```
 
-## Summary
+## Resumen
 
-| Metric | Value |
-|--------|-------|
-| Total tests | 44 |
-| Passed | 44 |
-| Failed | 0 |
-| Coverage | 84.2% |
+| Métrica | Valor |
+|---------|-------|
+| Total de pruebas | 44 |
+| Exitosas | 44 |
+| Fallidas | 0 |
+| Cobertura | 84.2% |
 
-Test Status: PASS ✓
+Estado de pruebas: PASS ✓
 ````
 
-## Common Test Failures
+## Fallas Comunes de Pruebas
 
-| Failure | Typical Fix |
-|---------|-------------|
-| `Expected: <X> Actual: <Y>` | Update assertion or fix implementation |
-| `Widget not found` | Fix finder selector or update test after widget rename |
-| `Golden file not found` | Run `flutter test --update-goldens` to generate |
-| `Golden mismatch` | Inspect diff; run `--update-goldens` if change was intentional |
-| `MissingPluginException` | Mock platform channel in test setup |
-| `LateInitializationError` | Initialize `late` fields in `setUp()` |
-| `pumpAndSettle timed out` | Replace with explicit `pump(Duration)` calls |
+| Falla | Solución Típica |
+|-------|-----------------|
+| `Expected: <X> Actual: <Y>` | Actualizar aserción o corregir implementación |
+| `Widget not found` | Corregir selector de finder o actualizar prueba tras renombre de widget |
+| `Golden file not found` | Ejecutar `flutter test --update-goldens` para generar |
+| `Golden mismatch` | Inspeccionar diff; ejecutar `--update-goldens` si el cambio fue intencional |
+| `MissingPluginException` | Simular (mock) canal de plataforma en la preparación de la prueba |
+| `LateInitializationError` | Inicializar campos `late` en `setUp()` |
+| `pumpAndSettle timed out` | Reemplazar con llamadas explícitas a `pump(Duration)` |
 
-## Related Commands
+## Comandos Relacionados
 
-- `/flutter-build` — Fix build errors before running tests
-- `/flutter-review` — Review code after tests pass
-- `tdd-workflow` skill — Test-driven development workflow
+- `/flutter-build` — Corrige errores de compilación antes de ejecutar pruebas
+- `/flutter-review` — Revisa código después de que las pruebas pasen
+- Skill `tdd-workflow` — Flujo de trabajo de desarrollo guiado por pruebas
 
-## Related
+## Relacionado
 
-- Agent: `agents/flutter-reviewer.md`
-- Agent: `agents/dart-build-resolver.md`
+- Agente: `agents/flutter-reviewer.md`
+- Agente: `agents/dart-build-resolver.md`
 - Skill: `skills/flutter-dart-code-review/`
-- Rules: `rules/dart/testing.md`
+- Reglas: `rules/dart/testing.md`

@@ -1,447 +1,447 @@
 ---
-description: "Interactive PRD generator - problem-first, hypothesis-driven product spec with back-and-forth questioning"
-argument-hint: "[feature/product idea] (blank = start with questions)"
+description: "Generador interactivo de PRD - especificación de producto basada en problemas e hipótesis mediante preguntas y respuestas guiadas"
+argument-hint: "[idea de característica/producto] (en blanco = iniciar con preguntas)"
 ---
 
-# Product Requirements Document Generator
+# Generador de Documento de Requisitos del Producto (PRD)
 
-> Adapted from PRPs-agentic-eng by Wirasm. Part of the PRP workflow series.
+> Adaptado de PRPs-agentic-eng por Wirasm. Parte de la serie de flujos de trabajo PRP.
 
-**Input**: $ARGUMENTS
-
----
-
-## Your Role
-
-You are a sharp product manager who:
-- Starts with PROBLEMS, not solutions
-- Demands evidence before building
-- Thinks in hypotheses, not specs
-- Asks clarifying questions before assuming
-- Acknowledges uncertainty honestly
-
-**Anti-pattern**: Don't fill sections with fluff. If info is missing, write "TBD - needs research" rather than inventing plausible-sounding requirements.
+**Entrada**: $ARGUMENTS
 
 ---
 
-## Process Overview
+## Tu Rol
+
+Eres un product manager agudo que:
+- Comienza con PROBLEMAS, no con soluciones
+- Exige evidencia antes de construir
+- Piensa en hipótesis, no en especificaciones cerradas
+- Realiza preguntas clarificadoras antes de asumir
+- Reconoce la incertidumbre con honestidad
+
+**Antipatrón**: No llenes secciones con texto de relleno. Si falta información, escribe "Por definir (TBD) - requiere investigación" antes que inventar requisitos que solo suenen verosímiles.
+
+---
+
+## Resumen del Proceso
 
 ```
-QUESTION SET 1 → GROUNDING → QUESTION SET 2 → RESEARCH → QUESTION SET 3 → GENERATE
+CONJUNTO DE PREGUNTAS 1 → FUNDAMENTACIÓN → CONJUNTO DE PREGUNTAS 2 → INVESTIGACIÓN → CONJUNTO DE PREGUNTAS 3 → GENERAR
 ```
 
-Each question set builds on previous answers. Grounding phases validate assumptions.
+Cada conjunto de preguntas se apoya en las respuestas previas. Las fases de fundamentación validan las suposiciones.
 
 ---
 
-## Phase 1: INITIATE - Core Problem
+## Fase 1: INICIAR - Problema Central
 
-**If no input provided**, ask:
+**Si no se proporcionó entrada**, pregunta:
 
-> **What do you want to build?**
-> Describe the product, feature, or capability in a few sentences.
+> **¿Qué deseas construir?**
+> Describe el producto, característica o capacidad en pocas oraciones.
 
-**If input provided**, confirm understanding by restating:
+**Si se proporcionó entrada**, confirma la comprensión reiterándola:
 
-> I understand you want to build: {restated understanding}
-> Is this correct, or should I adjust my understanding?
+> Entiendo que deseas construir: {comprensión reiterada}
+> ¿Es correcto o debo ajustar mi interpretación?
 
-**GATE**: Wait for user response before proceeding.
-
----
-
-## Phase 2: FOUNDATION - Problem Discovery
-
-Ask these questions (present all at once, user can answer together):
-
-> **Foundation Questions:**
->
-> 1. **Who** has this problem? Be specific - not just "users" but what type of person/role?
->
-> 2. **What** problem are they facing? Describe the observable pain, not the assumed need.
->
-> 3. **Why** can't they solve it today? What alternatives exist and why do they fail?
->
-> 4. **Why now?** What changed that makes this worth building?
->
-> 5. **How** will you know if you solved it? What would success look like?
-
-**GATE**: Wait for user responses before proceeding.
+**CONTROL (GATE)**: Espera la respuesta del usuario antes de continuar.
 
 ---
 
-## Phase 3: GROUNDING - Market & Context Research
+## Fase 2: FUNDAMENTO - Descubrimiento del Problema
 
-After foundation answers, conduct research:
+Formula estas preguntas (preséntalas todas juntas, el usuario puede responder en conjunto):
 
-**Research market context:**
-
-1. Find similar products/features in the market
-2. Identify how competitors solve this problem
-3. Note common patterns and anti-patterns
-4. Check for recent trends or changes in this space
-
-Compile findings with direct links, key insights, and any gaps in available information.
-
-**If a codebase exists, explore it in parallel:**
-
-1. Find existing functionality relevant to the product/feature idea
-2. Identify patterns that could be leveraged
-3. Note technical constraints or opportunities
-
-Record file locations, code patterns, and conventions observed.
-
-**Summarize findings to user:**
-
-> **What I found:**
-> - {Market insight 1}
-> - {Competitor approach}
-> - {Relevant pattern from codebase, if applicable}
+> **Preguntas de Fundamento:**
 >
-> Does this change or refine your thinking?
+> 1. **¿Quién** tiene este problema? Sé específico - no simplemente "los usuarios", sino ¿qué tipo de persona/rol?
+>
+> 2. **¿Qué** problema enfrentan? Describe el dolor observable, no la necesidad supuesta.
+>
+> 3. **¿Por qué** no pueden resolverlo hoy? ¿Qué alternativas existen y por qué fallan?
+>
+> 4. **¿Por qué ahora?** ¿Qué cambió que hace que valga la pena construirlo en este momento?
+>
+> 5. **¿Cómo** sabrás si lo resolviste? ¿Cómo sería el éxito?
 
-**GATE**: Brief pause for user input (can be "continue" or adjustments).
+**CONTROL (GATE)**: Espera las respuestas del usuario antes de continuar.
 
 ---
 
-## Phase 4: DEEP DIVE - Vision & Users
+## Fase 3: FUNDAMENTACIÓN - Investigación de Mercado y Contexto
 
-Based on foundation + research, ask:
+Tras las respuestas de fundamento, realiza la investigación:
 
-> **Vision & Users:**
->
-> 1. **Vision**: In one sentence, what's the ideal end state if this succeeds wildly?
->
-> 2. **Primary User**: Describe your most important user - their role, context, and what triggers their need.
->
-> 3. **Job to Be Done**: Complete this: "When [situation], I want to [motivation], so I can [outcome]."
->
-> 4. **Non-Users**: Who is explicitly NOT the target? Who should we ignore?
->
-> 5. **Constraints**: What limitations exist? (time, budget, technical, regulatory)
+**Investigar el contexto de mercado:**
 
-**GATE**: Wait for user responses before proceeding.
+1. Encontrar productos o características similares en el mercado
+2. Identificar cómo resuelven este problema los competidores
+3. Tomar nota de patrones comunes y antipatrones
+4. Revisar tendencias recientes o cambios en este ámbito
+
+Compila los hallazgos con enlaces directos, conclusiones clave y cualquier brecha en la información disponible.
+
+**Si existe un código base, explóralo en paralelo:**
+
+1. Encontrar funcionalidad existente relevante para la idea de producto/característica
+2. Identificar patrones que puedan aprovecharse
+3. Señalar restricciones u oportunidades técnicas
+
+Registra ubicaciones de archivos, patrones de código y convenciones observadas.
+
+**Resumir los hallazgos al usuario:**
+
+> **Lo que encontré:**
+> - {Conclusión de mercado 1}
+> - {Enfoque de la competencia}
+> - {Patrón relevante del código base, si aplica}
+>
+> ¿Cambia o refina esto tu perspectiva?
+
+**CONTROL (GATE)**: Pausa breve para la retroalimentación del usuario (puede ser "continuar" o ajustes).
 
 ---
 
-## Phase 5: GROUNDING - Technical Feasibility
+## Fase 4: PROFUNDIZACIÓN - Visión y Usuarios
 
-**If a codebase exists, perform two parallel investigations:**
+Basándote en el fundamento y la investigación, pregunta:
 
-Investigation 1 — Explore feasibility:
-1. Identify existing infrastructure that can be leveraged
-2. Find similar patterns already implemented
-3. Map integration points and dependencies
-4. Locate relevant configuration and type definitions
-
-Record file locations, code patterns, and conventions observed.
-
-Investigation 2 — Analyze constraints:
-1. Trace how existing related features are implemented end-to-end
-2. Map data flow through potential integration points
-3. Identify architectural patterns and boundaries
-4. Estimate complexity based on similar features
-
-Document what exists with precise file:line references. No suggestions.
-
-**If no codebase, research technical approaches:**
-
-1. Find technical approaches others have used
-2. Identify common implementation patterns
-3. Note known technical challenges and pitfalls
-
-Compile findings with citations and gap analysis.
-
-**Summarize to user:**
-
-> **Technical Context:**
-> - Feasibility: {HIGH/MEDIUM/LOW} because {reason}
-> - Can leverage: {existing patterns/infrastructure}
-> - Key technical risk: {main concern}
+> **Visión y Usuarios:**
 >
-> Any technical constraints I should know about?
+> 1. **Visión**: En una sola oración, ¿cuál es el estado final ideal si esto tiene un éxito rotundo?
+>
+> 2. **Usuario Principal**: Describe a tu usuario más importante - su rol, contexto y qué detona su necesidad.
+>
+> 3. **Trabajo a Realizar (Job to Be Done)**: Completa: "Cuando [situación], quiero [motivación], para poder [resultado]."
+>
+> 4. **No-Usuarios**: ¿Quién NO es el público objetivo de forma explícita? ¿A quién debemos ignorar?
+>
+> 5. **Restricciones**: ¿Qué limitaciones existen? (tiempo, presupuesto, técnicas, regulatorias)
 
-**GATE**: Brief pause for user input.
+**CONTROL (GATE)**: Espera las respuestas del usuario antes de continuar.
 
 ---
 
-## Phase 6: DECISIONS - Scope & Approach
+## Fase 5: FUNDAMENTACIÓN - Viabilidad Técnica
 
-Ask final clarifying questions:
+**Si existe un código base, realiza dos investigaciones paralelas:**
 
-> **Scope & Approach:**
->
-> 1. **MVP Definition**: What's the absolute minimum to test if this works?
->
-> 2. **Must Have vs Nice to Have**: What 2-3 things MUST be in v1? What can wait?
->
-> 3. **Key Hypothesis**: Complete this: "We believe [capability] will [solve problem] for [users]. We'll know we're right when [measurable outcome]."
->
-> 4. **Out of Scope**: What are you explicitly NOT building (even if users ask)?
->
-> 5. **Open Questions**: What uncertainties could change the approach?
+Investigación 1 — Explorar viabilidad:
+1. Identificar infraestructura existente que pueda aprovecharse
+2. Encontrar patrones similares ya implementados
+3. Mapear puntos de integración y dependencias
+4. Localizar configuraciones y definiciones de tipos pertinentes
 
-**GATE**: Wait for user responses before generating.
+Registra ubicaciones de archivos, patrones de código y convenciones observadas.
+
+Investigación 2 — Analizar restricciones:
+1. Rastrear cómo se implementan de extremo a extremo las características relacionadas existentes
+2. Mapear el flujo de datos a través de posibles puntos de integración
+3. Identificar patrones arquitectónicos y límites
+4. Estimar complejidad basándose en características similares
+
+Documenta lo existente con referencias precisas a archivo:línea. Sin sugerencias.
+
+**Si no hay código base, investiga enfoques técnicos:**
+
+1. Encontrar enfoques técnicos que otros hayan utilizado
+2. Identificar patrones de implementación habituales
+3. Tomar nota de desafíos y trampas técnicas conocidas
+
+Compila los hallazgos con citas y análisis de brechas.
+
+**Resumir al usuario:**
+
+> **Contexto Técnico:**
+> - Viabilidad: {ALTA/MEDIA/BAJA} debido a {motivo}
+> - Se puede aprovechar: {patrones/infraestructura existente}
+> - Riesgo técnico principal: {preocupación principal}
+>
+> ¿Hay alguna restricción técnica que deba tener en cuenta?
+
+**CONTROL (GATE)**: Pausa breve para la entrada del usuario.
 
 ---
 
-## Phase 7: GENERATE - Write PRD
+## Fase 6: DECISIONES - Alcance y Enfoque
 
-**Output path**: `.claude/PRPs/prds/{kebab-case-name}.prd.md`
+Formula las preguntas clarificadoras finales:
 
-Create directory if needed: `mkdir -p .claude/PRPs/prds`
+> **Alcance y Enfoque:**
+>
+> 1. **Definición de MVP**: ¿Cuál es el mínimo absoluto para probar si esto funciona?
+>
+> 2. **Indispensable vs Deseable**: ¿Qué 2 o 3 cosas DEBEN estar en la v1? ¿Qué puede esperar?
+>
+> 3. **Hipótesis Clave**: Completa esto: "Creemos que [capacidad] va a [resolver problema] para [usuarios]. Sabremos que tenemos razón cuando [resultado medible]."
+>
+> 4. **Fuera de Alcance**: ¿Qué estás decidiendo explícitamente NO construir (incluso si los usuarios lo piden)?
+>
+> 5. **Preguntas Abiertas**: ¿Qué incertidumbres podrían alterar el enfoque?
 
-### PRD Template
+**CONTROL (GATE)**: Espera las respuestas del usuario antes de generar.
+
+---
+
+## Fase 7: GENERAR - Escribir el PRD
+
+**Ruta de salida**: `.claude/PRPs/prds/{nombre-en-kebab-case}.prd.md`
+
+Crea el directorio si es necesario: `mkdir -p .claude/PRPs/prds`
+
+### Plantilla de PRD
 
 ```markdown
-# {Product/Feature Name}
+# {Nombre del Producto/Característica}
 
-## Problem Statement
+## Declaración del Problema
 
-{2-3 sentences: Who has what problem, and what's the cost of not solving it?}
+{2-3 oraciones: ¿Quién tiene qué problema y cuál es el costo de no resolverlo?}
 
-## Evidence
+## Evidencia
 
-- {User quote, data point, or observation that proves this problem exists}
-- {Another piece of evidence}
-- {If none: "Assumption - needs validation through [method]"}
+- {Cita de usuario, punto de datos u observación que demuestre que este problema existe}
+- {Otra pieza de evidencia}
+- {Si no hay ninguna: "Suposición - requiere validación mediante [método]"}
 
-## Proposed Solution
+## Solución Propuesta
 
-{One paragraph: What we're building and why this approach over alternatives}
+{Un párrafo: Qué estamos construyendo y por qué este enfoque frente a alternativas}
 
-## Key Hypothesis
+## Hipótesis Clave
 
-We believe {capability} will {solve problem} for {users}.
-We'll know we're right when {measurable outcome}.
+Creemos que {capacidad} va a {resolver problema} para {usuarios}.
+Sabremos que tenemos razón cuando {resultado medible}.
 
-## What We're NOT Building
+## Qué NO Vamos a Construir
 
-- {Out of scope item 1} - {why}
-- {Out of scope item 2} - {why}
+- {Elemento fuera de alcance 1} - {por qué}
+- {Elemento fuera de alcance 2} - {por qué}
 
-## Success Metrics
+## Métricas de Éxito
 
-| Metric | Target | How Measured |
-|--------|--------|--------------|
-| {Primary metric} | {Specific number} | {Method} |
-| {Secondary metric} | {Specific number} | {Method} |
+| Métrica | Objetivo | Cómo se Mide |
+|---------|----------|--------------|
+| {Métrica primaria} | {Número específico} | {Método} |
+| {Métrica secundaria} | {Número específico} | {Método} |
 
-## Open Questions
+## Preguntas Abiertas
 
-- [ ] {Unresolved question 1}
-- [ ] {Unresolved question 2}
-
----
-
-## Users & Context
-
-**Primary User**
-- **Who**: {Specific description}
-- **Current behavior**: {What they do today}
-- **Trigger**: {What moment triggers the need}
-- **Success state**: {What "done" looks like}
-
-**Job to Be Done**
-When {situation}, I want to {motivation}, so I can {outcome}.
-
-**Non-Users**
-{Who this is NOT for and why}
+- [ ] {Pregunta no resuelta 1}
+- [ ] {Pregunta no resuelta 2}
 
 ---
 
-## Solution Detail
+## Usuarios y Contexto
 
-### Core Capabilities (MoSCoW)
+**Usuario Principal**
+- **Quién**: {Descripción específica}
+- **Comportamiento actual**: {Qué hacen hoy}
+- **Disparador**: {Qué momento detona la necesidad}
+- **Estado de éxito**: {Cómo se ve el estado "terminado"}
 
-| Priority | Capability | Rationale |
-|----------|------------|-----------|
-| Must | {Feature} | {Why essential} |
-| Must | {Feature} | {Why essential} |
-| Should | {Feature} | {Why important but not blocking} |
-| Could | {Feature} | {Nice to have} |
-| Won't | {Feature} | {Explicitly deferred and why} |
+**Trabajo a Realizar (Job to Be Done)**
+Cuando {situación}, quiero {motivación}, para poder {resultado}.
 
-### MVP Scope
-
-{What's the minimum to validate the hypothesis}
-
-### User Flow
-
-{Critical path - shortest journey to value}
+**No-Usuarios**
+{Para quién NO está dirigido esto y por qué}
 
 ---
 
-## Technical Approach
+## Detalle de la Solución
 
-**Feasibility**: {HIGH/MEDIUM/LOW}
+### Capacidades Centrales (MoSCoW)
 
-**Architecture Notes**
-- {Key technical decision and why}
-- {Dependency or integration point}
+| Prioridad | Capacidad | Justificación |
+|-----------|-----------|---------------|
+| Must (Debe) | {Característica} | {Por qué es esencial} |
+| Must (Debe) | {Característica} | {Por qué es esencial} |
+| Should (Debería) | {Característica} | {Por qué es importante pero no bloqueante} |
+| Could (Podría) | {Característica} | {Deseable pero prescindible} |
+| Won't (No se hará) | {Característica} | {Explícitamente pospuesto y por qué} |
 
-**Technical Risks**
+### Alcance de MVP
 
-| Risk | Likelihood | Mitigation |
-|------|------------|------------|
-| {Risk} | {H/M/L} | {How to handle} |
+{Cuál es el mínimo para validar la hipótesis}
+
+### Flujo de Usuario
+
+{Ruta crítica - el viaje más corto hacia el valor}
 
 ---
 
-## Implementation Phases
+## Enfoque Técnico
+
+**Viabilidad**: {ALTA/MEDIA/BAJA}
+
+**Notas de Arquitectura**
+- {Decisión técnica clave y por qué}
+- {Punto de dependencia o integración}
+
+**Riesgos Técnicos**
+
+| Riesgo | Probabilidad | Mitigación |
+|--------|--------------|------------|
+| {Riesgo} | {A/M/B} | {Cómo manejarlo} |
+
+---
+
+## Fases de Implementación
 
 <!--
   STATUS: pending | in-progress | complete
-  PARALLEL: phases that can run concurrently (e.g., "with 3" or "-")
-  DEPENDS: phases that must complete first (e.g., "1, 2" or "-")
-  PRP: link to generated plan file once created
+  PARALLEL: fases que pueden ejecutarse concurrentemente (ej., "con 3" o "-")
+  DEPENDS: fases que deben completarse primero (ej., "1, 2" o "-")
+  PRP: enlace al archivo de plan generado una vez creado
 -->
 
-| # | Phase | Description | Status | Parallel | Depends | PRP Plan |
-|---|-------|-------------|--------|----------|---------|----------|
-| 1 | {Phase name} | {What this phase delivers} | pending | - | - | - |
-| 2 | {Phase name} | {What this phase delivers} | pending | - | 1 | - |
-| 3 | {Phase name} | {What this phase delivers} | pending | with 4 | 2 | - |
-| 4 | {Phase name} | {What this phase delivers} | pending | with 3 | 2 | - |
-| 5 | {Phase name} | {What this phase delivers} | pending | - | 3, 4 | - |
+| # | Fase | Descripción | Estado | Paralelo | Depende de | Plan PRP |
+|---|------|-------------|--------|----------|------------|----------|
+| 1 | {Nombre de fase} | {Qué entrega esta fase} | pending | - | - | - |
+| 2 | {Nombre de fase} | {Qué entrega esta fase} | pending | - | 1 | - |
+| 3 | {Nombre de fase} | {Qué entrega esta fase} | pending | con 4 | 2 | - |
+| 4 | {Nombre de fase} | {Qué entrega esta fase} | pending | con 3 | 2 | - |
+| 5 | {Nombre de fase} | {Qué entrega esta fase} | pending | - | 3, 4 | - |
 
-### Phase Details
+### Detalles de Fases
 
-**Phase 1: {Name}**
-- **Goal**: {What we're trying to achieve}
-- **Scope**: {Bounded deliverables}
-- **Success signal**: {How we know it's done}
+**Fase 1: {Nombre}**
+- **Objetivo**: {Qué intentamos lograr}
+- **Alcance**: {Entregables delimitados}
+- **Señal de éxito**: {Cómo sabemos que está listo}
 
-**Phase 2: {Name}**
-- **Goal**: {What we're trying to achieve}
-- **Scope**: {Bounded deliverables}
-- **Success signal**: {How we know it's done}
+**Fase 2: {Nombre}**
+- **Objetivo**: {Qué intentamos lograr}
+- **Alcance**: {Entregables delimitados}
+- **Señal de éxito**: {Cómo sabemos que está listo}
 
-{Continue for each phase...}
+{Continuar para cada fase...}
 
-### Parallelism Notes
+### Notas de Paralelismo
 
-{Explain which phases can run in parallel and why}
-
----
-
-## Decisions Log
-
-| Decision | Choice | Alternatives | Rationale |
-|----------|--------|--------------|-----------|
-| {Decision} | {Choice} | {Options considered} | {Why this one} |
+{Explicar qué fases pueden ejecutarse en paralelo y por qué}
 
 ---
 
-## Research Summary
+## Registro de Decisiones
 
-**Market Context**
-{Key findings from market research}
-
-**Technical Context**
-{Key findings from technical exploration}
+| Decisión | Elección | Alternativas | Justificación |
+|----------|----------|--------------|---------------|
+| {Decisión} | {Elección} | {Opciones consideradas} | {Por qué esta} |
 
 ---
 
-*Generated: {timestamp}*
-*Status: DRAFT - needs validation*
+## Resumen de Investigación
+
+**Contexto de Mercado**
+{Conclusiones clave de la investigación de mercado}
+
+**Contexto Técnico**
+{Conclusiones clave de la exploración técnica}
+
+---
+
+*Generado: {timestamp}*
+*Estado: BORRADOR - requiere validación*
 ```
 
 ---
 
-## Phase 8: OUTPUT - Summary
+## Fase 8: SALIDA - Resumen
 
-After generating, report:
+Tras generar, reporta:
 
 ```markdown
-## PRD Created
+## PRD Creado
 
-**File**: `.claude/PRPs/prds/{name}.prd.md`
+**Archivo**: `.claude/PRPs/prds/{name}.prd.md`
 
-### Summary
+### Resumen
 
-**Problem**: {One line}
-**Solution**: {One line}
-**Key Metric**: {Primary success metric}
+**Problema**: {Una línea}
+**Solución**: {Una línea}
+**Métrica Clave**: {Métrica principal de éxito}
 
-### Validation Status
+### Estado de Validación
 
-| Section | Status |
+| Sección | Estado |
 |---------|--------|
-| Problem Statement | {Validated/Assumption} |
-| User Research | {Done/Needed} |
-| Technical Feasibility | {Assessed/TBD} |
-| Success Metrics | {Defined/Needs refinement} |
+| Declaración del Problema | {Validado/Suposición} |
+| Investigación de Usuarios | {Hecha/Pendiente} |
+| Viabilidad Técnica | {Evaluada/TBD} |
+| Métricas de Éxito | {Definidas/Requiere refinamiento} |
 
-### Open Questions ({count})
+### Preguntas Abiertas ({count})
 
-{List the open questions that need answers}
+{Lista de preguntas abiertas que requieren respuesta}
 
-### Recommended Next Step
+### Siguiente Paso Recomendado
 
-{One of: user research, technical spike, prototype, stakeholder review, etc.}
+{Uno de: investigación de usuarios, spike técnico, prototipo, revisión con stakeholders, etc.}
 
-### Implementation Phases
+### Fases de Implementación
 
-| # | Phase | Status | Can Parallel |
-|---|-------|--------|--------------|
-{Table of phases from PRD}
+| # | Fase | Estado | Puede ir en Paralelo |
+|---|------|--------|----------------------|
+{Tabla de fases del PRD}
 
-### To Start Implementation
+### Para Iniciar la Implementación
 
-Run: `/prp-plan .claude/PRPs/prds/{name}.prd.md`
+Ejecuta: `/prp-plan .claude/PRPs/prds/{name}.prd.md`
 
-This will automatically select the next pending phase and create an implementation plan.
+Esto seleccionará automáticamente la siguiente fase pendiente y creará un plan de implementación.
 ```
 
 ---
 
-## Question Flow Summary
+## Resumen del Flujo de Preguntas
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  INITIATE: "What do you want to build?"                 │
+│  INICIAR: "¿Qué deseas construir?"                     │
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│  FOUNDATION: Who, What, Why, Why now, How to measure    │
+│  FUNDAMENTO: Quién, Qué, Por qué, Por qué ahora, Medición│
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│  GROUNDING: Market research, competitor analysis        │
+│  FUNDAMENTACIÓN: Investigación de mercado y competencia │
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│  DEEP DIVE: Vision, Primary user, JTBD, Constraints     │
+│  PROFUNDIZACIÓN: Visión, Usuario principal, JTBD, Límites│
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│  GROUNDING: Technical feasibility, codebase exploration │
+│  FUNDAMENTACIÓN: Viabilidad técnica y exploración       │
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│  DECISIONS: MVP, Must-haves, Hypothesis, Out of scope   │
+│  DECISIONES: MVP, Indispensables, Hipótesis, Fuera alcance│
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│  GENERATE: Write PRD to .claude/PRPs/prds/              │
+│  GENERAR: Escribir PRD en .claude/PRPs/prds/            │
 └─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Integration with ECC
+## Integración con ECC
 
-After PRD generation:
-- Use `/prp-plan` to create implementation plans from PRD phases
-- Use `/plan` for simpler planning without PRD structure
-- Use `/save-session` to preserve PRD context across sessions
+Tras la generación del PRD:
+- Usa `/prp-plan` para crear planes de implementación desde las fases del PRD
+- Usa `/plan` para una planificación más simple sin estructura formal de PRD
+- Usa `/save-session` para conservar el contexto del PRD entre sesiones
 
-## Success Criteria
+## Criterios de Éxito
 
-- **PROBLEM_VALIDATED**: Problem is specific and evidenced (or marked as assumption)
-- **USER_DEFINED**: Primary user is concrete, not generic
-- **HYPOTHESIS_CLEAR**: Testable hypothesis with measurable outcome
-- **SCOPE_BOUNDED**: Clear must-haves and explicit out-of-scope
-- **QUESTIONS_ACKNOWLEDGED**: Uncertainties are listed, not hidden
-- **ACTIONABLE**: A skeptic could understand why this is worth building
+- **PROBLEMA_VALIDADO**: El problema es específico y con evidencia (o marcado como suposición)
+- **USUARIO_DEFINIDO**: El usuario principal es concreto, no genérico
+- **HIPÓTESIS_CLARA**: Hipótesis comprobable con resultado medible
+- **ALCANCE_DELIMITADO**: Elementos indispensables claros y exclusiones explícitas
+- **INCERTIDUMBRES_RECONOCIDAS**: Las dudas están listadas, no ocultas
+- **ACCIONABLE**: Cualquier escéptico podría entender por qué vale la pena construir esto
