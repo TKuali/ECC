@@ -196,7 +196,7 @@ Copy-Item -Recurse rules/typescript "$HOME/.claude/rules/"
 /plugin list ecc@ecc
 ```
 
-**完成！** 你现在可以使用 68 个代理、292 个技能和 94 个命令。
+**完成！** 你现在可以使用 68 个代理、293 个技能和 94 个命令。
 
 ### multi-* 命令需要额外配置
 
@@ -342,6 +342,7 @@ everything-claude-code/
 |   |-- springboot-security/        # Spring Boot 安全（新增）
 |   |-- springboot-tdd/             # Spring Boot TDD（新增）
 |   |-- springboot-verification/    # Spring Boot 验证（新增）
+|   |-- typescript-patterns/        # TypeScript/JavaScript 模式和类型安全（新增）
 |   |-- configure-ecc/              # 交互式安装向导（新增）
 |   |-- security-scan/              # 集成 AgentShield 安全审计（新增）
 |   |-- java-coding-standards/      # Java 编码规范（新增）
