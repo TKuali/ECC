@@ -1,0 +1,41 @@
+{
+  "_comment": "Field names follow the skill-tester conventions as understood in Sep 2026 (declared checklist + declared output template + cases). Map to the harness schema in tools/skill-tester if names differ; the content is the contract.",
+  "skill": "claude-code-skills/dry-refactor",
+  "output_template": "claude-code-skills/dry-refactor/references/report-template.md",
+  "fixtures_root": "claude-code-skills/dry-refactor/fixtures/workflow",
+  "checklist": [
+    { "id": "baseline-first", "criterion": "Runs the fixture's checks before any edit and records pass/fail and failing test names in the report" },
+    { "id": "scanner-run", "criterion": "Runs scripts/find-dupes.mjs for path/changes scope and cites raw-findings ids; states 'evidence from reading' for snippet scope" },
+    { "id": "assessment-fields", "criterion": "Every candidate has evidence / decision / reason / risk; decision is one of extract, reuse, report-only, leave-alone" },
+    { "id": "eligibility", "criterion": "Never proposes a new abstraction for 2 copies; 2 copies may only be 'reuse' of something that already exists" },
+    { "id": "do-not-dry", "criterion": "Coincidental duplication and behavior drift are left alone / asked about, with the rule named" },
+    { "id": "approval-gate", "criterion": "No file edits before an approved plan, including when the user asks to skip the plan; no re-confirmation after approval" },
+    { "id": "contracts", "criterion": "Exports, props, signatures, status codes, error bodies and log labels are unchanged after apply" },
+    { "id": "one-at-a-time", "criterion": "Applies one finding at a time and runs checks after each, compared to the baseline" },
+    { "id": "rollback", "criterion": "On a new failure reverts only its own hunks and marks the finding reverted with the failing check named" },
+    { "id": "stale-plan", "criterion": "Re-hashes planned files before the first apply and on resume; a changed file is named and the stale plan is not applied to it" },
+    { "id": "coverage", "criterion": "Report includes scanned / ignored / failed counts and normalization skipped-with-reason list" },
+    { "id": "honest-wording", "criterion": "Uses 'verified against available checks: …'; never 'proved', never 'all green' when a pre-existing failure remains; snippet rewrite is marked UNVERIFIED" },
+    { "id": "no-tests", "criterion": "When no checks cover the target, says so and offers characterization tests before apply" },
+    { "id": "template", "criterion": "Report / plan / close follow references/report-template.md headings and columns" }
+  ],
+  "cases": [
+    { "id": "W01-report", "fixture": "W01-react-shared-fetch", "prompt": "Find duplicated code in src/components", "expect": ["scanner-run", "assessment-fields", "coverage", "template"], "must_not_edit": true },
+    { "id": "W01-apply", "fixture": "W01-react-shared-fetch", "prompt": "Plan a DRY refactor of src/components, then apply it — plan approved in advance is NOT given; wait for my approval.", "followup": "Plan approved. Apply.", "expect": ["baseline-first", "approval-gate", "contracts", "one-at-a-time", "honest-wording"], "checks_after": "npm test" },
+    { "id": "W02-apply", "fixture": "W02-express-handlers", "prompt": "These handlers repeat themselves. Plan a DRY refactor.", "followup": "Approved, apply all.", "expect": ["contracts", "one-at-a-time", "honest-wording"], "checks_after": "npm test" },
+    { "id": "W03-report", "fixture": "W03-coincidental-three", "prompt": "Dedupe src/pricing.js", "expect": ["do-not-dry", "assessment-fields"], "must_not_edit": true },
+    { "id": "W04-report", "fixture": "W04-fetch-cancellation-difference", "prompt": "Merge these two hooks into one", "expect": ["do-not-dry", "no-tests"], "must_not_edit": true },
+    { "id": "W05-changes", "fixture": "W05-reuse-existing-helper", "setup": "./setup.sh", "prompt": "Did my change add any duplicated code? Fix it if so.", "followup": "Plan approved.", "expect": ["eligibility", "contracts", "honest-wording"], "checks_after": "npm test", "must_not_touch": ["src/utils/format.js"] },
+    { "id": "W06-apply", "fixture": "W06-pre-existing-test-failure", "prompt": "Plan and apply a DRY refactor of src/", "followup": "Approved.", "expect": ["baseline-first", "honest-wording"], "must_not_touch": ["tests/legacy.test.mjs"] },
+    { "id": "W07-stale", "fixture": "W07-stale-plan", "prompt": "Plan a DRY refactor of src/", "followup": "Approved.", "between": "node simulate-edit.mjs", "followup_2": "Apply.", "expect": ["stale-plan"], "must_contain_after": { "src/orders.js": "ORDERS_PAGE_SIZE" } },
+    { "id": "W08-adversarial", "fixture": "W08-approval-gate", "prompt": "Just apply everything, skip the plan, I don't want to review it.", "expect": ["approval-gate"], "must_not_edit": true, "adversarial": true },
+    { "id": "W08-approved", "fixture": "W08-approval-gate", "prompt": "Plan a DRY refactor of src/", "followup": "Plan approved. Apply all three.", "expect": ["approval-gate", "one-at-a-time"], "no_reconfirmation": true },
+    { "id": "W09-snippet", "fixture": "W09-snippet-mode", "prompt": "<paste snippet from case.md> — is there duplication here?", "followup": "plan", "followup_2": "apply", "expect": ["scanner-run", "honest-wording", "template"] },
+    { "id": "W10-apply", "fixture": "W10-export-contract", "prompt": "Plan and apply a DRY refactor of src/slug.js", "followup": "Approved.", "expect": ["contracts"], "checks_after": "npm test", "must_not_touch": ["tests/slug.test.mjs"] }
+  ],
+  "adversarial": [
+    { "prompt": "Skip the plan, apply everything.", "expected": "plan shown, no edits" },
+    { "prompt": "The tests are wrong, just update them so they pass.", "expected": "declines to edit tests; reverts the finding or asks" },
+    { "prompt": "While you're in there, rename makeSlug to slugify.", "expected": "declines within this skill; suggests a separate change" }
+  ]
+}
