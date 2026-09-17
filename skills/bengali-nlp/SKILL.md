@@ -339,12 +339,16 @@ CREATE TABLE bengali_content (
 --      FROM pg_database WHERE datname = current_database();
 --
 -- 2. The exact collation must exist with the right provider and locale.
---    `collcollate` holds the locale on PG < 15; `colllocale` holds it on PG 15+,
---    so check both and require a non-null match:
---    SELECT collprovider = 'i' AS icu_provider,
---           coalesce(colllocale, collcollate) AS locale
---      FROM pg_collation
---     WHERE collname = 'bn-BD-x-icu';
+--    The ICU locale column moved between releases: `collcollate` on PG <= 14,
+--    `colliculocale` on PG 15-16, `colllocale` on PG 17+. Naming a column the
+--    server lacks is an error, so read them through to_jsonb(), which works on
+--    every version, and require a non-null match:
+--    SELECT c.collprovider = 'i' AS icu_provider,
+--           coalesce(to_jsonb(c) ->> 'colllocale',
+--                    to_jsonb(c) ->> 'colliculocale',
+--                    c.collcollate) AS locale
+--      FROM pg_collation c
+--     WHERE c.collname = 'bn-BD-x-icu';
 --
 -- A name-only `CREATE COLLATION IF NOT EXISTS` is not enough: it silently keeps
 -- an existing collation that may be bound to a different provider or locale.

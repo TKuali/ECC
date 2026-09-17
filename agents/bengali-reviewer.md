@@ -117,8 +117,12 @@ first_char = graphemes[0]  # Returns 'ক্ষ' as a complete unit
   from Unicode code point order.
 - **Tokenization splitting on whitespace only** — Bengali has compound words and
   postposition attachments that require linguistic tokenization.
-- **Regex not covering Bengali range** — Character class patterns like `\w` or `[a-zA-Z]`
-  that exclude Bengali characters when Bengali input is expected.
+- **Regex not covering Bengali range** — Character classes like `[a-zA-Z]` that
+  exclude Bengali characters when Bengali input is expected, and `\w` used to match
+  Bengali words. `\w` is ASCII-only in JavaScript (with or without the `u` flag) and
+  in Python with `re.ASCII`. In Python `str` patterns it matches Bengali letters but
+  not vowel signs or hasanta (category M), so `re.findall(r'\w+', 'রহিম')` returns
+  `['রহ', 'ম']`. Recommend `[ঀ-৿]` or the `regex` module's `\p{Bengali}`.
 - **Bengali digits not handled** — Validation or parsing that rejects Bengali digits
   (০-৯) when users may input them.
 
