@@ -194,8 +194,13 @@ verdict `APPROVE` with status `pass` for all rows.
 
 - **Approve**: No CRITICAL or HIGH issues, including clean reviews with zero
   findings. This is a valid and expected outcome.
-- **Warning**: HIGH issues only (can merge with caution)
-- **Block**: CRITICAL issues found — must fix before merge
+- **Warning**: HIGH issues only, and every one of them is either fixed in this
+  change or covered by a written waiver. A waiver must name an owner, an expiry
+  date, and the reason the risk is acceptable until then. Record it in the
+  summary, for example:
+  `HIGH waived: mojibake on legacy import — owner @handle, expires 2026-12-01, blocked on upstream encoding fix.`
+- **Block**: CRITICAL issues found, or HIGH issues that are neither fixed nor
+  waived — must fix before merge
 
 Do not withhold approval to appear rigorous. If the code handles Bengali text
 correctly, approve it.

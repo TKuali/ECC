@@ -1,13 +1,18 @@
-**ভাষা:** [English](../../README.md) | [Português (Brasil)](../pt-BR/README.md) | [简体中文](../../README.zh-CN.md) | [繁體中文](../zh-TW/README.md) | [日本語](../ja-JP/README.md) | [한국어](../ko-KR/README.md) | [Türkçe](../tr/README.md) | [Русский](../ru/README.md) | [Tiếng Việt](../vi-VN/README.md) | [ไทย](../th/README.md) | [Deutsch](../de-DE/README.md) | [Español](../es/README.md) | [اردو](../ur/README.md) | বাংলা
+**ভাষা:** [English](../../README.md) | [Português (Brasil)](../pt-BR/README.md) | [简体中文](../../README.zh-CN.md) | [繁體中文](../zh-TW/README.md) | [日本語](../ja-JP/README.md) | [한국어](../ko-KR/README.md) | [Türkçe](../tr/README.md) | [Русский](../ru/README.md) | [Tiếng Việt](../vi-VN/README.md) | [ไทย](../th/README.md) | [Deutsch](../de-DE/README.md) | [Español](../es/README.md) | [Українська](../uk-UA/README.md) | [اردو](../ur/README.md) | বাংলা
 
-# Everything Claude Code
+# ECC
 
-[![Stars](https://img.shields.io/github/stars/affaan-m/everything-claude-code?style=flat)](https://github.com/affaan-m/everything-claude-code/stargazers)
-[![Forks](https://img.shields.io/github/forks/affaan-m/everything-claude-code?style=flat)](https://github.com/affaan-m/everything-claude-code/network/members)
-[![Contributors](https://img.shields.io/github/contributors/affaan-m/everything-claude-code?style=flat)](https://github.com/affaan-m/everything-claude-code/graphs/contributors)
+![ECC - এজেন্টিক কাজের জন্য হার্নেস-নেটিভ অপারেটর সিস্টেম](../../assets/hero.png)
+
+[![Stars](https://img.shields.io/endpoint?url=https%3A%2F%2Fapi.ecc.tools%2Fbadge%2Fstars&style=flat)](https://github.com/affaan-m/ECC/stargazers)
+[![Forks](https://img.shields.io/endpoint?url=https%3A%2F%2Fapi.ecc.tools%2Fbadge%2Fforks&style=flat)](https://github.com/affaan-m/ECC/network/members)
+[![Contributors](https://img.shields.io/github/contributors/affaan-m/ECC?style=flat)](https://github.com/affaan-m/ECC/graphs/contributors)
+[![npm ecc-universal](https://img.shields.io/npm/dw/ecc-universal?label=ecc-universal%20weekly%20downloads&logo=npm)](https://www.npmjs.com/package/ecc-universal)
+[![npm ecc-agentshield](https://img.shields.io/npm/dw/ecc-agentshield?label=ecc-agentshield%20weekly%20downloads&logo=npm)](https://www.npmjs.com/package/ecc-agentshield)
+[![GitHub App Install](https://img.shields.io/endpoint?url=https%3A%2F%2Fapi.ecc.tools%2Fbadge%2Finstalls&logo=github)](https://github.com/marketplace/ecc-tools)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 
-> **140K+ স্টার** | **21K+ ফর্ক** | **170+ অবদানকারী** | **12+ ভাষা ইকোসিস্টেম** | **Anthropic হ্যাকাথন বিজয়ী**
+> **182K+ স্টার** | **28K+ ফর্ক** | **170+ অবদানকারী** | **12+ ভাষা ইকোসিস্টেম** | **Anthropic হ্যাকাথন বিজয়ী**
 
 ---
 
@@ -15,7 +20,7 @@
 
 **Language / ভাষা / 语言 / 語言 / 언어 / Dil / Язык / Ngôn ngữ**
 
-[**English**](../../README.md) | [Português (Brasil)](../pt-BR/README.md) | [简体中文](../../README.zh-CN.md) | [繁體中文](../zh-TW/README.md) | [日本語](../ja-JP/README.md) | [한국어](../ko-KR/README.md) | [Türkçe](../tr/README.md) | [Русский](../ru/README.md) | [Tiếng Việt](../vi-VN/README.md) | [ไทย](../th/README.md) | [Deutsch](../de-DE/README.md) | [Español](../es/README.md) | [اردو](../ur/README.md) | [বাংলা](README.md)
+[**English**](../../README.md) | [Português (Brasil)](../pt-BR/README.md) | [简体中文](../../README.zh-CN.md) | [繁體中文](../zh-TW/README.md) | [日本語](../ja-JP/README.md) | [한국어](../ko-KR/README.md) | [Türkçe](../tr/README.md) | [Русский](../ru/README.md) | [Tiếng Việt](../vi-VN/README.md) | [ไทย](../th/README.md) | [Deutsch](../de-DE/README.md) | [Español](../es/README.md) | [Українська](../uk-UA/README.md) | [اردو](../ur/README.md) | [বাংলা](README.md)
 
 </div>
 
@@ -65,6 +70,14 @@
 
 ## নতুন কী আছে
 
+### v2.2.1 — গাইডেড সেটআপ ও রিলিজ গেট (২০২৬ আগস্ট)
+
+বর্তমান রিলিজ: **2.2.1** (২০২৬-০৮-৩১)। 2.2 ধারার প্রধান বৈশিষ্ট্য:
+
+- Claude Code, Codex ও Kimi Code জুড়ে ম্যানিফেস্ট-চালিত গাইডেড সেটআপ, সেই সঙ্গে ইনস্টল-স্টেট মালিকানা, `doctor`, `repair` ও `uninstall`।
+- নেটিভ Antigravity ইনস্টল, পাতলা Pi অ্যাডাপ্টার, এবং Linux, macOS ও Windows-এ পরীক্ষিত প্যাকড-আর্টিফ্যাক্ট রিলিজ গেট।
+- Plan Canvas ব্রাউজার রিভিউ, ইউনিফায়েড মেমরি ভল্ট (`ecc memory`) ও Itô কম্পিউট স্কিল পরিবার।
+
 ### v2.1 — Plan Canvas, Kimi হার্নেস (২০২৬ জুলাই)
 
 - **Plan Canvas** — আপনার এজেন্ট একটি প্ল্যান লেখে, তারপর একটি ব্রাউজার ক্যানভাসে খোলে। ক্লিক করুন, টীকা যোগ করুন, সাইড রেইল থেকে চ্যাট করুন।
@@ -113,7 +126,7 @@ cd ECC
 /plugin list ecc@ecc
 ```
 
-**হয়ে গেছে!** এখন আপনি 67+ এজেন্ট, 281+ স্কিল এবং 94+ কমান্ড ব্যবহার করতে পারবেন।
+**হয়ে গেছে!** এখন আপনি 69 এজেন্ট, 293 স্কিল এবং 94 কমান্ড ব্যবহার করতে পারবেন।
 
 ---
 
@@ -140,17 +153,17 @@ cd ECC
 
 ```text
 ECC/
-|-- agents/           # বিশেষায়িত সাবএজেন্ট (67+)
+|-- agents/           # বিশেষায়িত সাবএজেন্ট (69)
 |   |-- planner.md           # ফিচার বাস্তবায়ন পরিকল্পনা
 |   |-- code-reviewer.md     # মান ও নিরাপত্তা পর্যালোচনা
 |   |-- bengali-reviewer.md  # বাংলা টেক্সট হ্যান্ডলিং রিভিউ
 |
-|-- skills/           # ওয়ার্কফ্লো ও ডোমেইন জ্ঞান (281+)
+|-- skills/           # ওয়ার্কফ্লো ও ডোমেইন জ্ঞান (293)
 |   |-- bengali-nlp/         # বাংলা টেক্সট প্রসেসিং প্যাটার্ন
 |   |-- tdd-workflow/        # TDD পদ্ধতি
 |   |-- security-review/     # নিরাপত্তা চেকলিস্ট
 |
-|-- commands/         # স্ল্যাশ কমান্ড (94+)
+|-- commands/         # স্ল্যাশ কমান্ড (94)
 |-- rules/            # কোডিং নির্দেশনা
 |   |-- common/       # ভাষা-নিরপেক্ষ নীতি
 |   |-- typescript/   # TypeScript নির্দিষ্ট
