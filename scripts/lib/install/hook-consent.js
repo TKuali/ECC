@@ -39,6 +39,7 @@ const HOOK_CAPABILITY_GROUPS = Object.freeze([
 const HOOK_CONSENT_DECISIONS = Object.freeze(['enabled', 'declined']);
 const HOOK_RUNTIME_MODULE_ID = 'hooks-runtime';
 const OPENCODE_DISABLE_ECC_HOOKS_TRANSFORM = 'opencode-disable-ecc-hooks';
+const OPENCODE_DISABLE_PLUGIN_TRANSFORM = 'opencode-disable-plugin-entrypoint';
 
 function normalizeOperationPath(value) {
   return String(value || '').replace(/\\/g, '/').toLowerCase();
@@ -68,19 +69,37 @@ function disableOpenCodeHookPluginRegistration(content, sourceRelativePath) {
   }, null, 2)}\n`;
 }
 
+function isOpenCodePluginEntrypoint(operation = {}) {
+  return /^\.opencode\/(?:dist\/)?plugins\/[^/]+\.(?:[cm]?js|ts)$/.test(
+    normalizeOperationPath(operation.sourceRelativePath)
+  );
+}
+
+function getDisabledOpenCodePluginContent() {
+  // OpenCode discovers plugins independently of opencode.json registration.
+  // Do not import the original module: even module initialization has effects.
+  return 'export default async () => ({});\n';
+}
+
 function isOpenCodeHookActivationOperation(operation = {}) {
-  return normalizeOperationPath(operation.sourceRelativePath) === '.opencode/opencode.json';
+  return normalizeOperationPath(operation.sourceRelativePath) === '.opencode/opencode.json'
+    || isOpenCodePluginEntrypoint(operation);
 }
 
 function isHookRuntimeOperation(operation = {}) {
-  if (operation.moduleId === HOOK_RUNTIME_MODULE_ID) {
+  if (
+    operation.kind === 'update-claude-settings'
+    || operation.moduleId === HOOK_RUNTIME_MODULE_ID
+  ) {
     return true;
   }
 
   if (isOpenCodeHookActivationOperation(operation)) {
     return !(
       operation.kind === 'copy-file'
-      && operation.contentTransform === OPENCODE_DISABLE_ECC_HOOKS_TRANSFORM
+      && operation.contentTransform === (isOpenCodePluginEntrypoint(operation)
+        ? OPENCODE_DISABLE_PLUGIN_TRANSFORM
+        : OPENCODE_DISABLE_ECC_HOOKS_TRANSFORM)
     );
   }
 
@@ -135,7 +154,9 @@ function withoutOpenCodeHookActivation(operation) {
   }
   return {
     ...operation,
-    contentTransform: OPENCODE_DISABLE_ECC_HOOKS_TRANSFORM,
+    contentTransform: isOpenCodePluginEntrypoint(operation)
+      ? OPENCODE_DISABLE_PLUGIN_TRANSFORM
+      : OPENCODE_DISABLE_ECC_HOOKS_TRANSFORM,
   };
 }
 
@@ -170,6 +191,11 @@ function disableUnselectedOpenCodeHooks(plan) {
   };
 }
 
+function shouldDisableOpenCodeHooks(plan = {}) {
+  return plan.target === 'opencode'
+    && (plan.hookConsent === 'declined' || !planSelectsHookRuntime(plan));
+}
+
 function setStatePreviewHookConsent(statePreview, hookConsent) {
   if (!statePreview || !statePreview.request) {
     return statePreview;
@@ -200,7 +226,11 @@ function getRecordedHookConsent(state = {}) {
     return 'enabled';
   }
 
-  if (planMaterializesHookRuntime(state)) {
+  // Older OpenCode installs copied activation files without asking for consent.
+  // Their presence cannot establish that the user opted in to automatic hooks.
+  if ((Array.isArray(state.operations) ? state.operations : []).some(operation => (
+    !isOpenCodeHookActivationOperation(operation) && isHookRuntimeOperation(operation)
+  ))) {
     return 'enabled';
   }
 
@@ -279,10 +309,14 @@ module.exports = {
   assertHookConsentReady,
   disableUnselectedOpenCodeHooks,
   disableOpenCodeHookPluginRegistration,
+  getDisabledOpenCodePluginContent,
   formatHookCapabilityDisclosure,
   getRecordedHookConsent,
   isHookRuntimeOperation,
+  isOpenCodeHookActivationOperation,
+  isOpenCodePluginEntrypoint,
   planMaterializesHookRuntime,
   resolveHookConsentFlags,
+  shouldDisableOpenCodeHooks,
   withHookConsent,
 };

@@ -9,6 +9,7 @@ const {
   assertHookConsentReady,
   disableOpenCodeHookPluginRegistration,
   formatHookCapabilityDisclosure,
+  getRecordedHookConsent,
   isHookRuntimeOperation,
   planMaterializesHookRuntime,
   resolveHookConsentFlags,
@@ -28,10 +29,23 @@ function test(name, fn) {
 }
 
 function buildHookPlan() {
+  const managedHooks = {
+    SessionStart: [{
+      id: 'session:start',
+      matcher: '.*',
+      hooks: [{ type: 'command', command: 'node /target/scripts/hooks/session-start.js' }],
+    }],
+  };
   return {
     operations: [
       { kind: 'copy-file', moduleId: 'rules-core', sourceRelativePath: 'rules/common.md', destinationPath: '/target/rules/common.md' },
-      { kind: 'copy-file', moduleId: 'hooks-runtime', sourceRelativePath: 'hooks/hooks.json', destinationPath: '/target/hooks/hooks.json' },
+      {
+        kind: 'update-claude-settings',
+        moduleId: 'hooks-runtime',
+        sourceRelativePath: 'hooks/hooks.json',
+        destinationPath: '/target/settings.json',
+        managedHooks,
+      },
       { kind: 'copy-file', moduleId: 'hooks-runtime', sourceRelativePath: 'scripts/hooks/session-start.js', destinationPath: '/target/scripts/hooks/session-start.js' },
     ],
     selectedModuleIds: ['rules-core', 'hooks-runtime'],
@@ -47,7 +61,13 @@ function buildHookPlan() {
       },
       operations: [
         { kind: 'copy-file', moduleId: 'rules-core', sourceRelativePath: 'rules/common.md', destinationPath: '/target/rules/common.md' },
-        { kind: 'copy-file', moduleId: 'hooks-runtime', sourceRelativePath: 'hooks/hooks.json', destinationPath: '/target/hooks/hooks.json' },
+        {
+          kind: 'update-claude-settings',
+          moduleId: 'hooks-runtime',
+          sourceRelativePath: 'hooks/hooks.json',
+          destinationPath: '/target/settings.json',
+          managedHooks,
+        },
       ],
       resolution: { selectedModules: ['rules-core', 'hooks-runtime'], skippedModules: [] },
     },
@@ -70,6 +90,7 @@ function runTests() {
 
   if (test('matches hook runtime operations by module id and source path', () => {
     assert.strictEqual(isHookRuntimeOperation({ moduleId: 'hooks-runtime' }), true);
+    assert.strictEqual(isHookRuntimeOperation({ kind: 'update-claude-settings' }), true);
     assert.strictEqual(isHookRuntimeOperation({ sourceRelativePath: 'hooks/hooks.json' }), true);
     assert.strictEqual(isHookRuntimeOperation({ sourceRelativePath: '.cursor/hooks.json' }), true);
     assert.strictEqual(isHookRuntimeOperation({ destinationPath: '/root/.claude/hooks/hooks.json' }), true);
@@ -79,7 +100,7 @@ function runTests() {
         sourceRelativePath: '.opencode/plugins/ecc-hooks.ts',
         destinationPath: '/root/.config/opencode/plugins/ecc-hooks.ts',
       }),
-      false
+      true
     );
     assert.strictEqual(isHookRuntimeOperation({
       kind: 'copy-file',
@@ -103,6 +124,41 @@ function runTests() {
       isHookRuntimeOperation({ sourceRelativePath: 'skills/webhooks-guide.md' }),
       false
     );
+  })) passed++; else failed++;
+
+  if (test('OpenCode auto-discovered entrypoints require selected runtime and consent', () => {
+    const entrypoints = ['.opencode/plugins/ecc-hooks.ts', '.opencode/plugins/index.ts'];
+    const operations = entrypoints.map(sourceRelativePath => ({
+      kind: 'copy-file', moduleId: 'platform-configs', sourceRelativePath,
+    }));
+    const base = {
+      target: 'opencode', operations, selectedModuleIds: ['platform-configs'],
+      statePreview: { operations, request: {}, resolution: { selectedModules: ['platform-configs'] } },
+    };
+    for (const decision of [null, 'enabled', 'declined']) {
+      const plan = withHookConsent(base, decision);
+      for (const operation of [...plan.operations, ...plan.statePreview.operations]) {
+        assert.strictEqual(operation.contentTransform, 'opencode-disable-plugin-entrypoint');
+        assert.strictEqual(isHookRuntimeOperation(operation), false);
+      }
+      assert.doesNotThrow(() => assertHookConsentReady(plan));
+    }
+    const selected = { ...base, selectedModuleIds: ['platform-configs', 'hooks-runtime'] };
+    const pending = withHookConsent(selected, null);
+    assert.throws(() => assertHookConsentReady(pending), /automatic hook runtime/);
+    const enabled = withHookConsent(selected, 'enabled');
+    assert.ok(enabled.operations.every(operation => operation.contentTransform === undefined));
+    assert.doesNotThrow(() => assertHookConsentReady(enabled));
+    const declined = withHookConsent(selected, 'declined');
+    assert.strictEqual(declined.operations.length, 2);
+    assert.ok(declined.operations.every(operation => (
+      operation.contentTransform === 'opencode-disable-plugin-entrypoint'
+    )));
+    assert.ok(operations.every(operation => operation.contentTransform === undefined), 'Input plan stays unchanged');
+    assert.strictEqual(isHookRuntimeOperation({
+      kind: 'copy-file', moduleId: 'platform-configs',
+      sourceRelativePath: '.opencode/plugins/helpers/readme.md',
+    }), false);
   })) passed++; else failed++;
 
   if (test('detects hook materialization from plan operations only', () => {
@@ -129,6 +185,21 @@ function runTests() {
     )), {
       instructions: ['AGENTS.md'],
     });
+  })) passed++; else failed++;
+
+  if (test('historical OpenCode activation bytes alone do not imply hook consent', () => {
+    const state = {
+      request: {}, resolution: { selectedModules: ['platform-configs'] },
+      operations: [
+        { kind: 'copy-file', moduleId: 'platform-configs', sourceRelativePath: '.opencode/opencode.json' },
+        { kind: 'copy-file', moduleId: 'platform-configs', sourceRelativePath: '.opencode/plugins/ecc-hooks.ts' },
+      ],
+    };
+    assert.strictEqual(getRecordedHookConsent(state), null);
+    assert.strictEqual(getRecordedHookConsent({ ...state, request: { hookConsent: 'declined' } }), 'declined');
+    assert.strictEqual(getRecordedHookConsent({ ...state, request: { hookConsent: 'enabled' } }), 'enabled');
+    assert.strictEqual(getRecordedHookConsent({ ...state, resolution: { selectedModules: ['hooks-runtime'] } }), 'enabled');
+    assert.strictEqual(getRecordedHookConsent({ operations: [{ kind: 'update-claude-settings' }] }), 'enabled');
   })) passed++; else failed++;
 
   if (test('formats one numbered disclosure line per capability group', () => {
