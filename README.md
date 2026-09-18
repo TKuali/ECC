@@ -138,13 +138,13 @@ Instead of rebuilding that process in every prompt, you install it once and make
 
 ECC is MIT-licensed open source. It works best with Claude Code today, has a supported Codex sync path, and provides capability-limited adapters for Cursor, OpenCode, Gemini, Zed, GitHub Copilot, Antigravity, Qwen, and other harnesses. See the [support status matrix](#platform-support) before assuming feature parity.
 
-Access to 68 agents, 292 skills, and 94 legacy command shims, plus hooks, rules, memory, continuous learning, and AgentShield security scanning. The agents are specialized for planning, review, build repair, security, architecture, and domain work.
+Access to 68 agents, 292 skills, and 95 legacy command shims, plus hooks, rules, memory, continuous learning, and AgentShield security scanning. The agents are specialized for planning, review, build repair, security, architecture, and domain work.
 
 | Included         |       Count | What it gives you                                                                    |
 | ---------------- | ----------: | ------------------------------------------------------------------------------------ |
 | Agents           |   68 agents | Planning, review, build repair, security, architecture, and domain work              |
 | Skills           |  292 skills | TDD, research, security, docs, frontend, data, ML, operations, and more              |
-| Commands         | 94 commands | Convenient entry points while ECC moves to a skills-first surface                    |
+| Commands         | 95 commands | Convenient entry points while ECC moves to a skills-first surface                    |
 | Hooks and memory |     Runtime | Enforcement, session summaries, continuous learning, instincts, and context controls |
 | Rules            |   Selective | Always-loaded standards you choose by language or project                            |
 | AgentShield      |    Included | Scanning for prompts, hooks, MCP config, permissions, secrets, and agent files       |
@@ -575,6 +575,12 @@ That runtime provides the external dependencies these commands expect, including
 - `~/.claude/.ccg/prompts/*`
 
 Without `ccg-workflow`, these `multi-*` commands will not run correctly.
+</details>
+
+<details>
+<summary><strong>Astra review requires the Codex CLI</strong></summary>
+
+`/astra-review` sends Claude-written code to GPT-6-Astra for an independent cross-provider review. It runs the locally installed [Codex CLI](https://github.com/openai/codex) with your ChatGPT login (`codex login`); no OpenAI API key is needed, and API keys in your environment are not forwarded. Invoking the command is your consent to send that diff to OpenAI. Setup, scopes, push gating, and troubleshooting are in the [Astra Review Guide](docs/ASTRA-REVIEW-GUIDE.md).
 </details>
 
 <details>
@@ -1149,7 +1155,7 @@ This repo is the raw code. The guides explain everything.
 | Parallelization | Git worktrees, cascade method, when to scale instances |
 | Subagent Orchestration | The context problem, iterative retrieval pattern |
 
-[Commands Quick Reference](./COMMANDS-QUICK-REF.md) | [Manual Adaptation Guide](docs/MANUAL-ADAPTATION-GUIDE.md) | [Troubleshooting FAQ](./TROUBLESHOOTING.md) | [Roadmap](docs/ROADMAP.md)
+[Commands Quick Reference](./COMMANDS-QUICK-REF.md) | [Manual Adaptation Guide](docs/MANUAL-ADAPTATION-GUIDE.md) | [Astra Review Guide](docs/ASTRA-REVIEW-GUIDE.md) | [Troubleshooting FAQ](./TROUBLESHOOTING.md) | [Roadmap](docs/ROADMAP.md)
 
 ## Why Choose ECC?
 
