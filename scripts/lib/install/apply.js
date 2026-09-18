@@ -9,7 +9,16 @@ const {
   withCommitAttributionDisabled,
 } = require('../claude-commit-attribution');
 const { readInstallState, writeInstallState } = require('../install-state');
-const { assertHookConsentReady, planMaterializesHookRuntime } = require('./hook-consent');
+const {
+  assertHookConsentReady,
+  disableOpenCodeHookPluginRegistration,
+  getDisabledOpenCodePluginContent,
+  getRecordedHookConsent,
+  isOpenCodeHookActivationOperation,
+  isOpenCodePluginEntrypoint,
+  planMaterializesHookRuntime,
+  shouldDisableOpenCodeHooks,
+} = require('./hook-consent');
 const {
   getClaudeSettingsPath,
   mergeManagedHooks,
@@ -47,6 +56,12 @@ function transformInstallContent(operation, content) {
   }
   if (operation.contentTransform === 'antigravity-agent-frontmatter') {
     return adaptAntigravityAgent(content, operation.sourceRelativePath);
+  }
+  if (operation.contentTransform === 'opencode-disable-ecc-hooks') {
+    return disableOpenCodeHookPluginRegistration(content, operation.sourceRelativePath);
+  }
+  if (operation.contentTransform === 'opencode-disable-plugin-entrypoint') {
+    return getDisabledOpenCodePluginContent();
   }
   throw new Error(`Unknown install content transform: ${operation.contentTransform}`);
 }
@@ -288,6 +303,117 @@ function comparablePath(filePath) {
   return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
 }
 
+function openCodeActivationKind(plan, operation) {
+  const relative = operation.destinationPath
+    ? path.relative(plan.targetRoot, operation.destinationPath).split(path.sep).join('/').toLowerCase()
+    : '';
+  if (/^plugins\/(?:[^/]+\.(?:[cm]?js|ts)|[^/]+\/(?:index\.(?:[cm]?js|ts)|package\.json))$/.test(relative)) {
+    return 'plugin';
+  }
+  if (relative === 'opencode.json') return 'config';
+  if (isOpenCodePluginEntrypoint(operation)) return 'plugin';
+  return isOpenCodeHookActivationOperation(operation) ? 'config' : null;
+}
+
+function openCodeActivationCandidates(plan, previousOperations) {
+  const candidates = new Map();
+  for (const operation of [...previousOperations, ...plan.operations]) {
+    if (openCodeActivationKind(plan, operation) && operation.destinationPath) {
+      candidates.set(comparablePath(operation.destinationPath), operation);
+    }
+  }
+  // Old installs can leave aliases that are absent from the new source tree.
+  // Inspect only ECC's known entrypoint names, never unrelated user plugins.
+  for (const name of ['ecc-hooks', 'index']) {
+    for (const extension of ['ts', 'js', 'mjs', 'cjs']) {
+      const destinationPath = path.join(plan.targetRoot, 'plugins', `${name}.${extension}`);
+      const key = comparablePath(destinationPath);
+      if (!candidates.has(key)) {
+        candidates.set(key, {
+          sourceRelativePath: `.opencode/plugins/${name}.${extension}`,
+          destinationPath,
+        });
+      }
+    }
+  }
+  return candidates;
+}
+
+function activationIsInactive(kind, operation, content) {
+  if (kind === 'plugin') {
+    return content.toString('utf8') === getDisabledOpenCodePluginContent();
+  }
+  const config = JSON.parse(content.toString('utf8'));
+  // Validate the shape through the same transformer used by installation.
+  disableOpenCodeHookPluginRegistration(content.toString('utf8'), operation.sourceRelativePath);
+  return !Array.isArray(config.plugin) || !config.plugin.includes('./plugins');
+}
+
+function assertOpenCodeHookDeactivationReady(plan, options = {}) {
+  if (!shouldDisableOpenCodeHooks(plan)) {
+    return new Map();
+  }
+  assertSafeInstallOperation(plan, { destinationPath: plan.installStatePath });
+  const previousState = readPreviousInstallState(plan);
+  if (previousState && (
+    previousState.target.id !== plan.adapter.id
+    || comparablePath(previousState.target.root) !== comparablePath(plan.targetRoot)
+    || comparablePath(previousState.target.installStatePath) !== comparablePath(plan.installStatePath)
+  )) {
+    throw new Error('Refusing OpenCode hook deactivation: install-state target mismatch.');
+  }
+  const previous = new Map(((previousState && previousState.operations) || [])
+    .filter(operation => operation.ownership === 'managed' && operation.destinationPath)
+    .map(operation => [comparablePath(operation.destinationPath), operation]));
+  const desired = new Map(plan.operations.filter(operation => openCodeActivationKind(plan, operation))
+    .map(operation => [comparablePath(operation.destinationPath), operation]));
+  const snapshot = new Map();
+  for (const [key, operation] of openCodeActivationCandidates(plan, [...previous.values()])) {
+    const kind = openCodeActivationKind(plan, operation);
+    const expectedTransform = kind === 'plugin'
+      ? 'opencode-disable-plugin-entrypoint' : 'opencode-disable-ecc-hooks';
+    const replacement = desired.get(key);
+    // Validate planned activation even when its destination does not yet exist.
+    // Recorded operations may name an unrelated source or use render-template.
+    if (replacement && (replacement.kind !== 'copy-file'
+      || replacement.contentTransform !== expectedTransform)) {
+      throw new Error(`Refusing OpenCode hook deactivation: unsupported activation operation at ${operation.destinationPath}`);
+    }
+    const content = readInstalledFileNoFollow(plan, operation);
+    if (content === null && fs.existsSync(operation.destinationPath)) {
+      throw new Error(`Refusing OpenCode hook deactivation: non-file activation at ${operation.destinationPath}`);
+    }
+    const digest = content === null ? null : crypto.createHash('sha256').update(content).digest('hex');
+    snapshot.set(key, digest);
+    if (content === null) continue;
+    const inactive = activationIsInactive(kind, operation, content);
+    if (options.requireInactive) {
+      if (!inactive) {
+        throw new Error(`OpenCode hook activation remains active at ${operation.destinationPath}`);
+      }
+      continue;
+    }
+    if (kind === 'plugin' && inactive) continue;
+    const recorded = previous.get(key);
+    if (!replacement || replacement.kind !== 'copy-file'
+      || replacement.contentTransform !== expectedTransform
+      || !recorded || recorded.contentSha256 !== digest) {
+      throw new Error(`Refusing OpenCode hook deactivation: user-owned, modified, unverifiable or stale activation at ${operation.destinationPath}`);
+    }
+  }
+  return snapshot;
+}
+
+function assertOpenCodeActivationUnchanged(plan, operation, snapshot) {
+  const key = comparablePath(operation.destinationPath);
+  if (!snapshot.has(key)) return;
+  const content = readInstalledFileNoFollow(plan, operation);
+  const digest = content === null ? null : crypto.createHash('sha256').update(content).digest('hex');
+  if (digest !== snapshot.get(key)) {
+    throw new Error(`Refusing OpenCode hook deactivation: activation changed after preflight at ${operation.destinationPath}`);
+  }
+}
+
 function findPreviousManagedHooks(previousState, plan, operation) {
   if (
     !previousState
@@ -343,6 +469,27 @@ function preflightClaudeSettingsOperations(plan) {
 }
 
 function prepareHookConsentMigration(plan, migration) {
+  if (shouldDisableOpenCodeHooks(plan) && migration.requiresBridgeState) {
+    const previousState = readPreviousInstallState(plan);
+    if (previousState) {
+      const previousConsent = getRecordedHookConsent(previousState);
+      return {
+        ...migration,
+        // A checkpoint is not a completed consent transition. On failure,
+        // retain the previous decision until every activation is inactive.
+        bridgeState: {
+          ...migration.bridgeState,
+          request: { ...migration.bridgeState.request, hookConsent: previousConsent },
+          resolution: {
+            ...migration.bridgeState.resolution,
+            selectedModules: previousConsent === 'enabled'
+              ? [...new Set([...migration.bridgeState.resolution.selectedModules, 'hooks-runtime'])]
+              : migration.bridgeState.resolution.selectedModules,
+          },
+        },
+      };
+    }
+  }
   if (plan.hookConsent !== 'declined') {
     return migration;
   }
@@ -396,6 +543,7 @@ function prepareHookConsentMigration(plan, migration) {
 }
 
 function previewInstallPlan(plan) {
+  assertOpenCodeHookDeactivationReady(plan);
   const migration = prepareHookConsentMigration(
     plan,
     prepareUserOwnedFileGuard(plan, prepareClaudeSkillMigration(plan))
@@ -449,6 +597,7 @@ function applyInstallPlanLocked(plan, dependencies = {}, settingsLockHeld = fals
   if (typeof beforeInstallStateRead === 'function') {
     beforeInstallStateRead({ plan });
   }
+  const activationSnapshot = assertOpenCodeHookDeactivationReady(plan);
   const migration = prepareHookConsentMigration(
     plan,
     prepareUserOwnedFileGuard(plan, prepareClaudeSkillMigration(plan))
@@ -492,6 +641,7 @@ function applyInstallPlanLocked(plan, dependencies = {}, settingsLockHeld = fals
         beforeOperationWrite({ plan: appliedPlan, operation });
       }
       assertNoNewUserOwnedFile(migration, operation);
+      assertOpenCodeActivationUnchanged(appliedPlan, operation, activationSnapshot);
 
       if (
         operation.kind === 'update-claude-settings'
@@ -598,6 +748,7 @@ function applyInstallPlanLocked(plan, dependencies = {}, settingsLockHeld = fals
         );
       }
 
+      assertOpenCodeHookDeactivationReady(appliedPlan, { requireInactive: true });
       finalState = stateWithContentDigests(migration.finalState, appliedPlan);
       if (typeof beforeInstallStateWrite === 'function') {
         beforeInstallStateWrite({ plan: appliedPlan, state: finalState });
@@ -684,6 +835,9 @@ function applyInstallPlanLocked(plan, dependencies = {}, settingsLockHeld = fals
 
 module.exports = {
   applyInstallPlan,
+  assertOpenCodeActivationUnchanged,
+  assertOpenCodeHookDeactivationReady,
   assertSafeInstallOperation,
+  prepareHookConsentMigration,
   previewInstallPlan,
 };
