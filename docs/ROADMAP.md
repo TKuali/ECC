@@ -39,7 +39,7 @@ Three things follow from that.
 - The 2.2.1 source baseline includes guided manifest-driven setup, install-state
   ownership, repair and uninstall. Its release workflow requires exact-head
   validation; this roadmap is not release-signature evidence.
-- Catalog in this source snapshot: 68 agents, 289 skills, 94 legacy commands. The
+- Catalog in this source snapshot: 68 agents, 291 skills, 94 legacy commands. The
   count is a liability as much as an asset. Overlapping and unreferenced
   skills exist.
 - The README now has one primary install section, with per-harness details
@@ -72,6 +72,13 @@ Keep execution disabled until those boundaries are proven. Then wire the
 capsule recording to the hooks that already log session activity. Then the
 next two plan slices: offline retrospective grouping over capsules (no new
 rollouts) and forced-compaction tests that prove pinned constraints survive.
+
+Offline code preparation is available as `capsule group` over explicitly
+selected, verified local snapshots from one task family. It only groups recorded
+counts and digests; it does not run candidates, score outcomes or promote changes.
+This utility does not fulfill the executor, hook-recording or stable-taskset
+prerequisites for the operational milestone below. See the
+[retrospective contract](architecture/eval-harness-frameworks.md#offline-retrospective-preparation).
 
 ### Track C: operator skills
 

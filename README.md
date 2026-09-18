@@ -109,10 +109,12 @@ Use the [guided setup](#install-ecc) or [native plugin commands](#claude-code-de
 <p align="center" aria-label="Partners and sponsors">
   <a href="https://www.coderabbit.ai" title="CodeRabbit"><img src="assets/images/sponsors/coderabbit.png" height="54" alt="CodeRabbit" /></a>&nbsp;&nbsp;&nbsp;
   <a href="https://www.greptile.com/go/ecc" title="Greptile"><img src="assets/images/sponsors/greptile.png" height="54" alt="Greptile" /></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://www.atlascloud.ai/?utm_source=github&amp;utm_medium=link&amp;utm_campaign=ECC" title="Atlas Cloud"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/images/sponsors/atlascloud-dark.svg" /><img src="assets/images/sponsors/atlascloud.svg" width="154" alt="Atlas Cloud" /></picture></a>&nbsp;&nbsp;&nbsp;
   <a href="https://platform.kimi.ai?aff=ecc" title="Moonshot AI - Kimi"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/images/sponsors/moonshot-dark.png" /><img src="assets/images/sponsors/moonshot.png" width="132" alt="Moonshot AI - Kimi" /></picture></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://compute.itomarkets.com" title="Itô Markets"><picture><source media="(prefers-color-scheme: light)" srcset="assets/images/sponsors/ito-transparent-light.png" /><img src="assets/images/sponsors/ito-transparent.png" width="96" alt="Itô Markets" /></picture></a>
+  <a href="https://compute.itomarkets.com" title="Itô Markets"><picture><source media="(prefers-color-scheme: light)" srcset="assets/images/sponsors/ito-transparent-light.png" /><img src="assets/images/sponsors/ito-transparent.png" width="96" alt="Itô Markets" /></picture></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://serpapi.com/github-ecc" title="SerpApi: Web Search API"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/images/sponsors/serpapi-logo-dark-mode.svg" /><img src="assets/images/sponsors/serpapi-logo-light-mode.svg" width="200" alt="SerpApi: Web Search API" /></picture></a>
 </p>
+
+<sub><strong>Past sponsors:</strong> <a href="https://www.atlascloud.ai/?utm_source=github&amp;utm_medium=link&amp;utm_campaign=ECC">Atlas Cloud</a></sub>
 
 <sub><strong>Community sponsors:</strong> <a href="https://github.com/mikejmorgan-ai">Mike Morgan</a> · <a href="https://github.com/jasonwu513">@jasonwu513</a> · <a href="https://github.com/1anter">@1anter</a> · <a href="https://github.com/massimotodaro">@massimotodaro</a> · <a href="https://github.com/meadmccabe">@meadmccabe</a></sub>
 
@@ -136,12 +138,12 @@ Instead of rebuilding that process in every prompt, you install it once and make
 
 ECC is MIT-licensed open source. It works best with Claude Code today, has a supported Codex sync path, and provides capability-limited adapters for Cursor, OpenCode, Gemini, Zed, GitHub Copilot, Antigravity, Qwen, and other harnesses. See the [support status matrix](#platform-support) before assuming feature parity.
 
-Access to 68 agents, 289 skills, and 94 legacy command shims, plus hooks, rules, memory, continuous learning, and AgentShield security scanning. The agents are specialized for planning, review, build repair, security, architecture, and domain work.
+Access to 68 agents, 292 skills, and 94 legacy command shims, plus hooks, rules, memory, continuous learning, and AgentShield security scanning. The agents are specialized for planning, review, build repair, security, architecture, and domain work.
 
 | Included         |       Count | What it gives you                                                                    |
 | ---------------- | ----------: | ------------------------------------------------------------------------------------ |
 | Agents           |   68 agents | Planning, review, build repair, security, architecture, and domain work              |
-| Skills           |  289 skills | TDD, research, security, docs, frontend, data, ML, operations, and more              |
+| Skills           |  292 skills | TDD, research, security, docs, frontend, data, ML, operations, and more              |
 | Commands         | 94 commands | Convenient entry points while ECC moves to a skills-first surface                    |
 | Hooks and memory |     Runtime | Enforcement, session summaries, continuous learning, instincts, and context controls |
 | Rules            |   Selective | Always-loaded standards you choose by language or project                            |
@@ -369,7 +371,7 @@ cd ECC
 | Harness | Install or setup | Notes |
 |---|---|---|
 | Cursor | `./install.sh --profile minimal --target cursor` | Project-local `.cursor/` adapter |
-| OpenCode | `npm install && npm run build:opencode && ./install.sh --profile full --target opencode` | Builds the plugin payload before the full install |
+| OpenCode | `npm install && npm run build:opencode && ./install.sh --profile full --target opencode --enable-hooks` | Builds the plugin payload before the full install |
 | Gemini CLI | `./install.sh --profile minimal --target gemini` | Project-local `.gemini/` config |
 | Zed | `./install.sh --profile minimal --target zed` | Project-local `.zed/` adapter |
 | Antigravity | `./install.sh --profile minimal --target antigravity` | See the [Antigravity guide](docs/ANTIGRAVITY-GUIDE.md) |
@@ -794,7 +796,7 @@ Stable graduation of the 2.0 line: control-pane substrate, worktree lifecycle se
 ```text
 ECC/
 |-- agents/           # 68 specialized subagents for delegation
-|-- skills/           # 284 reusable workflows loaded on demand
+|-- skills/           # 292 reusable workflows loaded on demand
 |-- commands/         # 94 maintained slash-command shims
 |-- rules/            # opt-in common and language standards
 |-- hooks/            # runtime automation and enforcement
@@ -887,6 +889,7 @@ ECC/
 |   |-- quarkus-security/           # Quarkus security
 |   |-- quarkus-tdd/                # Quarkus TDD
 |   |-- quarkus-verification/       # Quarkus verification
+|   |-- rails-patterns/             # Rails architecture patterns
 |   |-- springboot-patterns/        # Java Spring Boot patterns
 |   |-- springboot-security/        # Spring Boot security
 |   |-- springboot-tdd/             # Spring Boot TDD

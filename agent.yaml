@@ -125,6 +125,7 @@ skills:
   - quarkus-security
   - quarkus-tdd
   - quarkus-verification
+  - rails-patterns
   - ralphinho-rfc-pipeline
   - react-patterns
   - react-performance
@@ -151,6 +152,9 @@ skills:
   - swift-concurrency-6-2
   - swift-protocol-di-testing
   - swiftui-patterns
+  - taste-application
+  - taste-distillation
+  - tasteforge-video
   - tdd-workflow
   - team-builder
   - token-budget-advisor

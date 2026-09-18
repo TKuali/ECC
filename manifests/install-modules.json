@@ -196,6 +196,7 @@
         "skills/quarkus-patterns",
         "skills/quarkus-tdd",
         "skills/quarkus-verification",
+        "skills/rails-patterns",
         "skills/react-patterns",
         "skills/react-performance",
         "skills/react-testing",
@@ -741,7 +742,9 @@
         "skills/video-editing",
         "skills/videodb",
         "skills/taste",
-        "skills/tasteforge-video"
+        "skills/tasteforge-video",
+        "skills/taste-distillation",
+        "skills/taste-application"
       ],
       "targets": [
         "claude",
