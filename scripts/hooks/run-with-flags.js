@@ -13,40 +13,50 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const { StringDecoder } = require('string_decoder');
 const { isHookEnabled, isDryRun } = require('../lib/hook-flags');
+const { readStdinRaw: readBoundedStdin, resolveMaxStdin } = require('./hook-input');
 const { buildPreToolUseAdditionalContext } = require('./pretooluse-visible-output');
-const {
-  REGISTERED_HOOK_MAX_STDIN_BYTES,
-  createHookContextScanner,
-} = require('./hook-input-limits');
+const { createHookContextScanner } = require('./hook-input-limits');
 
-const MAX_STDIN = REGISTERED_HOOK_MAX_STDIN_BYTES;
+const FAIL_CLOSED_ON_TRUNCATION_HOOKS = new Set([
+  'pre:powershell:gateguard-fact-force',
+  'pre:edit-write:gateguard-fact-force',
+  'pre:mcp-health-check'
+]);
+
+const MAX_STDIN = resolveMaxStdin(process.env.ECC_HOOK_INPUT_MAX_BYTES, {
+  writeDiagnostic: message => process.stderr.write(message)
+});
+const UPSTREAM_TRUNCATED = /^(1|true|yes)$/i.test(
+  String(process.env.ECC_HOOK_INPUT_TRUNCATED_UPSTREAM || '')
+);
+
+function readUpstreamHookContext() {
+  if (!UPSTREAM_TRUNCATED) return {};
+  try {
+    const parsed = JSON.parse(String(process.env.ECC_HOOK_CONTEXT_JSON || '{}'));
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
 
 function readStdinRaw() {
-  return new Promise(resolve => {
-    const rawDecoder = new StringDecoder('utf8');
-    const contextDecoder = new StringDecoder('utf8');
-    let raw = '';
-    let bytesRead = 0;
-    let truncated = false;
-    const contextScanner = createHookContextScanner();
-    process.stdin.on('data', chunk => {
-      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-      contextScanner.push(contextDecoder.write(buffer));
-      const remaining = Math.max(0, MAX_STDIN - bytesRead);
-      const accepted = buffer.subarray(0, remaining);
-      if (accepted.length > 0) {
-        raw += rawDecoder.write(accepted);
-        bytesRead += accepted.length;
-      }
-      if (accepted.length < buffer.length) truncated = true;
-    });
-    const finish = () => {
-      contextScanner.push(contextDecoder.end());
-      if (!truncated) raw += rawDecoder.end();
-      resolve({ raw, truncated, hookContext: contextScanner.context });
+  const contextDecoder = new StringDecoder('utf8');
+  const contextScanner = createHookContextScanner();
+  const upstreamHookContext = readUpstreamHookContext();
+  return readBoundedStdin(process.stdin, {
+    maxStdin: MAX_STDIN,
+    truncated: UPSTREAM_TRUNCATED,
+    onChunk: buffer => contextScanner.push(contextDecoder.write(buffer))
+  }).then(result => {
+    contextScanner.push(contextDecoder.end());
+    const scannedHookContext = contextScanner.context;
+    return {
+      ...result,
+      hookContext: UPSTREAM_TRUNCATED
+        ? { ...scannedHookContext, ...upstreamHookContext }
+        : scannedHookContext
     };
-    process.stdin.on('end', finish);
-    process.stdin.on('error', finish);
   });
 }
 
@@ -81,7 +91,7 @@ function exitWithStdout(text, exitCode) {
   process.stderr.write('', exitWhenFlushed);
 }
 
-function resolveHookResult(raw, output) {
+function resolveHookResult(output) {
   if (typeof output === 'string' || Buffer.isBuffer(output)) {
     return { stdout: String(output), exitCode: 0 };
   }
@@ -96,23 +106,39 @@ function resolveHookResult(raw, output) {
     if (Object.prototype.hasOwnProperty.call(output, 'stdout')) {
       return { stdout: String(output.stdout ?? ''), exitCode };
     }
-    return { stdout: exitCode === 0 ? raw : '', exitCode };
+    return { stdout: '', exitCode };
   }
 
-  return { stdout: raw, exitCode: 0 };
+  return { stdout: '', exitCode: 0 };
 }
 
-function resolveLegacySpawnStdout(raw, result) {
+function resolveLegacySpawnStdout(result) {
   const stdout = typeof result.stdout === 'string' ? result.stdout : '';
-  if (stdout) {
-    return stdout;
+  return stdout || '';
+}
+
+function truncatedInputResult(hookId, maxStdin) {
+  if (!FAIL_CLOSED_ON_TRUNCATION_HOOKS.has(hookId)) return null;
+  if (hookId === 'pre:powershell:gateguard-fact-force'
+    || hookId === 'pre:edit-write:gateguard-fact-force') {
+    const gateGuardValue = String(process.env.ECC_GATEGUARD || '').trim().toLowerCase();
+    const legacyDisabled = String(process.env.GATEGUARD_DISABLED || '').trim() === '1';
+    if (legacyDisabled || ['0', 'false', 'off', 'disabled', 'disable'].includes(gateGuardValue)) {
+      return null;
+    }
+  }
+  if (hookId === 'pre:mcp-health-check') {
+    const failOpen = /^(1|true|yes)$/i.test(
+      String(process.env.ECC_MCP_HEALTH_FAIL_OPEN || '')
+    );
+    if (failOpen) return null;
   }
 
-  if (Number.isInteger(result.status) && result.status === 0) {
-    return raw;
-  }
-
-  return '';
+  return {
+    stdout: '',
+    stderr: `BLOCKED: Hook input exceeded ${maxStdin} bytes, so ${hookId} could not safely inspect the complete request. Retry with a smaller tool input or explicitly disable this hook.`,
+    exitCode: 2
+  };
 }
 
 function getPluginRoot() {
@@ -170,28 +196,28 @@ async function main() {
   // Oversized payloads: never echo the truncated string — a JSON document
   // cut mid-stream is treated by the harness as a hook failure, blocking the
   // tool call (#2222). Empty stdout + exit 0 means "no opinion", so
-  // pass-through paths fail open. The hook itself still runs and receives
+  // silent/no-op paths fail open. The hook itself still runs and receives
   // the truncated flag (run() context / ECC_HOOK_INPUT_TRUNCATED), so
   // security hooks like config-protection can still choose to block.
   const sanitizeEcho = text => (truncated && text === raw ? '' : text);
   if (truncated) {
-    process.stderr.write(`[Hook] stdin exceeded ${MAX_STDIN} bytes for ${hookId || 'unknown'}; suppressing pass-through (fail-open unless the hook blocks)\n`);
+    process.stderr.write(`[Hook] stdin exceeded ${MAX_STDIN} bytes for ${hookId || 'unknown'}; suppressing raw passthrough\n`);
   }
 
   if (!hookId || !relScriptPath) {
-    exitWithStdout(sanitizeEcho(raw), 0);
+    exitWithStdout('', 0);
     return;
   }
 
   if (!isHookEnabled(hookId, { profiles: profilesCsv })) {
-    exitWithStdout(sanitizeEcho(raw), 0);
+    exitWithStdout('', 0);
     return;
   }
 
   if (isDryRun()) {
     const preview = buildDryRunPreview(hookId, relScriptPath, profilesCsv, raw);
     process.stderr.write(preview);
-    exitWithStdout(sanitizeEcho(raw), 0);
+    exitWithStdout('', 0);
     return;
   }
 
@@ -202,13 +228,20 @@ async function main() {
   // Prevent path traversal outside the plugin root
   if (!scriptPath.startsWith(resolvedRoot + path.sep)) {
     process.stderr.write(`[Hook] Path traversal rejected for ${hookId}: ${scriptPath}\n`);
-    exitWithStdout(sanitizeEcho(raw), 0);
+    exitWithStdout('', 0);
     return;
   }
 
   if (!fs.existsSync(scriptPath)) {
     process.stderr.write(`[Hook] Script not found for ${hookId}: ${scriptPath}\n`);
-    exitWithStdout(sanitizeEcho(raw), 0);
+    exitWithStdout('', 0);
+    return;
+  }
+
+  const truncationBlock = truncated ? truncatedInputResult(hookId, MAX_STDIN) : null;
+  if (truncationBlock) {
+    writeStderr(truncationBlock.stderr);
+    exitWithStdout(truncationBlock.stdout, truncationBlock.exitCode);
     return;
   }
 
@@ -245,11 +278,11 @@ async function main() {
         maxStdin: MAX_STDIN,
         ...(truncated ? hookContext : {})
       });
-      const result = resolveHookResult(raw, output);
+      const result = resolveHookResult(output);
       exitWithStdout(sanitizeEcho(result.stdout), result.exitCode);
     } catch (runErr) {
       process.stderr.write(`[Hook] run() error for ${hookId}: ${runErr.message}\n`);
-      exitWithStdout(sanitizeEcho(raw), 0);
+      exitWithStdout('', 0);
     }
     return;
   }
@@ -270,7 +303,7 @@ async function main() {
     timeout: 30000
   });
 
-  const legacyStdout = sanitizeEcho(resolveLegacySpawnStdout(raw, result));
+  const legacyStdout = sanitizeEcho(resolveLegacySpawnStdout(result));
   if (result.stderr) process.stderr.write(result.stderr);
 
   if (result.error || result.signal || result.status === null) {

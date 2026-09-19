@@ -101,8 +101,9 @@ function buildEccSkeleton(repoRoot) {
   fs.mkdirSync(hooksDir, { recursive: true })
 
   for (const name of [
-    "run-with-flags.js",
+    "hook-input.js",
     "hook-input-limits.js",
+    "run-with-flags.js",
     "session-end-marker.js",
     "pretooluse-visible-output.js",
   ]) {
