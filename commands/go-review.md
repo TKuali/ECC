@@ -1,100 +1,100 @@
 ---
-description: Comprehensive Go code review for idiomatic patterns, concurrency safety, error handling, and security. Invokes the go-reviewer agent.
+description: Revisión exhaustiva de código Go en cuanto a patrones idiomáticos, seguridad en concurrencia, manejo de errores y seguridad. Invoca al agente go-reviewer.
 ---
 
-# Go Code Review
+# Revisión de Código Go
 
-This command invokes the **go-reviewer** agent for comprehensive Go-specific code review.
+Este comando invoca al agente **go-reviewer** para una revisión de código completa y especializada en Go.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Identify Go Changes**: Find modified `.go` files via `git diff`
-2. **Run Static Analysis**: Execute `go vet`, `staticcheck`, and `golangci-lint`
-3. **Security Scan**: Check for SQL injection, command injection, race conditions
-4. **Concurrency Review**: Analyze goroutine safety, channel usage, mutex patterns
-5. **Idiomatic Go Check**: Verify code follows Go conventions and best practices
-6. **Generate Report**: Categorize issues by severity
+1. **Identificar cambios en Go**: Encuentra archivos `.go` modificados mediante `git diff`
+2. **Ejecutar análisis estático**: Ejecuta `go vet`, `staticcheck` y `golangci-lint`
+3. **Escaneo de seguridad**: Busca inyecciones SQL/comandos y condiciones de carrera
+4. **Revisión de concurrencia**: Analiza seguridad en goroutines, uso de canales y patrones de mutex
+5. **Comprobación de Go idiomático**: Verifica que el código siga las convenciones y mejores prácticas de Go
+6. **Generar reporte**: Categoriza problemas por severidad
 
-## When to Use
+## Cuándo usarlo
 
-Use `/go-review` when:
-- After writing or modifying Go code
-- Before committing Go changes
-- Reviewing pull requests with Go code
-- Onboarding to a new Go codebase
-- Learning idiomatic Go patterns
+Usa `/go-review` cuando:
+- Después de escribir o modificar código Go
+- Antes de confirmar cambios (commit) en Go
+- Al revisar pull requests con código Go
+- Al incorporarse a un nuevo proyecto en Go
+- Para aprender patrones idiomáticos de Go
 
-## Review Categories
+## Categorías de Revisión
 
-### CRITICAL (Must Fix)
-- SQL/Command injection vulnerabilities
-- Race conditions without synchronization
-- Goroutine leaks
-- Hardcoded credentials
-- Unsafe pointer usage
-- Ignored errors in critical paths
+### CRÍTICO (Debe Corregirse)
+- Vulnerabilidades de inyección SQL o de comandos
+- Condiciones de carrera sin sincronización
+- Fugas de goroutines (goroutine leaks)
+- Credenciales hardcodeadas
+- Uso inseguro de punteros (`unsafe.Pointer`)
+- Errores ignorados en rutas críticas
 
-### HIGH (Should Fix)
-- Missing error wrapping with context
-- Panic instead of error returns
-- Context not propagated
-- Unbuffered channels causing deadlocks
-- Interface not satisfied errors
-- Missing mutex protection
+### ALTO (Debería Corregirse)
+- Falta de encapsulación de errores con contexto (`fmt.Errorf` con `%w`)
+- Uso de `panic` en lugar de devolver errores
+- `context.Context` no propagado
+- Canales sin búfer que provocan bloqueos mutuos (deadlocks)
+- Errores de interfaz no implementada
+- Falta de protección con mutex
 
-### MEDIUM (Consider)
-- Non-idiomatic code patterns
-- Missing godoc comments on exports
-- Inefficient string concatenation
-- Slice not preallocated
-- Table-driven tests not used
+### MEDIO (A Considerar)
+- Patrones de código no idiomáticos
+- Falta de comentarios de godoc en exportaciones públicas
+- Concatenación de cadenas ineficiente
+- Slices no preasignados
+- Pruebas dirigidas por tablas (table-driven tests) no utilizadas
 
-## Automated Checks Run
+## Comprobaciones Automatizadas Ejecutadas
 
 ```bash
-# Static analysis
+# Análisis estático
 go vet ./...
 
-# Advanced checks (if installed)
+# Comprobaciones avanzadas (si están instaladas)
 staticcheck ./...
 golangci-lint run
 
-# Race detection
+# Detección de carreras
 go build -race ./...
 
-# Security vulnerabilities
+# Vulnerabilidades de seguridad
 govulncheck ./...
 ```
 
-## Example Usage
+## Ejemplo de Uso
 
 ```text
-User: /go-review
+Usuario: /go-review
 
-Agent:
-# Go Code Review Report
+Agente:
+# Reporte de Revisión de Código Go
 
-## Files Reviewed
-- internal/handler/user.go (modified)
-- internal/service/auth.go (modified)
+## Archivos Revisados
+- internal/handler/user.go (modificado)
+- internal/service/auth.go (modificado)
 
-## Static Analysis Results
-✓ go vet: No issues
-✓ staticcheck: No issues
+## Resultados de Análisis Estático
+✓ go vet: Sin problemas
+✓ staticcheck: Sin problemas
 
-## Issues Found
+## Problemas Encontrados
 
-[CRITICAL] Race Condition
-File: internal/service/auth.go:45
-Issue: Shared map accessed without synchronization
+[CRITICAL] Condición de Carrera
+Archivo: internal/service/auth.go:45
+Problema: Mapa compartido accedido sin sincronización
 ```go
-var cache = map[string]*Session{}  // Concurrent access!
+var cache = map[string]*Session{}  // ¡Acceso concurrente!
 
 func GetSession(id string) *Session {
-    return cache[id]  // Race condition
+    return cache[id]  // Condición de carrera
 }
 ```
-Fix: Use sync.RWMutex or sync.Map
+Solución: Usar sync.RWMutex o sync.Map
 ```go
 var (
     cache   = map[string]*Session{}
@@ -108,41 +108,41 @@ func GetSession(id string) *Session {
 }
 ```
 
-[HIGH] Missing Error Context
-File: internal/handler/user.go:28
-Issue: Error returned without context
+[HIGH] Falta Contexto en el Error
+Archivo: internal/handler/user.go:28
+Problema: Error retornado sin contexto explicativo
 ```go
-return err  // No context
+return err  // Sin contexto
 ```
-Fix: Wrap with context
+Solución: Envolver con contexto
 ```go
 return fmt.Errorf("get user %s: %w", userID, err)
 ```
 
-## Summary
+## Resumen
 - CRITICAL: 1
 - HIGH: 1
 - MEDIUM: 0
 
-Recommendation: FAIL: Block merge until CRITICAL issue is fixed
+Recomendación: FAIL: Bloquear fusión hasta corregir problemas CRITICAL
 ```
 
-## Approval Criteria
+## Criterios de Aprobación
 
-| Status | Condition |
+| Estado | Condición |
 |--------|-----------|
-| PASS: Approve | No CRITICAL or HIGH issues |
-| WARNING: Warning | Only MEDIUM issues (merge with caution) |
-| FAIL: Block | CRITICAL or HIGH issues found |
+| PASS: Aprobar | Sin problemas CRITICAL o HIGH |
+| WARNING: Advertencia | Solo problemas MEDIUM (fusionar con precaución) |
+| FAIL: Bloquear | Problemas CRITICAL o HIGH encontrados |
 
-## Integration with Other Commands
+## Integración con Otros Comandos
 
-- Use `/go-test` first to ensure tests pass
-- Use `/go-build` if build errors occur
-- Use `/go-review` before committing
-- Use `/code-review` for non-Go specific concerns
+- Usa `/go-test` primero para garantizar que las pruebas pasen
+- Usa `/go-build` si ocurren errores de compilación
+- Usa `/go-review` antes de hacer commit
+- Usa `/code-review` para aspectos generales no específicos de Go
 
-## Related
+## Relacionado
 
-- Agent: `agents/go-reviewer.md`
+- Agente: `agents/go-reviewer.md`
 - Skills: `skills/golang-patterns/`, `skills/golang-testing/`

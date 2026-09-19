@@ -1,14 +1,16 @@
 ---
-description: Enable or disable hookify rules interactively
+description: Habilita o deshabilita reglas de hookify interactivamente
 ---
 
-Interactively enable or disable existing hookify rules.
+# Configuración de Hookify
 
-## Steps
+Habilita o deshabilita interactivamente reglas existentes de hookify.
 
-1. Find all `.claude/hookify.*.local.md` files
-2. Read the current state of each rule
-3. Present the list with current enabled / disabled status
-4. Ask which rules to toggle
-5. Update the `enabled:` field in the selected rule files
-6. Confirm the changes
+## Pasos
+
+1. Buscar todos los archivos `.claude/hookify.*.local.md`
+2. Leer el estado actual de cada regla
+3. Presentar la lista con el estado habilitado / deshabilitado actual
+4. Preguntar qué reglas alternar
+5. Actualizar el campo `enabled:` en los archivos de regla seleccionados
+6. Confirmar los cambios

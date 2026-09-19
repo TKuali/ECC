@@ -1,46 +1,46 @@
 ---
-description: Run a full multi-model development workflow with research, planning, execution, optimization, and review.
+description: Ejecuta un flujo de trabajo de desarrollo multimodelo completo con investigación, planificación, ejecución, optimización y revisión.
 ---
 
-# Workflow - Multi-Model Collaborative Development
+# Workflow - Desarrollo Colaborativo Multimodelo
 
-Multi-model collaborative development workflow (Research → Ideation → Plan → Execute → Optimize → Review), with intelligent routing: Frontend → Antigravity, Backend → Codex.
+Flujo de trabajo colaborativo multimodelo (Investigación → Ideación → Plan → Ejecución → Optimización → Revisión), con enrutamiento inteligente: Frontend → Antigravity, Backend → Codex.
 
-> **Prerequisite:** Requires the external `ccg-workflow` runtime, which is **not** part of the base ECC install. Initialize it with `npx ccg-workflow` to provision `~/.claude/bin/codeagent-wrapper` and the `~/.claude/.ccg/prompts/*` role files this command depends on. Without that runtime, this command will not run correctly.
+> **Prerrequisito:** Requiere el entorno de ejecución externo `ccg-workflow`, el cual **no** forma parte de la instalación base de ECC. Inicialízalo con `npx ccg-workflow` para aprovisionar `~/.claude/bin/codeagent-wrapper` y los archivos de rol `~/.claude/.ccg/prompts/*` de los que depende este comando. Sin ese entorno, este comando no funcionará correctamente.
 
-Structured development workflow with quality gates, MCP services, and multi-model collaboration.
+Flujo de trabajo de desarrollo estructurado con controles de calidad (quality gates), servicios MCP y colaboración multimodelo.
 
-## Usage
+## Uso
 
 ```bash
-/workflow <task description>
+/workflow <descripción de la tarea>
 ```
 
-## Context
+## Contexto
 
-- Task to develop: $ARGUMENTS
-- Structured 6-phase workflow with quality gates
-- Multi-model collaboration: Codex (backend) + Antigravity (frontend) + Claude (orchestration)
-- MCP service integration (ace-tool, optional) for enhanced capabilities
+- Tarea a desarrollar: $ARGUMENTS
+- Flujo estructurado en 6 fases con controles de calidad
+- Colaboración multimodelo: Codex (backend) + Antigravity (frontend) + Claude (orquestación)
+- Integración de servicios MCP (ace-tool, opcional) para capacidades ampliadas
 
-## Your Role
+## Tu Rol
 
-You are the **Orchestrator**, coordinating a multi-model collaborative system (Research → Ideation → Plan → Execute → Optimize → Review). Communicate concisely and professionally for experienced developers.
+Eres el **Orquestador**, coordinando un sistema colaborativo multimodelo (Investigación → Ideación → Plan → Ejecución → Optimización → Revisión). Comunícate de forma concisa y profesional para desarrolladores experimentados.
 
-**Collaborative Models**:
-- **ace-tool MCP** (optional) – Code retrieval + Prompt enhancement
-- **Codex** – Backend logic, algorithms, debugging (**Backend authority, trustworthy**)
-- **Antigravity** – Frontend UI/UX, visual design (**Frontend expert, backend opinions for reference only**)
-- **Claude (self)** – Orchestration, planning, execution, delivery
+**Modelos Colaboradores**:
+- **ace-tool MCP** (opcional) – Recuperación de código + Mejora de prompts
+- **Codex** – Lógica de backend, algoritmos, depuración (**Autoridad en backend, confiable**)
+- **Antigravity** – UI/UX de frontend, diseño visual (**Experto en frontend, opiniones de backend solo como referencia**)
+- **Claude (uno mismo)** – Orquestación, planificación, ejecución y entrega
 
 ---
 
-## Multi-Model Call Specification
+## Especificación de Llamadas Multimodelo
 
-**Call syntax** (parallel: `run_in_background: true`, sequential: `false`):
+**Sintaxis de Llamada** (en paralelo: `run_in_background: true`, secuencial: `false`):
 
 ```
-# New session call
+# Llamada de nueva sesión
 Bash({
   command: "~/.claude/bin/codeagent-wrapper {{LITE_MODE_FLAG}}--backend <codex|antigravity> - \"$PWD\" <<'EOF'
 ROLE_FILE: <role prompt path>
@@ -52,10 +52,10 @@ OUTPUT: Expected output format
 EOF",
   run_in_background: true,
   timeout: 3600000,
-  description: "Brief description"
+  description: "Breve descripción"
 })
 
-# Resume session call
+# Llamada para reanudar sesión
 Bash({
   command: "~/.claude/bin/codeagent-wrapper {{LITE_MODE_FLAG}}--backend <codex|antigravity> resume <SESSION_ID> - \"$PWD\" <<'EOF'
 ROLE_FILE: <role prompt path>
@@ -67,49 +67,49 @@ OUTPUT: Expected output format
 EOF",
   run_in_background: true,
   timeout: 3600000,
-  description: "Brief description"
+  description: "Breve descripción"
 })
 ```
 
-**Model Parameter Notes**:
-- No extra model flag is needed for `--backend antigravity` or `--backend codex`; `codeagent-wrapper` picks each backend's default model.
+**Notas sobre Parámetros del Modelo**:
+- No se requiere ningún indicador extra de modelo para `--backend antigravity` o `--backend codex`; `codeagent-wrapper` selecciona el modelo por defecto de cada backend.
 
-**Role Prompts**:
+**Prompts de Roles**:
 
-| Phase | Codex | Antigravity |
-|-------|-------|--------|
-| Analysis | `~/.claude/.ccg/prompts/codex/analyzer.md` | `~/.claude/.ccg/prompts/antigravity/analyzer.md` |
-| Planning | `~/.claude/.ccg/prompts/codex/architect.md` | `~/.claude/.ccg/prompts/antigravity/architect.md` |
-| Review | `~/.claude/.ccg/prompts/codex/reviewer.md` | `~/.claude/.ccg/prompts/antigravity/reviewer.md` |
+| Fase | Codex | Antigravity |
+|------|-------|-------------|
+| Análisis | `~/.claude/.ccg/prompts/codex/analyzer.md` | `~/.claude/.ccg/prompts/antigravity/analyzer.md` |
+| Planificación | `~/.claude/.ccg/prompts/codex/architect.md` | `~/.claude/.ccg/prompts/antigravity/architect.md` |
+| Revisión | `~/.claude/.ccg/prompts/codex/reviewer.md` | `~/.claude/.ccg/prompts/antigravity/reviewer.md` |
 
-**Session Reuse**: Each call returns `SESSION_ID: xxx`, use `resume xxx` subcommand for subsequent phases (note: `resume`, not `--resume`).
+**Reutilización de Sesión**: Cada llamada devuelve `SESSION_ID: xxx`, usa el subcomando `resume xxx` para fases posteriores (nota: `resume`, no `--resume`).
 
-**Parallel Calls**: Use `run_in_background: true` to start, wait for results with `TaskOutput`. **Must wait for all models to return before proceeding to next phase**.
+**Llamadas en Paralelo**: Usa `run_in_background: true` para iniciar y espera los resultados con `TaskOutput`. **Se debe esperar a que todos los modelos hayan retornado antes de avanzar a la siguiente fase**.
 
-**Wait for Background Tasks** (use max timeout 600000ms = 10 minutes):
+**Espera de Tareas en Segundo Plano** (usar tiempo de espera máximo de 600000ms = 10 minutos):
 
 ```
 TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 ```
 
-**IMPORTANT**:
-- Must specify `timeout: 600000`, otherwise default 30 seconds will cause premature timeout.
-- If still incomplete after 10 minutes, continue polling with `TaskOutput`, **NEVER kill the process**.
-- If waiting is skipped due to timeout, **MUST call `AskUserQuestion` to ask user whether to continue waiting or kill task. Never kill directly.**
+**IMPORTANTE**:
+- Debe especificarse `timeout: 600000`, de lo contrario los 30 segundos predeterminados provocarán un tiempo de espera prematuro.
+- Si aún no se completa tras 10 minutos, continúa consultando con `TaskOutput`, **NUNCA abortes el proceso**.
+- Si la espera se omite por timeout, **DEBE llamarse a `AskUserQuestion` para consultar al usuario si seguir esperando o cancelar la tarea. Nunca la canceles directamente.**
 
 ---
 
-## Communication Guidelines
+## Directrices de Comunicación
 
-1. Start responses with mode label `[Mode: X]`, initial is `[Mode: Research]`.
-2. Follow strict sequence: `Research → Ideation → Plan → Execute → Optimize → Review`.
-3. Request user confirmation after each phase completion.
-4. Force stop when score < 7 or user does not approve.
-5. Use `AskUserQuestion` tool for user interaction when needed (e.g., confirmation/selection/approval).
+1. Comienza las respuestas con la etiqueta de modo `[Modo: X]`, la inicial es `[Modo: Investigación]`.
+2. Sigue la secuencia estricta: `Investigación → Ideación → Plan → Ejecución → Optimización → Revisión`.
+3. Solicita confirmación al usuario tras completar cada fase.
+4. Detención obligatoria cuando la puntuación sea < 7 o el usuario no apruebe.
+5. Usa la herramienta `AskUserQuestion` para interactuar con el usuario cuando sea necesario (ej., confirmación/selección/aprobación).
 
-## When to Use External Orchestration
+## Cuándo usar Orquestación Externa
 
-Use external tmux/worktree orchestration when the work must be split across parallel workers that need isolated git state, independent terminals, or separate build/test execution. Use in-process subagents for lightweight analysis, planning, or review where the main session remains the only writer.
+Utiliza la orquestación externa mediante tmux/worktrees cuando el trabajo deba repartirse entre trabajadores paralelos que requieran un estado de git aislado, terminales independientes o ejecución separada de compilación/pruebas. Usa subagentes en el mismo proceso para análisis ligeros, planificación o revisión donde la sesión principal continúe siendo la única con acceso de escritura.
 
 ```bash
 node scripts/orchestrate-worktrees.js .claude/plan/workflow-e2e-test.json --execute
@@ -117,81 +117,81 @@ node scripts/orchestrate-worktrees.js .claude/plan/workflow-e2e-test.json --exec
 
 ---
 
-## Execution Workflow
+## Flujo de Trabajo de Ejecución
 
-**Task Description**: $ARGUMENTS
+**Descripción de la Tarea**: $ARGUMENTS
 
-### Phase 1: Research & Analysis
+### Fase 1: Investigación y Análisis
 
-`[Mode: Research]` - Understand requirements and gather context:
+`[Modo: Investigación]` - Comprender requisitos y reunir contexto:
 
-1. **Prompt Enhancement** (if ace-tool MCP available): Call `mcp__ace-tool__enhance_prompt`, **replace original $ARGUMENTS with enhanced result for all subsequent Codex/Antigravity calls**. If unavailable, use `$ARGUMENTS` as-is.
-2. **Context Retrieval** (if ace-tool MCP available): Call `mcp__ace-tool__search_context`. If unavailable, use built-in tools: `Glob` for file discovery, `Grep` for symbol search, `Read` for context gathering, `Task` (Explore agent) for deeper exploration.
-3. **Requirement Completeness Score** (0-10):
-   - Goal clarity (0-3), Expected outcome (0-3), Scope boundaries (0-2), Constraints (0-2)
-   - ≥7: Continue | <7: Stop, ask clarifying questions
+1. **Mejora de Prompt** (si el MCP ace-tool está disponible): Invoca `mcp__ace-tool__enhance_prompt`, **sustituye el $ARGUMENTS original por el resultado mejorado para todas las llamadas posteriores a Codex/Antigravity**. Si no está disponible, usa `$ARGUMENTS` tal como está.
+2. **Recuperación de Contexto** (si el MCP ace-tool está disponible): Invoca `mcp__ace-tool__search_context`. Si no está disponible, utiliza herramientas nativas: `Glob` para descubrir archivos, `Grep` para búsqueda de símbolos, `Read` para reunir contexto, `Task` (agente Explore) para exploración profunda.
+3. **Puntuación de Completitud de Requisitos** (0-10):
+   - Claridad del objetivo (0-3), Resultado esperado (0-3), Límites de alcance (0-2), Restricciones (0-2)
+   - ≥7: Continuar | <7: Detenerse y realizar preguntas aclaratorias
 
-### Phase 2: Solution Ideation
+### Fase 2: Ideación de Soluciones
 
-`[Mode: Ideation]` - Multi-model parallel analysis:
+`[Modo: Ideación]` - Análisis multimodelo en paralelo:
 
-**Parallel Calls** (`run_in_background: true`):
-- Codex: Use analyzer prompt, output technical feasibility, solutions, risks
-- Antigravity: Use analyzer prompt, output UI feasibility, solutions, UX evaluation
+**Llamadas en Paralelo** (`run_in_background: true`):
+- Codex: Usa el prompt de analizador, entrega viabilidad técnica, soluciones y riesgos
+- Antigravity: Usa el prompt de analizador, entrega viabilidad de interfaz, soluciones y evaluación de UX
 
-Wait for results with `TaskOutput`. **Save SESSION_ID** (`CODEX_SESSION` and `ANTIGRAVITY_SESSION`).
+Espera los resultados con `TaskOutput`. **Guarda SESSION_ID** (`CODEX_SESSION` y `ANTIGRAVITY_SESSION`).
 
-**Follow the `IMPORTANT` instructions in `Multi-Model Call Specification` above**
+**Sigue las instrucciones marcadas como `IMPORTANTE` en la `Especificación de Llamadas Multimodelo` anterior**
 
-Synthesize both analyses, output solution comparison (at least 2 options), wait for user selection.
+Sintetiza ambos análisis, muestra la comparación de soluciones (al menos 2 opciones) y espera la selección del usuario.
 
-### Phase 3: Detailed Planning
+### Fase 3: Planificación Detallada
 
-`[Mode: Plan]` - Multi-model collaborative planning:
+`[Modo: Plan]` - Planificación colaborativa multimodelo:
 
-**Parallel Calls** (resume session with `resume <SESSION_ID>`):
-- Codex: Use architect prompt + `resume $CODEX_SESSION`, output backend architecture
-- Antigravity: Use architect prompt + `resume $ANTIGRAVITY_SESSION`, output frontend architecture
+**Llamadas en Paralelo** (reanuda la sesión con `resume <SESSION_ID>`):
+- Codex: Usa el prompt de arquitecto + `resume $CODEX_SESSION`, genera la arquitectura de backend
+- Antigravity: Usa el prompt de arquitecto + `resume $ANTIGRAVITY_SESSION`, genera la arquitectura de frontend
 
-Wait for results with `TaskOutput`.
+Espera los resultados con `TaskOutput`.
 
-**Follow the `IMPORTANT` instructions in `Multi-Model Call Specification` above**
+**Sigue las instrucciones marcadas como `IMPORTANTE` en la `Especificación de Llamadas Multimodelo` anterior**
 
-**Claude Synthesis**: Adopt Codex backend plan + Antigravity frontend plan, save to `.claude/plan/task-name.md` after user approval.
+**Síntesis de Claude**: Adopta el plan de backend de Codex + el plan de frontend de Antigravity, guárdalo en `.claude/plan/task-name.md` tras la aprobación del usuario.
 
-### Phase 4: Implementation
+### Fase 4: Implementación
 
-`[Mode: Execute]` - Code development:
+`[Modo: Ejecución]` - Desarrollo del código:
 
-- Strictly follow approved plan
-- Follow existing project code standards
-- Request feedback at key milestones
+- Seguir estrictamente el plan aprobado
+- Cumplir con los estándares de código del proyecto existente
+- Solicitar retroalimentación en los hitos clave
 
-### Phase 5: Code Optimization
+### Fase 5: Optimización del Código
 
-`[Mode: Optimize]` - Multi-model parallel review:
+`[Modo: Optimización]` - Revisión multimodelo en paralelo:
 
-**Parallel Calls**:
-- Codex: Use reviewer prompt, focus on security, performance, error handling
-- Antigravity: Use reviewer prompt, focus on accessibility, design consistency
+**Llamadas en Paralelo**:
+- Codex: Usa el prompt de revisor, centrado en seguridad, rendimiento y manejo de errores
+- Antigravity: Usa el prompt de revisor, centrado en accesibilidad y consistencia de diseño
 
-Wait for results with `TaskOutput`. Integrate review feedback, execute optimization after user confirmation.
+Espera los resultados con `TaskOutput`. Integra las observaciones de la revisión y ejecuta la optimización tras la confirmación del usuario.
 
-**Follow the `IMPORTANT` instructions in `Multi-Model Call Specification` above**
+**Sigue las instrucciones marcadas como `IMPORTANTE` en la `Especificación de Llamadas Multimodelo` anterior**
 
-### Phase 6: Quality Review
+### Fase 6: Revisión de Calidad
 
-`[Mode: Review]` - Final evaluation:
+`[Modo: Revisión]` - Evaluación final:
 
-- Check completion against plan
-- Run tests to verify functionality
-- Report issues and recommendations
-- Request final user confirmation
+- Verificar la finalización frente al plan
+- Ejecutar pruebas para verificar funcionalidad
+- Reportar problemas y recomendaciones
+- Solicitar confirmación final del usuario
 
 ---
 
-## Key Rules
+## Reglas Clave
 
-1. Phase sequence cannot be skipped (unless user explicitly instructs)
-2. External models have **zero filesystem write access**, all modifications by Claude
-3. **Force stop** when score < 7 or user does not approve
+1. La secuencia de fases no puede omitirse (a menos que el usuario lo instruya explícitamente)
+2. Los modelos externos tienen **cero acceso de escritura en el sistema de archivos**, todas las modificaciones las realiza Claude
+3. **Detención obligatoria** cuando la puntuación sea < 7 o el usuario no apruebe

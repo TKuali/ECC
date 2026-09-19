@@ -1,181 +1,179 @@
 ---
-description: Load the most recent session file from ~/.claude/session-data/ and resume work with full context from where the last session ended.
+description: Carga el archivo de sesión más reciente desde ~/.claude/session-data/ y reanuda el trabajo con contexto completo desde donde concluyó la última sesión.
 ---
 
-# Resume Session Command
+# Comando Reanudar Sesión (Resume Session)
 
-Load the last saved session state and orient fully before doing any work.
-This command is the counterpart to `/save-session`.
+Carga el último estado de sesión guardado y oriéntate completamente antes de realizar cualquier trabajo.
+Este comando es la contraparte de `/save-session`.
 
-## When to Use
+## Cuándo usarlo
 
-- Starting a new session to continue work from a previous day
-- After starting a fresh session due to context limits
-- When handing off a session file from another source (just provide the file path)
-- Any time you have a session file and want Claude to fully absorb it before proceeding
+- Al comenzar una nueva sesión para continuar el trabajo de un día anterior
+- Después de iniciar una sesión limpia debido a límites de contexto
+- Al recibir un archivo de sesión de otra fuente (simplemente proporciona la ruta del archivo)
+- Cada vez que dispongas de un archivo de sesión y desees que Claude lo asimile por completo antes de continuar
 
-## Usage
+## Uso
 
 ```
-/resume-session                                                      # loads most recent file in ~/.claude/session-data/
-/resume-session 2024-01-15                                           # loads most recent session for that date
-/resume-session ~/.claude/session-data/2024-01-15-abc123de-session.tmp  # loads a current short-id session file
-/resume-session ~/.claude/sessions/2024-01-15-session.tmp               # loads a specific legacy-format file
+/resume-session                                                      # carga el archivo más reciente en ~/.claude/session-data/
+/resume-session 2024-01-15                                           # carga la sesión más reciente para esa fecha
+/resume-session ~/.claude/session-data/2024-01-15-abc123de-session.tmp  # carga un archivo de sesión actual con id corto
+/resume-session ~/.claude/sessions/2024-01-15-session.tmp               # carga un archivo específico en formato heredado
 ```
 
-## Process
+## Proceso
 
-### Step 1: Find the session file
+### Paso 1: Encontrar el archivo de sesión
 
-If no argument provided:
+Si no se proporciona ningún argumento:
 
-1. Check `~/.claude/session-data/`
-2. Read the matching `*-session.tmp` candidates and apply the candidate ranking below
-3. Load the highest-ranked candidate
-4. If the folder does not exist or has no eligible matching files, tell the user:
+1. Revisa `~/.claude/session-data/`
+2. Lee los candidatos que coincidan con `*-session.tmp` y aplica la clasificación de candidatos siguiente
+3. Carga el candidato con mayor puntuación
+4. Si la carpeta no existe o no tiene archivos aptos coincidentes, informa al usuario:
    ```
-   No session files found in ~/.claude/session-data/
-   Run /save-session at the end of a session to create one.
+   No se encontraron archivos de sesión en ~/.claude/session-data/
+   Ejecuta /save-session al final de una sesión para crear uno.
    ```
-   Then stop.
+   Luego detén la ejecución.
 
-If an argument is provided:
+Si se proporciona un argumento:
 
-- If it looks like a date (`YYYY-MM-DD`), search `~/.claude/session-data/` first, then the legacy
-  `~/.claude/sessions/`, for files matching `YYYY-MM-DD-session.tmp` (legacy format) or
-  `YYYY-MM-DD-<shortid>-session.tmp` (current format), apply the candidate ranking below across
-  all matches, and load the highest-ranked candidate for that date
-- If it looks like a file path, read exactly that file directly. Do not apply candidate ranking or
-  substitute a different file, even if the requested file is empty or another file is newer
-- If not found, report clearly and stop
+- Si parece una fecha (`AAAA-MM-DD`), busca primero en `~/.claude/session-data/`, y luego en el directorio heredado
+  `~/.claude/sessions/`, archivos que coincidan con `AAAA-MM-DD-session.tmp` (formato heredado) o
+  `AAAA-MM-DD-<shortid>-session.tmp` (formato actual), aplica la clasificación de candidatos entre
+  todas las coincidencias y carga el candidato mejor clasificado para esa fecha
+- Si parece una ruta de archivo, lee exactamente ese archivo directamente. No apliques clasificación ni
+  sustituyas por otro archivo, incluso si el solicitado está vacío o existe otro más reciente
+- Si no se encuentra, infórmalo claramente y detén la ejecución
 
-#### Candidate ranking for implicit and date-based lookup
+#### Clasificación de candidatos para búsquedas implícitas o por fecha
 
-Rank only automatically discovered candidates. Never use this ranking for an explicit file path.
+Clasifica únicamente los candidatos descubiertos automáticamente. Nunca uses esta clasificación para una ruta de archivo explícita.
 
-1. Reject files that are unreadable, empty, whitespace-only, or contain only headings, metadata,
-   separators, and placeholder values such as `[Session context goes here]`, `- [ ]`, a lone `-`,
-   or `[relevant files]`.
-2. Reject generated summaries with only one task and no populated files-modified, tools-used,
-   completed, in-progress, notes, or context-to-load content. This structural rule filters
-   one-message summarizer echoes without depending on any particular prompt text.
-3. Keep candidates with substantive populated content: completed work, in-progress work, concrete
-   next-session notes, concrete context paths, multiple tasks, modified files, or tools used.
-4. Among eligible substantive candidates, prefer the newest modification time.
-5. If modification times are equal, prefer more populated sections, then more non-placeholder
-   content, then larger byte size, then the lexicographically smaller resolved path. Count populated
-   sections and content only after removing headings, metadata, separators, and placeholder text.
-   These final tie-breaks make selection deterministic.
+1. Descarta archivos que sean ilegibles, vacíos, solo de espacios en blanco o que solo contengan encabezados, metadatos,
+   separadores y valores de marcador de posición como `[Session context goes here]`, `- [ ]`, un simple `-` o `[relevant files]`.
+2. Descarta resúmenes generados con una sola tarea y sin contenido poblado en archivos modificados, herramientas usadas,
+   completadas, en progreso, notas o rutas de contexto a cargar. Esta regla estructural filtra
+   ecos de sintetizadores de un solo mensaje sin depender de textos específicos de prompt.
+3. Conserva candidatos con contenido sustancial poblado: trabajo completado, trabajo en progreso, notas concretas
+   para la siguiente sesión, rutas concretas de contexto, múltiples tareas, archivos modificados o herramientas utilizadas.
+4. Entre los candidatos sustanciales elegibles, prefiere la fecha de modificación más reciente.
+5. Si las fechas de modificación son iguales, prefiere más secciones pobladas, luego más contenido sin marcadores
+   de posición, luego mayor tamaño en bytes y finalmente la ruta resuelta lexicográficamente menor. Cuenta secciones
+   y contenido poblado solo tras retirar encabezados, metadatos, separadores y texto de relleno.
+   Estos desempates finales hacen que la selección sea determinista.
 
-### Step 2: Read the entire session file
+### Paso 2: Leer el archivo de sesión completo
 
-Read the complete file. Do not summarize yet.
+Lee el archivo en su totalidad. No lo resumas todavía.
 
-### Step 3: Confirm understanding
+### Paso 3: Confirmar comprensión
 
-Respond with a structured briefing in this exact format:
+Responde con un informe estructurado exactamente en este formato:
 
 ```
-SESSION LOADED: [actual resolved path to the file]
+SESIÓN CARGADA: [ruta real resuelta al archivo]
 ════════════════════════════════════════════════
 
-PROJECT: [project name / topic from file]
+PROYECTO: [nombre del proyecto / tema del archivo]
 
-WHAT WE'RE BUILDING:
-[2-3 sentence summary in your own words]
+QUÉ ESTAMOS CONSTRUYENDO:
+[resumen de 2-3 oraciones en tus propias palabras]
 
-CURRENT STATE:
-PASS: Working: [count] items confirmed
- In Progress: [list files that are in progress]
- Not Started: [list planned but untouched]
+ESTADO ACTUAL:
+PASS: Funcionando: [cantidad] elementos confirmados
+ En Progreso: [listar archivos que están en progreso]
+ No Iniciado: [listar planificados pero aún sin tocar]
 
-WHAT NOT TO RETRY:
-[list every failed approach with its reason — this is critical]
+QUÉ NO VOLVER A INTENTAR:
+[listar cada enfoque fallido con su motivo — esto es crítico]
 
-OPEN QUESTIONS / BLOCKERS:
-[list any blockers or unanswered questions]
+PREGUNTAS ABIERTAS / BLOQUEADORES:
+[listar bloqueadores o preguntas sin responder]
 
-NEXT STEP:
-[exact next step if defined in the file]
-[if not defined: "No next step defined — recommend reviewing 'What Has NOT Been Tried Yet' together before starting"]
+SIGUIENTE PASO:
+[siguiente paso exacto si está definido en el archivo]
+[si no está definido: "No se definió siguiente paso — se recomienda revisar 'Qué NO se ha intentado aún' juntos antes de comenzar"]
 
 ════════════════════════════════════════════════
-Ready to continue. What would you like to do?
+Listo para continuar. ¿Qué te gustaría hacer?
 ```
 
-### Step 4: Wait for the user
+### Paso 4: Esperar al usuario
 
-Do NOT start working automatically. Do NOT touch any files. Wait for the user to say what to do next.
+NO comiences a trabajar automáticamente. NO toques ningún archivo. Espera a que el usuario indique qué hacer a continuación.
 
-If the next step is clearly defined in the session file and the user says "continue" or "yes" or similar — proceed with that exact next step.
+Si el siguiente paso está claramente definido en el archivo de sesión y el usuario dice "continuar", "sí" o similar — procede con ese paso exacto.
 
-If no next step is defined — ask the user where to start, and optionally suggest an approach from the "What Has NOT Been Tried Yet" section.
+Si no hay siguiente paso definido — pregunta al usuario por dónde empezar y opcionalmente sugiere un enfoque de la sección "Qué NO se ha intentado aún".
 
 ---
 
-## Edge Cases
+## Casos Límite
 
-**Multiple sessions for the same date** (`2024-01-15-session.tmp`, `2024-01-15-abc123de-session.tmp`):
-Apply the candidate ranking across every matching legacy and current-format file. A substantive
-session must win over a newer placeholder or one-message summarizer echo; modification time decides
-between eligible candidates.
+**Múltiples sesiones para la misma fecha** (`2024-01-15-session.tmp`, `2024-01-15-abc123de-session.tmp`):
+Aplica la clasificación de candidatos entre cada archivo coincidente heredado y de formato actual. Una sesión sustancial
+debe prevalecer sobre un marcador de posición más reciente o un eco de un mensaje; la fecha de modificación decide entre candidatos elegibles.
 
-**Session file references files that no longer exist:**
-Note this during the briefing — "WARNING: `path/to/file.ts` referenced in session but not found on disk."
+**El archivo de sesión referencia archivos que ya no existen:**
+Indícalo durante el informe — "ADVERTENCIA: `path/to/file.ts` está referenciado en la sesión pero no fue encontrado en el disco."
 
-**Session file is from more than 7 days ago:**
-Note the gap — "WARNING: This session is from N days ago (threshold: 7 days). Things may have changed." — then proceed normally.
+**El archivo de sesión tiene más de 7 días:**
+Señala la brecha — "ADVERTENCIA: Esta sesión es de hace N días (umbral: 7 días). Las cosas pueden haber cambiado." — luego continúa normalmente.
 
-**User provides a file path directly (e.g., forwarded from a teammate):**
-Read it and follow the same briefing process — the format is the same regardless of source.
+**El usuario proporciona directamente una ruta de archivo (ej. enviada por un compañero):**
+Léela y sigue el mismo proceso de informe — el formato es el mismo independientemente del origen.
 
-**Session file is empty or malformed:**
-For implicit or date-based discovery, reject it and continue ranking the remaining candidates. If no
-eligible candidate remains, report: "Session files were found but appear empty or unreadable. You may
-need to create a new one with /save-session." For an explicit path, report that the requested file is
-empty or unreadable without loading a substitute.
+**El archivo de sesión está vacío o malformado:**
+Para descubrimiento implícito o por fecha, descártalo y continúa clasificando el resto de candidatos. Si no queda
+ningún candidato admisible, informa: "Se encontraron archivos de sesión pero parecen vacíos o ilegibles. Es posible
+que debas crear uno nuevo con /save-session." Para una ruta explícita, informa que el archivo solicitado está
+vacío o es ilegible sin cargar ningún sustituto.
 
 ---
 
-## Example Output
+## Ejemplo de Salida
 
 ```
-SESSION LOADED: /Users/you/.claude/session-data/2024-01-15-abc123de-session.tmp
+SESIÓN CARGADA: /Users/you/.claude/session-data/2024-01-15-abc123de-session.tmp
 ════════════════════════════════════════════════
 
-PROJECT: my-app — JWT Authentication
+PROYECTO: my-app — Autenticación JWT
 
-WHAT WE'RE BUILDING:
-User authentication with JWT tokens stored in httpOnly cookies.
-Register and login endpoints are partially done. Route protection
-via middleware hasn't been started yet.
+QUÉ ESTAMOS CONSTRUYENDO:
+Autenticación de usuarios con tokens JWT almacenados en cookies httpOnly.
+Los endpoints de registro e inicio de sesión están parcialmente listos. La protección de rutas
+mediante middleware aún no ha comenzado.
 
-CURRENT STATE:
-PASS: Working: 3 items (register endpoint, JWT generation, password hashing)
- In Progress: app/api/auth/login/route.ts (token works, cookie not set yet)
- Not Started: middleware.ts, app/login/page.tsx
+ESTADO ACTUAL:
+PASS: Funcionando: 3 elementos (endpoint de registro, generación de JWT, hash de contraseñas)
+ En Progreso: app/api/auth/login/route.ts (el token funciona, la cookie aún no se establece)
+ No Iniciado: middleware.ts, app/login/page.tsx
 
-WHAT NOT TO RETRY:
-FAIL: Next-Auth — conflicts with custom Prisma adapter, threw adapter error on every request
-FAIL: localStorage for JWT — causes SSR hydration mismatch, incompatible with Next.js
+QUÉ NO VOLVER A INTENTAR:
+FAIL: Next-Auth — genera conflicto con el adaptador personalizado de Prisma, arrojó error de adaptador en cada solicitud
+FAIL: localStorage para JWT — produce discordancia en la hidratación de SSR, incompatible con Next.js
 
-OPEN QUESTIONS / BLOCKERS:
-- Does cookies().set() work inside a Route Handler or only Server Actions?
+PREGUNTAS ABIERTAS / BLOQUEADORES:
+- ¿Funciona cookies().set() dentro de un Route Handler o únicamente en Server Actions?
 
-NEXT STEP:
-In app/api/auth/login/route.ts — set the JWT as an httpOnly cookie using
+SIGUIENTE PASO:
+En app/api/auth/login/route.ts — establecer el JWT como una cookie httpOnly usando
 cookies().set('token', jwt, { httpOnly: true, secure: true, sameSite: 'strict' })
-then test with Postman for a Set-Cookie header in the response.
+y luego probar con Postman para verificar el encabezado Set-Cookie en la respuesta.
 
 ════════════════════════════════════════════════
-Ready to continue. What would you like to do?
+Listo para continuar. ¿Qué te gustaría hacer?
 ```
 
 ---
 
-## Notes
+## Notas
 
-- Never modify the session file when loading it — it's a read-only historical record
-- The briefing format is fixed — do not skip sections even if they are empty
-- "What Not To Retry" must always be shown, even if it just says "None" — it's too important to miss
-- After resuming, the user may want to run `/save-session` again at the end of the new session to create a new dated file
+- Nunca modifiques el archivo de sesión al cargarlo — es un registro histórico de solo lectura
+- El formato del informe es fijo — no omitas secciones incluso si están vacías
+- "Qué no volver a intentar" debe mostrarse siempre, incluso si solo dice "Ninguno" — es demasiado importante para ignorarlo
+- Tras reanudar, el usuario puede querer ejecutar `/save-session` nuevamente al final de la nueva sesión para crear un nuevo archivo fechado

@@ -1,36 +1,31 @@
 ---
-description: Orchestrate bootstrapping a working MVP from a design/spec doc — ingest, slice, scaffold, TDD, review, gated commit (reuses the GAN harness). Wrapper for the orch-build-mvp skill.
+description: Orquesta la inicialización de un MVP funcional a partir de un documento de diseño/especificación — ingesta, partición en rebanadas (slices), andamiaje, TDD, revisión y commit controlado (reutiliza el harness GAN). Envoltorio para la skill orch-build-mvp.
 ---
 
 # /orch-build-mvp
 
-Manually launch the **orch-build-mvp** orchestrator: turn an SDD/PRD/system-design
-document into a running vertical slice.
+Inicia manualmente el orquestador **orch-build-mvp**: convierte un documento SDD/PRD/diseño de sistema en una rebanada vertical funcional de extremo a extremo.
 
-## Usage
+## Uso
 
 ```
-/orch-build-mvp <path to design/spec doc>
+/orch-build-mvp <ruta al documento de diseño/especificación>
 ```
 
-Examples:
+Ejemplos:
 
 ```
 /orch-build-mvp civicpulse/docs/SDD-v0.6.md
 ```
 
-## What It Does
+## Qué hace este comando
 
-Invoke the `orch-build-mvp` skill with `$ARGUMENTS` as the doc path. The skill
-(via the shared `orch-pipeline` engine, full pipeline incl. Scaffold) will:
+Invoca la skill `orch-build-mvp` pasando `$ARGUMENTS` como la ruta del documento. La skill
+(a través del motor compartido `orch-pipeline`, cubriendo el pipeline completo que incluye Scaffold):
 
-1. Read the spec; extract scope, locked decisions, and a feature list ordered as
-**thin vertical slices** (one end-to-end path first). → **GATE 1** (approve slice plan).
-2. Scaffold the first end-to-end slice.
-3. Reuse the GAN harness: translate the SDD into `gan-harness/spec.md` +
-   `eval-rubric.md`, then drive `/gan-build "<brief>" --skip-planner`
-   (generator → evaluator loop) until the score passes or plateaus.
-4. `code-reviewer` (+ `security-reviewer` on any security-trigger slice), then
-   commit the scaffold and each slice as separate `feat:` commits. → **GATE 2**.
+1. Leerá la especificación; extraerá el alcance, las decisiones fijadas y una lista de características ordenada en **rebanadas verticales delgadas** (un camino de extremo a extremo primero). → **CONTROL 1 (GATE 1)** (aprobar plan de rebanadas).
+2. Construirá el andamiaje (scaffolding) de la primera rebanada de extremo a extremo.
+3. Reutilizará el harness GAN: traducirá el SDD en `gan-harness/spec.md` + `eval-rubric.md`, y luego ejecutará `/gan-build "<brief>" --skip-planner` (bucle generador → evaluador) hasta que la puntuación apruebe o se estabilice.
+4. Ejecutará `code-reviewer` (+ `security-reviewer` ante cualquier rebanada que involucre seguridad), y realizará el commit del andamiaje y de cada rebanada como commits independientes con formato `feat:`. → **CONTROL 2 (GATE 2)**.
 
-If `$ARGUMENTS` is empty, ask the user for the path to the design/spec doc.
+Si `$ARGUMENTS` está vacío, solicita al usuario la ruta hacia el documento de diseño o especificación.

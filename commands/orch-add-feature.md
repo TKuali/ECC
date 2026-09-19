@@ -1,36 +1,36 @@
 ---
-description: Orchestrate building a brand-new feature end to end — research, plan, TDD, review, gated commit. Wrapper that kicks off the orch-add-feature skill.
+description: Orquesta la creación de una característica completamente nueva de principio a fin — investigación, plan, TDD, revisión y commit controlado. Envoltorio que activa la skill orch-add-feature.
 ---
 
 # /orch-add-feature
 
-Manually launch the **orch-add-feature** orchestrator: a gated
-Research → Plan → TDD → Review → Commit pipeline for net-new capability.
+Inicia manualmente el orquestador **orch-add-feature**: un pipeline estructurado de
+Investigación → Plan → TDD → Revisión → Commit para capacidades totalmente nuevas.
 
-## Usage
-
-```
-/orch-add-feature <what to add>
-```
-
-Examples:
+## Uso
 
 ```
-/orch-add-feature add OAuth2 login to nws-poller
-/orch-add-feature support CSV export in the dashboard
+/orch-add-feature <qué agregar>
 ```
 
-## What It Does
+Ejemplos:
 
-Invoke the `orch-add-feature` skill with `$ARGUMENTS` as the request. The skill
-(via the shared `orch-pipeline` engine) will:
+```
+/orch-add-feature añadir inicio de sesión OAuth2 a nws-poller
+/orch-add-feature soportar exportación CSV en el dashboard
+```
 
-1. Classify size and state the tier in one line.
-2. Research existing libraries/patterns, then plan a `task_list`. → **GATE 1** (approve plan).
-3. TDD each task (new failing tests → green), then `code-reviewer`
-   (+ `security-reviewer` if a security trigger is touched).
-4. Commit as conventional `feat:` commits. → **GATE 2** (confirm before commit).
+## Qué hace este comando
 
-Honor both gates — do not write implementation before Gate 1, do not commit before Gate 2.
+Invoca la skill `orch-add-feature` pasando `$ARGUMENTS` como la solicitud. La skill
+(a través del motor compartido `orch-pipeline`):
 
-If `$ARGUMENTS` is empty, ask the user what capability to add.
+1. Clasificará el tamaño e indicará el nivel en una sola línea.
+2. Investigará librerías/patrones existentes y planificará una `task_list`. → **CONTROL 1 (GATE 1)** (aprobar plan).
+3. Aplicará TDD a cada tarea (nuevas pruebas que fallan → verde) y luego invocará a `code-reviewer`
+   (+ `security-reviewer` si se tocan puntos críticos de seguridad).
+4. Realizará el commit siguiendo el formato convencional `feat:`. → **CONTROL 2 (GATE 2)** (confirmar antes del commit).
+
+Respeta ambos controles — no escribas implementación antes del Control 1, no realices commits antes del Control 2.
+
+Si `$ARGUMENTS` está vacío, consulta al usuario qué capacidad desea añadir.

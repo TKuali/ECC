@@ -1,66 +1,66 @@
 ---
-description: Detect the project build system and incrementally fix build/type errors with minimal safe changes.
+description: Detecta el sistema de compilación del proyecto y corrige incrementalmente errores de compilación y tipos con cambios mínimos y seguros.
 ---
 
-# Build and Fix
+# Compilar y Corregir (Build and Fix)
 
-Incrementally fix build and type errors with minimal, safe changes.
+Corrige incrementalmente errores de compilación y de tipos con cambios mínimos y seguros.
 
-## Step 1: Detect Build System
+## Paso 1: Detectar el Sistema de Compilación
 
-Identify the project's build tool and run the build:
+Identifica la herramienta de compilación del proyecto y ejecuta la compilación:
 
-| Indicator | Build Command |
-|-----------|---------------|
-| `package.json` with `build` script | `npm run build` or `pnpm build` |
-| `tsconfig.json` (TypeScript only) | `npx tsc --noEmit` |
+| Indicador | Comando de Compilación |
+|-----------|------------------------|
+| `package.json` con script `build` | `npm run build` o `pnpm build` |
+| `tsconfig.json` (solo TypeScript) | `npx tsc --noEmit` |
 | `Cargo.toml` | `cargo build 2>&1` |
 | `pom.xml` | `mvn compile` |
 | `build.gradle` | `./gradlew compileJava` |
 | `go.mod` | `go build ./...` |
-| `pyproject.toml` | `python -m compileall -q .` or `mypy .` |
+| `pyproject.toml` | `python -m compileall -q .` o `mypy .` |
 
-## Step 2: Parse and Group Errors
+## Paso 2: Analizar y Agrupar Errores
 
-1. Run the build command and capture stderr
-2. Group errors by file path
-3. Sort by dependency order (fix imports/types before logic errors)
-4. Count total errors for progress tracking
+1. Ejecuta el comando de compilación y captura stderr.
+2. Agrupa los errores por ruta de archivo.
+3. Ordena por orden de dependencia (corrige importaciones/tipos antes que errores de lógica).
+4. Cuenta el total de errores para el seguimiento del progreso.
 
-## Step 3: Fix Loop (One Error at a Time)
+## Paso 3: Bucle de Corrección (Un Error a la Vez)
 
-For each error:
+Para cada error:
 
-1. **Read the file** — Use Read tool to see error context (10 lines around the error)
-2. **Diagnose** — Identify root cause (missing import, wrong type, syntax error)
-3. **Fix minimally** — Use Edit tool for the smallest change that resolves the error
-4. **Re-run build** — Verify the error is gone and no new errors introduced
-5. **Move to next** — Continue with remaining errors
+1. **Leer el archivo** — Usa la herramienta de lectura para ver el contexto del error (10 líneas alrededor del error).
+2. **Diagnosticar** — Identifica la causa raíz (importación faltante, tipo incorrecto, error de sintaxis).
+3. **Corregir mínimamente** — Usa la herramienta de edición para aplicar el cambio más pequeño que resuelva el error.
+4. **Volver a compilar** — Verifica que el error haya desaparecido y que no se hayan introducido nuevos errores.
+5. **Avanzar al siguiente** — Continúa con los errores restantes.
 
-## Step 4: Guardrails
+## Paso 4: Medidas de Protección (Guardrails)
 
-Stop and ask the user if:
-- A fix introduces **more errors than it resolves**
-- The **same error persists after 3 attempts** (likely a deeper issue)
-- The fix requires **architectural changes** (not just a build fix)
-- Build errors stem from **missing dependencies** (need `npm install`, `cargo add`, etc.)
+Detente y consulta al usuario si:
+- Una corrección introduce **más errores de los que resuelve**.
+- El **mismo error persiste tras 3 intentos** (probablemente sea un problema más profundo).
+- La corrección requiere **cambios arquitectónicos** (no solo una corrección de compilación).
+- Los errores de compilación se deben a **dependencias faltantes** (se requiere `npm install`, `cargo add`, etc.).
 
-## Step 5: Summary
+## Paso 5: Resumen
 
-Show results:
-- Errors fixed (with file paths)
-- Errors remaining (if any)
-- New errors introduced (should be zero)
-- Suggested next steps for unresolved issues
+Muestra los resultados:
+- Errores corregidos (con rutas de archivo).
+- Errores restantes (si los hay).
+- Nuevos errores introducidos (debería ser cero).
+- Pasos siguientes sugeridos para problemas no resueltos.
 
-## Recovery Strategies
+## Estrategias de Recuperación
 
-| Situation | Action |
+| Situación | Acción |
 |-----------|--------|
-| Missing module/import | Check if package is installed; suggest install command |
-| Type mismatch | Read both type definitions; fix the narrower type |
-| Circular dependency | Identify cycle with import graph; suggest extraction |
-| Version conflict | Check `package.json` / `Cargo.toml` for version constraints |
-| Build tool misconfiguration | Read config file; compare with working defaults |
+| Módulo/importación faltante | Verifica si el paquete está instalado; sugiere el comando de instalación |
+| Discordancia de tipos | Lee ambas definiciones de tipos; ajusta el tipo más específico |
+| Dependencia circular | Identifica el ciclo con el gráfico de importaciones; sugiere extracción |
+| Conflicto de versiones | Revisa `package.json` / `Cargo.toml` para restricciones de versiones |
+| Mala configuración de la herramienta de compilación | Lee el archivo de configuración; compara con los valores predeterminados funcionales |
 
-Fix one error at a time for safety. Prefer minimal diffs over refactoring.
+Corrige un error a la vez por seguridad. Prefiere diffs mínimos en lugar de refactorizaciones grandes.

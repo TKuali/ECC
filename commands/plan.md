@@ -1,206 +1,206 @@
 ---
-description: Restate requirements, assess risks, and create step-by-step implementation plan. WAIT for user CONFIRM before touching any code.
-argument-hint: "[feature description | path/to/*.prd.md]"
+description: Reitera los requisitos, evalúa riesgos y crea un plan de implementación paso a paso. ESPERA la CONFIRMACIÓN del usuario antes de tocar cualquier código.
+argument-hint: "[descripción de la característica | ruta/hacia/*.prd.md]"
 ---
 
-# Plan Command
+# Comando Plan
 
-This command creates a comprehensive implementation plan before writing any code. It accepts either free-form requirements or a PRD markdown file.
+Este comando crea un plan de implementación exhaustivo antes de escribir una sola línea de código. Acepta tanto requisitos en texto libre como un archivo markdown de PRD.
 
-Run inline by default. Do not call the Task tool or any subagent by default. This keeps `/plan` usable from plugin installs that ship commands without agent files.
+Se ejecuta de forma integrada (inline) por defecto. No llames a la herramienta Task ni a ningún subagente de manera predeterminada. Esto mantiene a `/plan` funcional en instalaciones de plugins que solo distribuyen comandos sin archivos de agentes.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Restate Requirements** - Clarify what needs to be built
-2. **Identify Risks** - Surface potential issues and blockers
-3. **Create Step Plan** - Break down implementation into phases
-4. **Wait for Confirmation** - MUST receive user approval before proceeding
+1. **Reiterar Requisitos** - Aclara lo que se necesita construir
+2. **Identificar Riesgos** - Saca a la luz posibles problemas y bloqueadores
+3. **Crear Plan por Pasos** - Desglosa la implementación en fases
+4. **Esperar Confirmación** - DEBE recibir la aprobación del usuario antes de proceder
 
-## When to Use
+## Cuándo usarlo
 
-Use `/plan` when:
-- Starting a new feature
-- Making significant architectural changes
-- Working on complex refactoring
-- Multiple files/components will be affected
-- Requirements are unclear or ambiguous
+Usa `/plan` cuando:
+- Comiences una nueva característica
+- Realices cambios arquitectónicos significativos
+- Trabajes en refactorizaciones complejas
+- Múltiples archivos/componentes vayan a verse afectados
+- Los requisitos sean poco claros o ambiguos
 
-## How It Works
+## Cómo funciona
 
-The assistant will:
+El asistente:
 
-1. **Analyze the request** and restate requirements in clear terms
-2. **Ground the plan** in relevant codebase patterns when the repo is available
-3. **Break down into phases** with specific, actionable steps
-4. **Identify dependencies** between components
-5. **Assess risks** and potential blockers
-6. **Estimate complexity** (High/Medium/Low)
-7. **Present the plan** and WAIT for your explicit confirmation
+1. **Analizará la solicitud** y reiterará los requisitos en términos claros
+2. **Fundamentará el plan** en patrones relevantes del código base cuando el repositorio esté disponible
+3. **Desglosará en fases** con pasos específicos y accionables
+4. **Identificará dependencias** entre componentes
+5. **Evaluará riesgos** y bloqueadores potenciales
+6. **Estimará la complejidad** (Alta/Media/Baja)
+7. **Presentará el plan** y ESPERARÁ tu confirmación explícita
 
-## Input Modes
+## Modos de Entrada
 
-| Input | Mode | Behavior |
+| Entrada | Modo | Comportamiento |
 |---|---|---|
-| `path/to/name.prd.md` | PRD artifact mode | Read the PRD, pick the next pending delivery milestone or implementation phase, and write `.claude/plans/{name}.plan.md` |
-| Any other markdown path | Reference mode | Read the file as context and produce an inline plan |
-| Free-form text | Conversational mode | Produce an inline plan |
-| Empty input | Clarification mode | Ask what should be planned |
+| `ruta/hacia/nombre.prd.md` | Modo artefacto PRD | Lee el PRD, selecciona el siguiente hito de entrega o fase de implementación pendiente y escribe `.claude/plans/{nombre}.plan.md` |
+| Cualquier otra ruta markdown | Modo referencia | Lee el archivo como contexto y genera un plan inline |
+| Texto libre | Modo conversacional | Genera un plan inline |
+| Entrada vacía | Modo aclaración | Pregunta qué se desea planificar |
 
-In PRD artifact mode, create `.claude/plans/` if needed. If the PRD contains a `Delivery Milestones` table, update only the selected row from `pending` to `in-progress` and set its `Plan` cell to the generated plan path. If the PRD uses the legacy `.claude/PRPs/prds/` format with `Implementation Phases`, read it without migrating paths.
+En el modo artefacto PRD, crea `.claude/plans/` si es necesario. Si el PRD contiene una tabla de `Delivery Milestones`, actualiza solo la fila seleccionada de `pending` a `in-progress` y asigna en su celda `Plan` la ruta del plan generado. Si el PRD utiliza el formato heredado `.claude/PRPs/prds/` con `Implementation Phases`, léelo sin migrar las rutas.
 
-## Pattern Grounding
+## Fundamentación en Patrones (Pattern Grounding)
 
-Before writing the plan, search the codebase for conventions the implementation should mirror. Capture the top example for each relevant category with file references:
+Antes de redactar el plan, busca en el código base las convenciones que la implementación deba reflejar. Captura el ejemplo principal para cada categoría relevante con referencias a los archivos:
 
-| Category | What to capture |
+| Categoría | Qué capturar |
 |---|---|
-| Naming | File, function, type, command, or script naming in the affected area |
-| Error handling | How failures are raised, returned, logged, or handled gracefully |
-| Logging | Levels, format, and what gets logged |
-| Data access | Repository, service, query, or filesystem patterns |
-| Tests | Test file location, framework, fixtures, and assertion style |
+| Nomenclatura | Nombres de archivos, funciones, tipos, comandos o scripts en el área afectada |
+| Manejo de errores | Cómo se lanzan, devuelven, registran o gestionan los fallos de manera controlada |
+| Logging | Niveles, formato y qué eventos se registran |
+| Acceso a datos | Patrones de repositorio, servicio, consultas o sistema de archivos |
+| Pruebas | Ubicación de archivos de prueba, framework, fixtures y estilo de aserciones |
 
-If no similar code exists, state that explicitly. Do not invent a pattern.
+Si no existe código similar, indícalo explícitamente. No inventes un patrón.
 
-## PRD Artifact Output
+## Salida del Artefacto PRD
 
-When called with a `.prd.md` file, write the plan to `.claude/plans/{kebab-case-name}.plan.md` using this structure:
+Cuando se invoque con un archivo `.prd.md`, escribe el plan en `.claude/plans/{nombre-en-kebab-case}.plan.md` utilizando esta estructura:
 
 ````markdown
-# Plan: {Feature Name}
+# Plan: {Nombre de la Característica}
 
-**Source PRD**: {path}
-**Selected Milestone**: {milestone or phase name}
-**Complexity**: {Small | Medium | Large}
+**PRD de Origen**: {ruta}
+**Hito Seleccionado**: {nombre del hito o fase}
+**Complejidad**: {Pequeña | Mediana | Grande}
 
-## Summary
-{2-3 sentences}
+## Resumen
+{2-3 oraciones}
 
-## Patterns to Mirror
-| Category | Source | Pattern |
+## Patrones a Reflejar
+| Categoría | Origen | Patrón |
 |---|---|---|
-| Naming | `path:line` | {short description} |
-| Errors | `path:line` | {short description} |
-| Tests | `path:line` | {short description} |
+| Nomenclatura | `ruta:línea` | {descripción corta} |
+| Errores | `ruta:línea` | {descripción corta} |
+| Pruebas | `ruta:línea` | {descripción corta} |
 
-## Files to Change
-| File | Action | Why |
+## Archivos a Modificar
+| Archivo | Acción | Motivo |
 |---|---|---|
-| `path` | CREATE / UPDATE / DELETE | {reason} |
+| `ruta` | CREATE / UPDATE / DELETE | {motivo} |
 
-## Tasks
-### Task 1: {name}
-- **Action**: {what to do}
-- **Mirror**: {pattern to follow}
-- **Validate**: {command that proves correctness}
+## Tareas
+### Tarea 1: {nombre}
+- **Acción**: {qué hacer}
+- **Reflejar**: {patrón a seguir}
+- **Validar**: {comando que demuestra la corrección}
 
-## Validation
+## Validación
 ```bash
-{project-specific validation commands}
+{comandos de validación específicos del proyecto}
 ```
 
-## Risks
-| Risk | Likelihood | Mitigation |
+## Riesgos
+| Riesgo | Probabilidad | Mitigación |
 |---|---|---|
 
-## Acceptance
-- [ ] All tasks complete
-- [ ] Validation passes
-- [ ] Patterns mirrored, not reinvented
+## Aceptación
+- [ ] Todas las tareas completadas
+- [ ] La validación pasa con éxito
+- [ ] Patrones reflejados, no reinventados
 ````
 
-After writing the artifact, report its path and WAIT for confirmation before writing code.
+Tras escribir el artefacto, reporta su ruta y ESPERA la confirmación antes de escribir código.
 
-> **Visual review:** instead of asking for a typed confirmation, you can open the
-> artifact in the browser Plan Canvas (`/plan-canvas`, or the `plan-canvas` skill):
-> the user annotates the plan in place and clicks **Approve plan** or **Request
-> changes**, which arrives as your confirmation signal.
+> **Revisión visual:** en lugar de solicitar una confirmación por texto, puedes abrir el
+> artefacto en el Plan Canvas del navegador (`/plan-canvas` o la skill `plan-canvas`):
+> el usuario anota el plan en la misma página y hace clic en **Approve plan** o **Request
+> changes**, lo cual llega como tu señal de confirmación.
 
-## Example Usage
+## Ejemplo de Uso
 
 ```
-User: /plan I need to add real-time notifications when markets resolve
+Usuario: /plan Necesito añadir notificaciones en tiempo real cuando los mercados se resuelvan
 
-Assistant:
-# Implementation Plan: Real-Time Market Resolution Notifications
+Asistente:
+# Plan de Implementación: Notificaciones en Tiempo Real para Resolución de Mercados
 
-## Requirements Restatement
-- Send notifications to users when markets they're watching resolve
-- Support multiple notification channels (in-app, email, webhook)
-- Ensure notifications are delivered reliably
-- Include market outcome and user's position result
+## Reiteración de Requisitos
+- Enviar notificaciones a los usuarios cuando se resuelvan los mercados que siguen
+- Admitir múltiples canales de notificación (en la app, correo, webhook)
+- Garantizar que las notificaciones se entreguen de forma confiable
+- Incluir el resultado del mercado y el resultado de la posición del usuario
 
-## Implementation Phases
+## Fases de Implementación
 
-### Phase 1: Database Schema
-- Add notifications table with columns: id, user_id, market_id, type, status, created_at
-- Add user_notification_preferences table for channel preferences
-- Create indexes on user_id and market_id for performance
+### Fase 1: Esquema de Base de Datos
+- Añadir tabla de notificaciones con columnas: id, user_id, market_id, type, status, created_at
+- Añadir tabla user_notification_preferences para preferencias de canal
+- Crear índices en user_id y market_id para rendimiento
 
-### Phase 2: Notification Service
-- Create notification service in lib/notifications.ts
-- Implement notification queue using BullMQ/Redis
-- Add retry logic for failed deliveries
-- Create notification templates
+### Fase 2: Servicio de Notificaciones
+- Crear servicio de notificaciones en lib/notifications.ts
+- Implementar cola de notificaciones usando BullMQ/Redis
+- Añadir lógica de reintento para entregas fallidas
+- Crear plantillas de notificación
 
-### Phase 3: Integration Points
-- Hook into market resolution logic (when status changes to "resolved")
-- Query all users with positions in market
-- Enqueue notifications for each user
+### Fase 3: Puntos de Integración
+- Conectar con la lógica de resolución de mercado (cuando el estado cambie a "resolved")
+- Consultar todos los usuarios con posiciones en el mercado
+- Encolar notificaciones para cada usuario
 
-### Phase 4: Frontend Components
-- Create NotificationBell component in header
-- Add NotificationList modal
-- Implement real-time updates via Supabase subscriptions
-- Add notification preferences page
+### Fase 4: Componentes de Frontend
+- Crear componente NotificationBell en el encabezado
+- Añadir modal NotificationList
+- Implementar actualizaciones en tiempo real mediante suscripciones de Supabase
+- Añadir página de preferencias de notificación
 
-## Dependencies
-- Redis (for queue)
-- Email service (SendGrid/Resend)
-- Supabase real-time subscriptions
+## Dependencias
+- Redis (para la cola)
+- Servicio de correo (SendGrid/Resend)
+- Suscripciones en tiempo real de Supabase
 
-## Risks
-- HIGH: Email deliverability (SPF/DKIM required)
-- MEDIUM: Performance with 1000+ users per market
-- MEDIUM: Notification spam if markets resolve frequently
-- LOW: Real-time subscription overhead
+## Riesgos
+- ALTO: Entregabilidad del correo (requiere SPF/DKIM)
+- MEDIO: Rendimiento con más de 1000 usuarios por mercado
+- MEDIO: Spam de notificaciones si los mercados se resuelven con frecuencia
+- BAJO: Sobrecarga de suscripciones en tiempo real
 
-## Estimated Complexity: MEDIUM
-- Backend: 4-6 hours
-- Frontend: 3-4 hours
-- Testing: 2-3 hours
-- Total: 9-13 hours
+## Complejidad Estimada: MEDIA
+- Backend: 4-6 horas
+- Frontend: 3-4 horas
+- Pruebas: 2-3 horas
+- Total: 9-13 horas
 
-**WAITING FOR CONFIRMATION**: Proceed with this plan? (yes/no/modify)
+**ESPERANDO CONFIRMACIÓN**: ¿Deseas continuar con este plan? (sí/no/modificar)
 ```
 
-## Important Notes
+## Notas Importantes
 
-**CRITICAL**: This command will **NOT** write any code until you explicitly confirm the plan with "yes" or "proceed" or similar affirmative response.
+**CRÍTICO**: Este comando **NO** escribirá ningún código hasta que confirmes explícitamente el plan con "sí", "proceder" o una respuesta afirmativa equivalente.
 
-If you want changes, respond with:
-- "modify: [your changes]"
-- "different approach: [alternative]"
-- "skip phase 2 and do phase 3 first"
+Si deseas cambios, responde con:
+- "modificar: [tus cambios]"
+- "enfoque diferente: [alternativa]"
+- "omitir la fase 2 y realizar la fase 3 primero"
 
-## Integration with Other Commands
+## Integración con Otros Comandos
 
-After planning:
-- Use `/plan-canvas` to run the confirmation gate visually in the browser (annotate + approve)
-- Use the `tdd-workflow` skill to implement with test-driven development
-- Use `/build-fix` if build errors occur
-- Use `/code-review` to review completed implementation
-- Use `/pr` or `/prp-pr` to open a pull request
+Después de planificar:
+- Usa `/plan-canvas` para gestionar la aprobación de manera visual en el navegador (anotar + aprobar)
+- Usa la skill `tdd-workflow` para implementar guiado por pruebas
+- Usa `/build-fix` si se presentan errores de compilación
+- Usa `/code-review` para revisar la implementación terminada
+- Usa `/pr` o `/prp-pr` para abrir un pull request
 
-> **Need requirements first?** Use `/plan-prd` for a lean PRD at `.claude/prds/{name}.prd.md`.
+> **¿Necesitas primero definir los requisitos?** Usa `/plan-prd` para generar un PRD ágil en `.claude/prds/{nombre}.prd.md`.
 >
-> **Need the legacy PRP flow?** Use `/prp-plan` for deep PRP planning with `.claude/PRPs/` artifacts. Use `/prp-implement` to execute those plans with rigorous validation loops.
+> **¿Necesitas el flujo PRP heredado?** Usa `/prp-plan` para una planificación profunda con artefactos en `.claude/PRPs/`. Usa `/prp-implement` para ejecutar esos planes con bucles de validación rigurosos.
 
-## Optional Planner Agent
+## Agente Planner Opcional
 
-ECC also provides a `planner` agent for manual installs that include agent files. Use it only when the local runtime already exposes that subagent and the user explicitly asks you to delegate planning.
+ECC también incluye un agente `planner` para instalaciones manuales que incluyen archivos de agentes. Úsalo solo cuando el entorno local ya exponga ese subagente y el usuario solicite explícitamente delegar la planificación.
 
-If the `planner` subagent is unavailable, continue planning inline instead of surfacing an "Agent type 'planner' not found" error.
+Si el subagente `planner` no está disponible, continúa planificando de manera inline en lugar de mostrar un error de tipo "Agent type 'planner' not found".
 
-For manual installs, the source file lives at:
+Para instalaciones manuales, el archivo fuente reside en:
 `agents/planner.md`

@@ -1,39 +1,34 @@
 ---
-description: Orchestrate a behavior-preserving refactor — confirm tests green, restructure without changing behavior, keep green, review, gated commit. Wrapper for the orch-refine-code skill.
+description: Orquesta una refactorización que preserva el comportamiento — confirma que las pruebas estén en verde, reestructura sin alterar el comportamiento, mantiene las pruebas en verde, revisa y realiza un commit controlado. Envoltorio para la skill orch-refine-code.
 ---
 
 # /orch-refine-code
 
-Manually launch the **orch-refine-code** orchestrator: improve structure while
-behavior stays identical, with the existing test suite as the safety net.
+Inicia manualmente el orquestador **orch-refine-code**: mejora la estructura manteniendo el comportamiento exactamente idéntico, utilizando la suite de pruebas existente como red de seguridad.
 
-## Usage
-
-```
-/orch-refine-code <what to restructure>
-```
-
-Examples:
+## Uso
 
 ```
-/orch-refine-code extract the NWS HTTP client out of poller.py
-/orch-refine-code remove dead code and duplication in the dashboard module
+/orch-refine-code <qué reestructurar>
 ```
 
-## What It Does
+Ejemplos:
 
-Invoke the `orch-refine-code` skill with `$ARGUMENTS` as the request. The skill
-(via the shared `orch-pipeline` engine) will:
+```
+/orch-refine-code extraer el cliente HTTP de NWS fuera de poller.py
+/orch-refine-code eliminar código muerto y duplicación en el módulo dashboard
+```
 
-1. Classify size (default floor: standard — restructures touch multiple files).
-2. Confirm the relevant tests exist and are **green before** touching code; add
-   characterization tests first if coverage is thin. Plan the restructure. → **GATE 1**.
-3. Restructure in small steps, re-running tests after each (no new behavior
-   tests — the existing suite proves behavior is unchanged). Dead-code/dup sweeps
-   delegate to `refactor-cleaner`.
-4. `code-reviewer`, then commit as `refactor:` (the diff must be behavior-neutral). → **GATE 2**.
+## Qué hace este comando
 
-Use this only when behavior must **not** change. If behavior should change at
-all, use `/orch-change-feature` or `/orch-fix-defect`.
+Invoca la skill `orch-refine-code` pasando `$ARGUMENTS` como la solicitud. La skill
+(a través del motor compartido `orch-pipeline`):
 
-If `$ARGUMENTS` is empty, ask the user what to refine.
+1. Clasificará el tamaño (base predeterminada: estándar — las reestructuraciones tocan múltiples archivos).
+2. Confirmará que las pruebas relevantes existan y estén en **verde antes** de tocar el código; añadirá pruebas de caracterización primero si la cobertura es escasa. Planificará la reestructuración. → **CONTROL 1 (GATE 1)**.
+3. Reestructurará en pasos pequeños, volviendo a ejecutar las pruebas tras cada cambio (sin nuevas pruebas de comportamiento — la suite existente demuestra que el comportamiento no cambió). Las limpiezas de código muerto y duplicados se delegan a `refactor-cleaner`.
+4. Ejecutará `code-reviewer`, y realizará el commit como `refactor:` (el diff debe ser neutro en comportamiento). → **CONTROL 2 (GATE 2)**.
+
+Usa este comando únicamente cuando el comportamiento **no deba** cambiar. Si el comportamiento debe modificarse en absoluto, usa `/orch-change-feature` o `/orch-fix-defect`.
+
+Si `$ARGUMENTS` está vacío, consulta al usuario qué desea refactorizar o pulir.

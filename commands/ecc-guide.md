@@ -1,12 +1,12 @@
 ---
-description: Navigate ECC's current agents, skills, commands, hooks, install profiles, and docs from the live repository surface.
+description: Navega por los agentes, habilidades, comandos, hooks, perfiles de instalación y documentación actuales de ECC desde la superficie viva del repositorio.
 ---
 
 # /ecc-guide
 
-Use this command as a conversational map of Everything Claude Code. It should help the user discover the right ECC surface for their task without dumping the entire README or stale catalog counts.
+Usa este comando como un mapa interactivo de Everything Claude Code. Ayuda al usuario a descubrir el componente adecuado de ECC para su tarea sin volcar todo el README ni conteos de catálogo desactualizados.
 
-## Usage
+## Uso
 
 ```text
 /ecc-guide
@@ -15,79 +15,79 @@ Use this command as a conversational map of Everything Claude Code. It should he
 /ecc-guide commands
 /ecc-guide hooks
 /ecc-guide install
-/ecc-guide find: <query>
-/ecc-guide <feature-or-file-name>
+/ecc-guide find: <consulta>
+/ecc-guide <nombre-de-archivo-o-funcionalidad>
 ```
 
-## Operating Rules
+## Reglas de Operación
 
-1. Read current repository files before answering when the checkout is available.
-2. Prefer current filesystem/catalog data over hard-coded counts.
-3. Keep the first answer short, then offer specific drill-down paths.
-4. Link users to canonical files instead of copying long sections.
-5. Do not invent commands, skills, agents, or install profiles that are not present.
+1. Leer los archivos actuales del repositorio antes de responder cuando el checkout esté disponible.
+2. Preferir datos actuales del sistema de archivos/catálogo frente a conteos prefijados.
+3. Mantener la primera respuesta breve, ofreciendo luego opciones específicas de profundización.
+4. Enlazar a los usuarios con los archivos canónicos en lugar de copiar secciones extensas.
+5. No inventar comandos, habilidades, agentes o perfiles de instalación que no estén presentes.
 
-## What To Inspect
+## Qué Inspeccionar
 
-Use these files as the canonical map:
+Usar estos archivos como mapa canónico:
 
-- `README.md` for install paths, reset/uninstall guidance, and high-level positioning
-- `AGENTS.md` for contributor and project-structure guidance
-- `agent.yaml` for exported agent and command surface
-- `commands/` for maintained slash-command shims
-- `skills/*/SKILL.md` for reusable skill workflows
-- `agents/*.md` for delegated agent roles
-- `hooks/README.md` and `hooks/hooks.json` for hook behavior
-- `manifests/install-*.json` for selective install modules, components, and profiles
-- `scripts/ci/catalog.js --json` for live catalog counts when running inside ECC
+- `README.md` para rutas de instalación, guía de reinicio/desinstalación y posicionamiento general
+- `AGENTS.md` para guía de colaboradores y estructura del proyecto
+- `agent.yaml` para la superficie exportada de agentes y comandos
+- `commands/` para adaptadores (shims) de comandos de barra diagonal mantenidos
+- `skills/*/SKILL.md` para flujos de trabajo reutilizables de habilidades
+- `agents/*.md` para roles de agentes delegados
+- `hooks/README.md` y `hooks/hooks.json` para el comportamiento de los hooks
+- `manifests/install-*.json` para módulos de instalación selectiva, componentes y perfiles
+- `scripts/ci/catalog.js --json` para conteos en vivo del catálogo al ejecutar dentro de ECC
 
-## Response Patterns
+## Patrones de Respuesta
 
-### No Arguments
+### Sin Argumentos
 
-Give a compact menu:
+Ofrecer un menú compacto:
 
-- setup and install
-- choosing skills
-- command compatibility shims
-- agents and delegation
-- hooks and safety
-- troubleshooting an install
-- finding a specific feature
+- configuración e instalación
+- elección de habilidades
+- adaptadores de compatibilidad de comandos
+- agentes y delegación
+- hooks y seguridad
+- resolución de problemas de instalación
+- búsqueda de una funcionalidad específica
 
-Then ask what they want to do next.
+Luego preguntar qué desea hacer a continuación.
 
-### Topic Lookup
+### Búsqueda por Tema
 
-For topics like `skills`, `commands`, `hooks`, `install`, or `agents`:
+Para temas como `skills`, `commands`, `hooks`, `install` o `agents`:
 
-1. Summarize the current surface in 3-6 bullets.
-2. Point to the canonical directories/files.
-3. Suggest one or two commands that can verify the state.
-4. Avoid exhaustive lists unless the user asks for one.
+1. Resumir la superficie actual en 3 a 6 viñetas.
+2. Apuntar a los directorios/archivos canónicos.
+3. Sugerir uno o dos comandos que puedan verificar el estado.
+4. Evitar listas exhaustivas a menos que el usuario lo solicite.
 
-### Search Mode
+### Modo de Búsqueda
 
-For `find: <query>`:
+Para `find: <consulta>`:
 
-1. Search the relevant files with `rg`.
-2. Group results by surface: skills, commands, agents, rules, docs, hooks.
-3. Return the strongest matches first with file paths.
-4. Recommend the next action for each match.
+1. Buscar en los archivos relevantes con `rg`.
+2. Agrupar resultados por tipo: habilidades, comandos, agentes, reglas, docs, hooks.
+3. Retornar las coincidencias más sólidas primero con rutas de archivo.
+4. Recomendar la acción siguiente para cada coincidencia.
 
-### Feature Lookup
+### Búsqueda por Funcionalidad
 
-For a specific feature name:
+Para un nombre de funcionalidad específico:
 
-1. Check exact paths first, such as `skills/<name>/SKILL.md`, `commands/<name>.md`, and `agents/<name>.md`.
-2. If exact lookup fails, search with `rg`.
-3. Explain what the feature does, when to use it, and what file is canonical.
-4. Mention adjacent features only when they reduce confusion.
+1. Comprobar primero las rutas exactas, como `skills/<name>/SKILL.md`, `commands/<name>.md` y `agents/<name>.md`.
+2. Si la búsqueda exacta no tiene éxito, buscar con `rg`.
+3. Explicar qué hace la funcionalidad, cuándo usarla y cuál es el archivo canónico.
+4. Mencionar funcionalidades adyacentes solo si reducen la confusión.
 
-## Related Commands
+## Comandos Relacionados
 
-- `/project-init` for stack-aware ECC onboarding of a target project
-- `/harness-audit` for deterministic repo readiness scoring
-- `/skill-health` for skill quality checks
-- `/skill-create` for extracting a new skill from local git history
-- `/security-scan` for Claude/OpenCode configuration security review
+- `/project-init` para incorporación adaptada al stack tecnológico de un proyecto objetivo
+- `/harness-audit` para puntuación determinista de preparación del repositorio
+- `/skill-health` para revisiones de calidad de habilidades
+- `/skill-create` para extraer una nueva habilidad del historial local de git
+- `/security-scan` para revisión de seguridad de la configuración de Claude/OpenCode

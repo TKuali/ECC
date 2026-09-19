@@ -1,142 +1,142 @@
 ---
-description: Comprehensive Rust code review for ownership, lifetimes, error handling, unsafe usage, and idiomatic patterns. Invokes the rust-reviewer agent.
+description: Revisión exhaustiva de código Rust para comprobación de propiedad (ownership), tiempos de vida (lifetimes), manejo de errores, uso de unsafe y patrones idiomáticos. Invoca al agente rust-reviewer.
 ---
 
-# Rust Code Review
+# Revisión de Código Rust
 
-This command invokes the **rust-reviewer** agent for comprehensive Rust-specific code review.
+Este comando invoca al agente **rust-reviewer** para una revisión de código exhaustiva y especializada en Rust.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Verify Automated Checks**: Run `cargo check`, `cargo clippy -- -D warnings`, `cargo fmt --check`, and `cargo test` — stop if any fail
-2. **Identify Rust Changes**: Find modified `.rs` files via `git diff HEAD~1` (or `git diff main...HEAD` for PRs)
-3. **Run Security Audit**: Execute `cargo audit` if available
-4. **Security Scan**: Check for unsafe usage, command injection, hardcoded secrets
-5. **Ownership Review**: Analyze unnecessary clones, lifetime issues, borrowing patterns
-6. **Generate Report**: Categorize issues by severity
+1. **Verificar Comprobaciones Automatizadas**: Ejecuta `cargo check`, `cargo clippy -- -D warnings`, `cargo fmt --check` y `cargo test` — se detiene si alguna falla
+2. **Identificar Cambios en Rust**: Encuentra archivos `.rs` modificados mediante `git diff HEAD~1` (o `git diff main...HEAD` para PRs)
+3. **Ejecutar Auditoría de Seguridad**: Ejecuta `cargo audit` si está disponible
+4. **Escaneo de Seguridad**: Comprueba el uso de código `unsafe`, inyección de comandos y credenciales hardcodeadas
+5. **Revisión de Propiedad (Ownership)**: Analiza clonaciones innecesarias, problemas de lifetimes y patrones de préstamo
+6. **Generar Reporte**: Categoriza problemas por severidad
 
-## When to Use
+## Cuándo usarlo
 
-Use `/rust-review` when:
-- After writing or modifying Rust code
-- Before committing Rust changes
-- Reviewing pull requests with Rust code
-- Onboarding to a new Rust codebase
-- Learning idiomatic Rust patterns
+Usa `/rust-review` cuando:
+- Después de escribir o modificar código Rust
+- Antes de confirmar cambios (commit) en Rust
+- Al revisar pull requests con código Rust
+- Al incorporarse a un nuevo proyecto en Rust
+- Para aprender patrones idiomáticos de Rust
 
-## Review Categories
+## Categorías de Revisión
 
-### CRITICAL (Must Fix)
-- Unchecked `unwrap()`/`expect()` in production code paths
-- `unsafe` without `// SAFETY:` comment documenting invariants
-- SQL injection via string interpolation in queries
-- Command injection via unvalidated input in `std::process::Command`
-- Hardcoded credentials
-- Use-after-free via raw pointers
+### CRÍTICO (Debe Corregirse)
+- Uso de `unwrap()`/`expect()` sin comprobar en rutas de código de producción
+- Bloques `unsafe` sin comentario `// SAFETY:` que documente sus invariantes
+- Inyección SQL mediante interpolación de cadenas en consultas
+- Inyección de comandos mediante entradas no validadas en `std::process::Command`
+- Credenciales hardcodeadas
+- Uso tras liberación (use-after-free) mediante punteros crudos (`raw pointers`)
 
-### HIGH (Should Fix)
-- Unnecessary `.clone()` to satisfy borrow checker
-- `String` parameter where `&str` or `impl AsRef<str>` suffices
-- Blocking in async context (`std::thread::sleep`, `std::fs`)
-- Missing `Send`/`Sync` bounds on shared types
-- Wildcard `_ =>` match on business-critical enums
-- Large functions (>50 lines)
+### ALTO (Debería Corregirse)
+- Uso innecesario de `.clone()` para satisfacer al borrow checker
+- Parámetro de tipo `String` donde un `&str` o `impl AsRef<str>` sea suficiente
+- Bloqueos en contexto asíncrono (`std::thread::sleep`, `std::fs`)
+- Límites `Send`/`Sync` faltantes en tipos compartidos
+- Coincidencia comodín `_ =>` en enumeraciones críticas para el negocio
+- Funciones extensas (>50 líneas)
 
-### MEDIUM (Consider)
-- Unnecessary allocation in hot paths
-- Missing `with_capacity` when size is known
-- Suppressed clippy warnings without justification
-- Public API without `///` documentation
-- Consider `#[must_use]` on non-`must_use` return types where ignoring values is likely a bug
+### MEDIO (A Considerar)
+- Asignaciones de memoria innecesarias en rutas críticas (hot paths)
+- Falta de `with_capacity` cuando el tamaño es conocido
+- Advertencias de Clippy suprimidas sin justificación
+- API pública sin documentación `///`
+- Considerar `#[must_use]` en tipos de retorno donde ignorar el valor represente un probable error
 
-## Automated Checks Run
+## Comprobaciones Automatizadas Ejecutadas
 
 ```bash
-# Build gate (must pass before review)
+# Puerta de compilación (debe pasar antes de la revisión)
 cargo check
 
-# Lints and suggestions
+# Lints y sugerencias
 cargo clippy -- -D warnings
 
-# Formatting
+# Formateo
 cargo fmt --check
 
-# Tests
+# Pruebas
 cargo test
 
-# Security audit (if available)
-if command -v cargo-audit >/dev/null; then cargo audit; else echo "cargo-audit not installed"; fi
+# Auditoría de seguridad (si está disponible)
+if command -v cargo-audit >/dev/null; then cargo audit; else echo "cargo-audit no instalado"; fi
 ```
 
-## Example Usage
+## Ejemplo de Uso
 
 ````text
-User: /rust-review
+Usuario: /rust-review
 
-Agent:
-# Rust Code Review Report
+Agente:
+# Reporte de Revisión de Código Rust
 
-## Files Reviewed
-- src/service/user.rs (modified)
-- src/handler/api.rs (modified)
+## Archivos Revisados
+- src/service/user.rs (modificado)
+- src/handler/api.rs (modificado)
 
-## Static Analysis Results
-- Build: Successful
-- Clippy: No warnings
-- Formatting: Passed
-- Tests: All passing
+## Resultados de Análisis Estático
+- Compilación: Exitosa
+- Clippy: Sin advertencias
+- Formato: Aprobado
+- Pruebas: Todas aprobadas
 
-## Issues Found
+## Problemas Encontrados
 
-[CRITICAL] Unchecked unwrap in Production Path
-File: src/service/user.rs:28
-Issue: Using `.unwrap()` on database query result
+[CRITICAL] unwrap sin comprobar en Ruta de Producción
+Archivo: src/service/user.rs:28
+Problema: Uso de `.unwrap()` en el resultado de una consulta a la base de datos
 ```rust
-let user = db.find_by_id(id).unwrap();  // Panics on missing user
+let user = db.find_by_id(id).unwrap();  // Pánico si el usuario no existe
 ```
-Fix: Propagate error with context
+Solución: Propagar el error con contexto
 ```rust
 let user = db.find_by_id(id)
     .context("failed to fetch user")?;
 ```
 
-[HIGH] Unnecessary Clone
-File: src/handler/api.rs:45
-Issue: Cloning String to satisfy borrow checker
+[HIGH] Clonación Innecesaria
+Archivo: src/handler/api.rs:45
+Problema: Clonar String para satisfacer al borrow checker
 ```rust
 let name = user.name.clone();
 process(&user, &name);
 ```
-Fix: Restructure to avoid clone
+Solución: Reestructurar para evitar el clonado
 ```rust
 let result = process_name(&user.name);
 use_user(&user, result);
 ```
 
-## Summary
+## Resumen
 - CRITICAL: 1
 - HIGH: 1
 - MEDIUM: 0
 
-Recommendation: Block merge until CRITICAL issue is fixed
+Recomendación: Bloquear fusión hasta corregir problemas CRITICAL
 ````
 
-## Approval Criteria
+## Criterios de Aprobación
 
-| Status | Condition |
+| Estado | Condición |
 |--------|-----------|
-| Approve | No CRITICAL or HIGH issues |
-| Warning | Only MEDIUM issues (merge with caution) |
-| Block | CRITICAL or HIGH issues found |
+| Aprobar | Sin problemas CRITICAL o HIGH |
+| Advertencia | Solo problemas MEDIUM (fusionar con precaución) |
+| Bloquear | Problemas CRITICAL o HIGH encontrados |
 
-## Integration with Other Commands
+## Integración con Otros Comandos
 
-- Use `/rust-test` first to ensure tests pass
-- Use `/rust-build` if build errors occur
-- Use `/rust-review` before committing
-- Use `/code-review` for non-Rust-specific concerns
+- Usa `/rust-test` primero para asegurar que las pruebas pasen
+- Usa `/rust-build` si ocurren errores de compilación
+- Usa `/rust-review` antes de hacer commit
+- Usa `/code-review` para aspectos generales independientes de Rust
 
-## Related
+## Relacionado
 
-- Agent: `agents/rust-reviewer.md`
+- Agente: `agents/rust-reviewer.md`
 - Skills: `skills/rust-patterns/`, `skills/rust-testing/`

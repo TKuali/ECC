@@ -1,45 +1,45 @@
 ---
 name: instinct-export
-description: Export instincts from project/global scope to a file
+description: Exporta instintos del ámbito de proyecto/global a un archivo
 command: /instinct-export
 ---
 
-# Instinct Export Command
+# Comando Instinct Export
 
-Exports instincts to a shareable format. Perfect for:
-- Sharing with teammates
-- Transferring to a new machine
-- Contributing to project conventions
+Exporta instintos a un formato compartible. Ideal para:
+- Compartir con compañeros de equipo
+- Transferir a una nueva máquina
+- Contribuir a las convenciones del proyecto
 
-## Usage
+## Uso
 
 ```
-/instinct-export                           # Export all personal instincts
-/instinct-export --domain testing          # Export only testing instincts
-/instinct-export --min-confidence 0.7      # Only export high-confidence instincts
+/instinct-export                           # Exportar todos los instintos personales
+/instinct-export --domain testing          # Exportar solo instintos de testing
+/instinct-export --min-confidence 0.7      # Exportar solo instintos de alta confianza
 /instinct-export --output team-instincts.yaml
 /instinct-export --scope project --output project-instincts.yaml
 ```
 
-## What to Do
+## Qué Hacer
 
-1. Detect current project context
-2. Load instincts by selected scope:
-   - `project`: current project only
-   - `global`: global only
-   - `all`: project + global merged (default)
-3. Apply filters (`--domain`, `--min-confidence`)
-4. Write YAML-style export to file (or stdout if no output path provided)
+1. Detectar el contexto del proyecto actual
+2. Cargar instintos según el ámbito seleccionado:
+   - `project`: solo el proyecto actual
+   - `global`: solo global
+   - `all`: proyecto + global combinados (por defecto)
+3. Aplicar filtros (`--domain`, `--min-confidence`)
+4. Escribir la exportación en formato YAML en un archivo (o en stdout si no se proporciona ruta de salida)
 
-## Output Format
+## Formato de Salida
 
-Creates a YAML file:
+Crea un archivo YAML:
 
 ```yaml
-# Instincts Export
-# Generated: 2025-01-22
-# Source: personal
-# Count: 12 instincts
+# Exportación de Instintos
+# Generado: 2025-01-22
+# Origen: personal
+# Total: 12 instintos
 
 ---
 id: prefer-functional-style
@@ -52,15 +52,15 @@ project_id: a1b2c3d4e5f6
 project_name: my-app
 ---
 
-# Prefer Functional Style
+# Preferir Estilo Funcional
 
-## Action
-Use functional patterns over classes.
+## Acción
+Usar patrones funcionales por encima de clases.
 ```
 
-## Flags
+## Banderas (Flags)
 
-- `--domain <name>`: Export only specified domain
-- `--min-confidence <n>`: Minimum confidence threshold
-- `--output <file>`: Output file path (prints to stdout when omitted)
-- `--scope <project|global|all>`: Export scope (default: `all`)
+- `--domain <nombre>`: Exportar únicamente el dominio especificado
+- `--min-confidence <n>`: Umbral mínimo de confianza
+- `--output <archivo>`: Ruta del archivo de salida (imprime en stdout si se omite)
+- `--scope <project|global|all>`: Ámbito de exportación (por defecto: `all`)

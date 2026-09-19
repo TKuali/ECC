@@ -1,257 +1,257 @@
 ---
-description: Comprehensive Python code review for PEP 8 compliance, type hints, security, and Pythonic idioms. Invokes the python-reviewer agent.
+description: Revisión exhaustiva de código Python para cumplimiento de PEP 8, anotaciones de tipos, seguridad y modismos pitónicos. Invoca al agente python-reviewer.
 ---
 
-# Python Code Review
+# Revisión de Código Python
 
-This command invokes the **python-reviewer** agent for comprehensive Python-specific code review.
+Este comando invoca al agente **python-reviewer** para una revisión de código exhaustiva y especializada en Python.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Identify Python Changes**: Find modified `.py` files via `git diff`
-2. **Run Static Analysis**: Execute `ruff`, `mypy`, `pylint`, `black --check`
-3. **Security Scan**: Check for SQL injection, command injection, unsafe deserialization
-4. **Type Safety Review**: Analyze type hints and mypy errors
-5. **Pythonic Code Check**: Verify code follows PEP 8 and Python best practices
-6. **Generate Report**: Categorize issues by severity
+1. **Identificar cambios en Python**: Encuentra archivos `.py` modificados mediante `git diff`
+2. **Ejecutar análisis estático**: Ejecuta `ruff`, `mypy`, `pylint`, `black --check`
+3. **Escaneo de seguridad**: Busca inyecciones SQL, inyecciones de comandos y deserialización insegura
+4. **Revisión de seguridad de tipos**: Analiza anotaciones de tipos y errores de mypy
+5. **Comprobación de código pitónico**: Verifica que el código siga PEP 8 y las mejores prácticas de Python
+6. **Generar reporte**: Categoriza problemas por severidad
 
-## When to Use
+## Cuándo usarlo
 
-Use `/python-review` when:
-- After writing or modifying Python code
-- Before committing Python changes
-- Reviewing pull requests with Python code
-- Onboarding to a new Python codebase
-- Learning Pythonic patterns and idioms
+Usa `/python-review` cuando:
+- Después de escribir o modificar código Python
+- Antes de confirmar cambios (commit) en Python
+- Al revisar pull requests con código Python
+- Al incorporarse a un nuevo proyecto en Python
+- Para aprender patrones y modismos pitónicos
 
-## Review Categories
+## Categorías de Revisión
 
-### CRITICAL (Must Fix)
-- SQL/Command injection vulnerabilities
-- Unsafe eval/exec usage
-- Pickle unsafe deserialization
-- Hardcoded credentials
-- YAML unsafe load
-- Bare except clauses hiding errors
+### CRÍTICO (Debe Corregirse)
+- Vulnerabilidades de inyección SQL o de comandos
+- Uso inseguro de `eval()` o `exec()`
+- Deserialización insegura con `pickle`
+- Credenciales hardcodeadas
+- Carga insegura de YAML (`yaml.load` sin SafeLoader)
+- Cláusulas `except:` desnudas que ocultan errores
 
-### HIGH (Should Fix)
-- Missing type hints on public functions
-- Mutable default arguments
-- Swallowing exceptions silently
-- Not using context managers for resources
-- C-style looping instead of comprehensions
-- Using type() instead of isinstance()
-- Race conditions without locks
+### ALTO (Debería Corregirse)
+- Falta de anotaciones de tipos en funciones públicas
+- Argumentos predeterminados mutables
+- Ocultar excepciones silenciosamente
+- No utilizar administradores de contexto (`with`) para recursos
+- Bucles estilo C en lugar de comprensiones de lista/generadores
+- Usar `type()` en lugar de `isinstance()`
+- Condiciones de carrera sin candados (locks)
 
-### MEDIUM (Consider)
-- PEP 8 formatting violations
-- Missing docstrings on public functions
-- Print statements instead of logging
-- Inefficient string operations
-- Magic numbers without named constants
-- Not using f-strings for formatting
-- Unnecessary list creation
+### MEDIO (A Considerar)
+- Violaciones de formato de PEP 8
+- Falta de docstrings en funciones públicas
+- Sentencias `print` en lugar de logging
+- Operaciones de cadena ineficientes
+- Números mágicos sin constantes con nombre
+- No utilizar f-strings para formateo
+- Creación innecesaria de listas intermedias
 
-## Automated Checks Run
+## Comprobaciones Automatizadas Ejecutadas
 
 ```bash
-# Type checking
+# Verificación de tipos
 mypy .
 
-# Linting and formatting
+# Linting y formateo
 ruff check .
 black --check .
 isort --check-only .
 
-# Security scanning
+# Escaneo de seguridad
 bandit -r .
 
-# Dependency audit
+# Auditoría de dependencias
 pip-audit
 safety check
 
-# Testing
+# Pruebas
 pytest --cov=app --cov-report=term-missing
 ```
 
-## Example Usage
+## Ejemplo de Uso
 
 ```text
-User: /python-review
+Usuario: /python-review
 
-Agent:
-# Python Code Review Report
+Agente:
+# Reporte de Revisión de Código Python
 
-## Files Reviewed
-- app/routes/user.py (modified)
-- app/services/auth.py (modified)
+## Archivos Revisados
+- app/routes/user.py (modificado)
+- app/services/auth.py (modificado)
 
-## Static Analysis Results
-✓ ruff: No issues
-✓ mypy: No errors
-WARNING: black: 2 files need reformatting
-✓ bandit: No security issues
+## Resultados de Análisis Estático
+✓ ruff: Sin problemas
+✓ mypy: Sin errores
+ADVERTENCIA: black: 2 archivos necesitan reformateo
+✓ bandit: Sin problemas de seguridad
 
-## Issues Found
+## Problemas Encontrados
 
-[CRITICAL] SQL Injection vulnerability
-File: app/routes/user.py:42
-Issue: User input directly interpolated into SQL query
+[CRITICAL] Vulnerabilidad de Inyección SQL
+Archivo: app/routes/user.py:42
+Problema: Entrada de usuario interpolada directamente en la consulta SQL
 ```python
-query = f"SELECT * FROM users WHERE id = {user_id}"  # Bad
+query = f"SELECT * FROM users WHERE id = {user_id}"  # Incorrecto
 ```
-Fix: Use parameterized query
+Solución: Usar consulta parametrizada
 ```python
-query = "SELECT * FROM users WHERE id = %s"  # Good
+query = "SELECT * FROM users WHERE id = %s"  # Correcto
 cursor.execute(query, (user_id,))
 ```
 
-[HIGH] Mutable default argument
-File: app/services/auth.py:18
-Issue: Mutable default argument causes shared state
+[HIGH] Argumento Predeterminado Mutable
+Archivo: app/services/auth.py:18
+Problema: Argumento predeterminado mutable causa estado compartido entre llamadas
 ```python
-def process_items(items=[]):  # Bad
+def process_items(items=[]):  # Incorrecto
     items.append("new")
     return items
 ```
-Fix: Use None as default
+Solución: Usar None como predeterminado
 ```python
-def process_items(items=None):  # Good
+def process_items(items=None):  # Correcto
     if items is None:
         items = []
     items.append("new")
     return items
 ```
 
-[MEDIUM] Missing type hints
-File: app/services/auth.py:25
-Issue: Public function without type annotations
+[MEDIUM] Falta de Anotaciones de Tipos
+Archivo: app/services/auth.py:25
+Problema: Función pública sin anotaciones de tipos
 ```python
-def get_user(user_id):  # Bad
+def get_user(user_id):  # Incorrecto
     return db.find(user_id)
 ```
-Fix: Add type hints
+Solución: Añadir pistas de tipos
 ```python
-def get_user(user_id: str) -> Optional[User]:  # Good
+def get_user(user_id: str) -> Optional[User]:  # Correcto
     return db.find(user_id)
 ```
 
-[MEDIUM] Not using context manager
-File: app/routes/user.py:55
-Issue: File not closed on exception
+[MEDIUM] Sin Administrador de Contexto
+Archivo: app/routes/user.py:55
+Problema: Archivo no cerrado si ocurre una excepción
 ```python
-f = open("config.json")  # Bad
+f = open("config.json")  # Incorrecto
 data = f.read()
 f.close()
 ```
-Fix: Use context manager
+Solución: Usar administrador de contexto
 ```python
-with open("config.json") as f:  # Good
+with open("config.json") as f:  # Correcto
     data = f.read()
 ```
 
-## Summary
+## Resumen
 - CRITICAL: 1
 - HIGH: 1
 - MEDIUM: 2
 
-Recommendation: FAIL: Block merge until CRITICAL issue is fixed
+Recomendación: FAIL: Bloquear fusión hasta corregir problemas CRITICAL
 
-## Formatting Required
-Run: `black app/routes/user.py app/services/auth.py`
+## Formateo Requerido
+Ejecutar: `black app/routes/user.py app/services/auth.py`
 ```
 
-## Approval Criteria
+## Criterios de Aprobación
 
-| Status | Condition |
+| Estado | Condición |
 |--------|-----------|
-| PASS: Approve | No CRITICAL or HIGH issues |
-| WARNING: Warning | Only MEDIUM issues (merge with caution) |
-| FAIL: Block | CRITICAL or HIGH issues found |
+| PASS: Aprobar | Sin problemas CRITICAL o HIGH |
+| WARNING: Advertencia | Solo problemas MEDIUM (fusionar con precaución) |
+| FAIL: Bloquear | Problemas CRITICAL o HIGH encontrados |
 
-## Integration with Other Commands
+## Integración con Otros Comandos
 
-- Use the `tdd-workflow` skill first to ensure tests pass
-- Use `/code-review` for non-Python specific concerns
-- Use `/python-review` before committing
-- Use `/build-fix` if static analysis tools fail
+- Usa la skill `tdd-workflow` primero para asegurar que las pruebas pasen
+- Usa `/code-review` para aspectos generales independientes de Python
+- Usa `/python-review` antes de hacer commit
+- Usa `/build-fix` si fallan las herramientas de análisis estático
 
-## Framework-Specific Reviews
+## Revisiones Específicas de Frameworks
 
-### Django Projects
-The reviewer checks for:
-- N+1 query issues (use `select_related` and `prefetch_related`)
-- Missing migrations for model changes
-- Raw SQL usage when ORM could work
-- Missing `transaction.atomic()` for multi-step operations
+### Proyectos Django
+El revisor verifica:
+- Problemas de consultas N+1 (usar `select_related` y `prefetch_related`)
+- Migraciones faltantes para cambios en modelos
+- Uso de SQL directo cuando el ORM es aplicable
+- Falta de `transaction.atomic()` para operaciones de múltiples pasos
 
-### FastAPI Projects
-The reviewer checks for:
-- CORS misconfiguration
-- Pydantic models for request validation
-- Response models correctness
-- Proper async/await usage
-- Dependency injection patterns
+### Proyectos FastAPI
+El revisor verifica:
+- Mala configuración de CORS
+- Modelos Pydantic para validación de solicitudes
+- Corrección de modelos de respuesta
+- Uso apropiado de async/await
+- Patrones de inyección de dependencias
 
-### Flask Projects
-The reviewer checks for:
-- Context management (app context, request context)
-- Proper error handling
-- Blueprint organization
-- Configuration management
+### Proyectos Flask
+El revisor verifica:
+- Manejo de contexto (contexto de aplicación, contexto de petición)
+- Manejo adecuado de errores
+- Organización mediante Blueprints
+- Gestión de configuración
 
-## Related
+## Relacionado
 
-- Agent: `agents/python-reviewer.md`
+- Agente: `agents/python-reviewer.md`
 - Skills: `skills/python-patterns/`, `skills/python-testing/`
 
-## Common Fixes
+## Correcciones Comunes
 
-### Add Type Hints
+### Añadir Anotaciones de Tipos
 ```python
-# Before
+# Antes
 def calculate(x, y):
     return x + y
 
-# After
+# Después
 from typing import Union
 
 def calculate(x: Union[int, float], y: Union[int, float]) -> Union[int, float]:
     return x + y
 ```
 
-### Use Context Managers
+### Usar Administradores de Contexto
 ```python
-# Before
+# Antes
 f = open("file.txt")
 data = f.read()
 f.close()
 
-# After
+# Después
 with open("file.txt") as f:
     data = f.read()
 ```
 
-### Use List Comprehensions
+### Usar Comprensiones de Listas
 ```python
-# Before
+# Antes
 result = []
 for item in items:
     if item.active:
         result.append(item.name)
 
-# After
+# Después
 result = [item.name for item in items if item.active]
 ```
 
-### Fix Mutable Defaults
+### Corregir Valores Predeterminados Mutables
 ```python
-# Before
+# Antes
 def append(value, items=[]):
     items.append(value)
     return items
 
-# After
+# Después
 def append(value, items=None):
     if items is None:
         items = []
@@ -259,39 +259,39 @@ def append(value, items=None):
     return items
 ```
 
-### Use f-strings (Python 3.6+)
+### Usar f-strings (Python 3.6+)
 ```python
-# Before
+# Antes
 name = "Alice"
 greeting = "Hello, " + name + "!"
 greeting2 = "Hello, {}".format(name)
 
-# After
+# Después
 greeting = f"Hello, {name}!"
 ```
 
-### Fix String Concatenation in Loops
+### Corregir Concatenación de Cadenas en Bucles
 ```python
-# Before
+# Antes
 result = ""
 for item in items:
     result += str(item)
 
-# After
+# Después
 result = "".join(str(item) for item in items)
 ```
 
-## Python Version Compatibility
+## Compatibilidad de Versiones de Python
 
-The reviewer notes when code uses features from newer Python versions:
+El revisor señala cuando el código utiliza características de versiones más recientes de Python:
 
-| Feature | Minimum Python |
-|---------|----------------|
-| Type hints | 3.5+ |
+| Característica | Versión Mínima de Python |
+|----------------|--------------------------|
+| Anotaciones de tipos | 3.5+ |
 | f-strings | 3.6+ |
-| Walrus operator (`:=`) | 3.8+ |
-| Position-only parameters | 3.8+ |
-| Match statements | 3.10+ |
-| Type unions (&#96;x &#124; None&#96;) | 3.10+ |
+| Operador morsa (`:=`) | 3.8+ |
+| Parámetros solo por posición | 3.8+ |
+| Sentencias match (`match/case`) | 3.10+ |
+| Uniones de tipos (&#96;x &#124; None&#96;) | 3.10+ |
 
-Ensure your project's `pyproject.toml` or `setup.py` specifies the correct minimum Python version.
+Asegúrate de que el archivo `pyproject.toml` o `setup.py` de tu proyecto especifique la versión mínima correcta de Python.

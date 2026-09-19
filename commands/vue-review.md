@@ -1,125 +1,125 @@
 ---
-description: Comprehensive Vue.js code review for Composition API correctness, reactivity, composable patterns, template security, accessibility, and Vue-specific performance. Invokes the vue-reviewer agent (and typescript-reviewer alongside on .vue/.ts changes).
+description: Revisión exhaustiva de código Vue.js para comprobar la corrección de Composition API, reactividad, patrones de composables, seguridad en plantillas, accesibilidad y rendimiento específico de Vue. Invoca al agente vue-reviewer (y a typescript-reviewer conjuntamente en cambios .vue/.ts).
 ---
 
-# Vue Code Review
+# Revisión de Código Vue
 
-This command invokes the **vue-reviewer** agent for Vue-specific code review. For pull requests touching `.vue` files or Vue-containing `.ts`/`.js` files, both `vue-reviewer` and `typescript-reviewer` should run — each owns a distinct lane.
+Este comando invoca al agente **vue-reviewer** para una revisión de código especializada en Vue. Para pull requests que modifiquen archivos `.vue` o archivos `.ts`/`.js` vinculados a Vue, deben ejecutarse tanto `vue-reviewer` como `typescript-reviewer` — cada uno posee un ámbito de responsabilidad diferenciado.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Identify Vue Changes**: Find modified `.vue` files and Vue-related `.ts`/`.js` files via `git diff`
-2. **Run Lint**: Execute `eslint` with `eslint-plugin-vue`
-3. **Typecheck**: Run `vue-tsc --noEmit` or the project's canonical typecheck command
-4. **Review Vue Lanes Only**: Reactivity, composables, template security, accessibility, Vue-specific performance
-5. **Generate Report**: Categorize issues by severity (CRITICAL / HIGH / MEDIUM)
+1. **Identificar Cambios en Vue**: Encuentra archivos `.vue` modificados y archivos `.ts`/`.js` relacionados mediante `git diff`
+2. **Ejecutar Lint**: Ejecuta `eslint` con `eslint-plugin-vue`
+3. **Comprobar Tipos**: Ejecuta `vue-tsc --noEmit` o el comando canónico de comprobación de tipos del proyecto
+4. **Revisar Ámbitos Específicos de Vue**: Reactividad, composables, seguridad en plantillas, accesibilidad y rendimiento específico de Vue
+5. **Generar Reporte**: Categoriza los problemas por severidad (CRITICAL / HIGH / MEDIUM)
 
-## When to Use
+## Cuándo usarlo
 
-Use `/vue-review` when:
+Usa `/vue-review` cuando:
 
-- A PR or commit touches `.vue` files
-- After writing or modifying Vue components, composables, or Pinia stores
-- Before merging Vue code
-- Auditing template security (`v-html`, URL bindings)
-- Reviewing a new composable for correctness
-- Auditing Vue Router guards and navigation
-- Reviewing Nuxt server routes or SSR-specific code
+- Un PR o commit toque archivos `.vue`
+- Después de escribir o modificar componentes Vue, composables o almacenes (stores) de Pinia
+- Antes de fusionar código Vue
+- Al auditar la seguridad en plantillas (`v-html`, enlaces de URL)
+- Al revisar un composable nuevo en cuanto a su corrección
+- Al auditar guardas y navegación de Vue Router
+- Al revisar rutas de servidor Nuxt o código específico de SSR
 
-For pure `.ts`/`.js` changes with no Vue imports, use `/code-review` (general) or invoke `typescript-reviewer` directly.
+Para cambios puros en `.ts`/`.js` sin imports de Vue, usa `/code-review` (general) o invoca a `typescript-reviewer` directamente.
 
-## Scope vs `/code-review` and TypeScript Review
+## Alcance frente a `/code-review` y Revisión de TypeScript
 
-| Tool | Scope |
+| Herramienta | Alcance |
 |---|---|
-| `vue-reviewer` (this command) | Reactivity, composables, template security, a11y, Vue performance, Pinia/Router |
-| `typescript-reviewer` | Generic TS/JS — `any` abuse, async correctness, Node security |
-| `security-reviewer` | Project-wide security audit |
-| `/code-review` | Generic uncommitted-changes or PR review |
+| `vue-reviewer` (este comando) | Reactividad, composables, seguridad en plantillas, a11y, rendimiento en Vue, Pinia/Router |
+| `typescript-reviewer` | TS/JS genérico — abuso de `any`, corrección asíncrona, seguridad en Node |
+| `security-reviewer` | Auditoría de seguridad a nivel de todo el proyecto |
+| `/code-review` | Revisión genérica de cambios sin confirmar o de PRs |
 
-On a `.vue` / Vue-related PR, invoke both `vue-reviewer` and `typescript-reviewer`. Findings from each are non-overlapping by design.
+En un PR con archivos `.vue` o código relacionado con Vue, invoca tanto a `vue-reviewer` como a `typescript-reviewer`. Los hallazgos de cada uno no se solapan por diseño.
 
-## Review Categories
+## Categorías de Revisión
 
-### CRITICAL (Must Fix)
+### CRÍTICO (Debe Corregirse)
 
-- `v-html` with unsanitized input
-- `:href`/`:src` with unvalidated user URLs (`javascript:`, `data:`)
-- Secret in client bundle (`VITE_*`, Nuxt `public` runtimeConfig)
-- Server endpoint without input validation (Nuxt Nitro)
-- `localStorage`/`sessionStorage` for session tokens
-- Destructuring reactive props in Vue < 3.5 (breaks reactivity)
-- `reactive()` object replacement (breaks watchers)
-- Watcher source tracking a ref object instead of `.value`
+- `v-html` con entradas sin sanitizar
+- `:href`/`:src` con URLs de usuario no validadas (`javascript:`, `data:`)
+- Secretos expuestos en el bundle cliente (`VITE_*`, `public` runtimeConfig en Nuxt)
+- Endpoint del servidor sin validación de entradas (Nuxt Nitro)
+- `localStorage`/`sessionStorage` para tokens de sesión
+- Desestructuración de props reactivas en Vue < 3.5 (rompe la reactividad)
+- Reemplazo completo de objetos con `reactive()` (rompe los watchers)
+- Fuente de watcher que rastrea un objeto ref en lugar de `.value`
 
-### HIGH (Should Fix)
+### ALTO (Debería Corregirse)
 
-- Composable with module-scope side effects
-- Missing cleanup in composable (watcher, interval, listener)
-- `v-for` without `:key` or with `key={index}`
-- `v-if` + `v-for` on same element
-- Props mutation
-- Missing prop validation
-- Route guard returning false without redirect
-- `useRoute().params` destructured at top-level (snapshot)
-- `v-model` bound to computed without setter
-- Accessibility violations (missing labels, non-semantic interactive elements)
-- Direct store property mutation outside actions
+- Composable con efectos secundarios a nivel de módulo
+- Falta de limpieza en composables (watchers, intervalos, escuchadores de eventos)
+- `v-for` sin `:key` o con `key={index}`
+- `v-if` + `v-for` en el mismo elemento
+- Mutación directa de props
+- Falta de validación en props
+- Guarda de ruta que retorna false sin redirección
+- `useRoute().params` desestructurado en nivel superior (crea una captura estática)
+- `v-model` vinculado a una propiedad computada sin setter
+- Violaciones de accesibilidad (etiquetas faltantes, elementos interactivos no semánticos)
+- Mutación directa de propiedades de la store fuera de actions
 
-### MEDIUM (Consider)
+### MEDIO (A Considerar)
 
-- Options API in new Vue 3 code
-- Component over 300 lines
-- `v-show` where `v-if` is more appropriate (or vice versa)
-- Missing `:max` on `<KeepAlive>`
-- Missing `shallowRef` for large replaced data
-- Custom validation instead of vetted form library
-- `defineExpose` exposing more than necessary
-- `inheritAttrs` not disabled when using `v-bind="$attrs"`
+- Uso de Options API en código nuevo de Vue 3
+- Componentes de más de 300 líneas
+- `v-show` donde `v-if` sea más apropiado (o viceversa)
+- Falta de `:max` en `<KeepAlive>`
+- Falta de `shallowRef` para grandes volúmenes de datos reemplazados
+- Validación personalizada en lugar de una librería de formularios probada
+- `defineExpose` exponiendo más elementos de los necesarios
+- `inheritAttrs` no deshabilitado cuando se usa `v-bind="$attrs"`
 
-## Automated Checks Run
+## Comprobaciones Automatizadas Ejecutadas
 
 ```bash
-# Lint (required)
+# Lint (requerido)
 npx eslint . --ext .vue,.ts,.js
 
-# Vue-specific typecheck
+# Comprobación de tipos específica de Vue
 vue-tsc --noEmit
 
-# Targeted security rules
+# Reglas de seguridad específicas
 npx eslint . --rule 'vue/no-v-html: warn' \
               --rule 'vue/no-template-target-blank: error'
 
-# Supply-chain
+# Seguridad de dependencias
 npm audit
 ```
 
-If `eslint-plugin-vue` or `vue-tsc` is not configured, the review will flag the gap as a HIGH config issue and continue.
+Si `eslint-plugin-vue` o `vue-tsc` no están configurados, la revisión señalará la carencia como un problema de configuración HIGH y continuará.
 
-## Example Usage
+## Ejemplo de Uso
 
 ````text
-User: /vue-review
+Usuario: /vue-review
 
-Agent:
-# Vue Code Review Report
+Agente:
+# Reporte de Revisión de Código Vue
 
-## Files Reviewed
-- src/components/UserCard.vue (modified)
-- src/composables/useUser.ts (new)
-- src/stores/useUserStore.ts (modified)
+## Archivos Revisados
+- src/components/UserCard.vue (modificado)
+- src/composables/useUser.ts (nuevo)
+- src/stores/useUserStore.ts (modificado)
 
-## Lint Results
-PASS: eslint clean
-PASS: vue-tsc clean
+## Resultados de Lint
+PASS: eslint limpio
+PASS: vue-tsc limpio
 
-## Issues Found
+## Problemas Encontrados
 
-[CRITICAL] Unsanitized v-html
-File: src/components/UserCard.vue:15
-Issue: User-controlled bio rendered as raw HTML via v-html.
-Why: XSS via stored script tags in user input.
-Fix: Sanitize with DOMPurify or render as text:
+[CRITICAL] v-html sin sanitizar
+Archivo: src/components/UserCard.vue:15
+Problema: Biografía controlada por el usuario renderizada como HTML crudo mediante v-html.
+Motivo: Riesgo de XSS mediante etiquetas script en la entrada del usuario.
+Solución: Sanitizar con DOMPurify o renderizar como texto:
 ```vue
 <script setup>
 import DOMPurify from "dompurify";
@@ -130,10 +130,10 @@ const safeBio = computed(() => DOMPurify.sanitize(user.bio));
 </template>
 ```
 
-[HIGH] Watcher in composable missing cleanup
-File: src/composables/useUser.ts:22
-Issue: `watch` callback fires fetch without AbortController; stale responses can overwrite newer data.
-Fix: Use onCleanup to abort:
+[HIGH] Watcher en composable sin función de limpieza
+Archivo: src/composables/useUser.ts:22
+Problema: La llamada a `watch` dispara un fetch sin AbortController; respuestas obsoletas pueden sobrescribir datos nuevos.
+Solución: Usar onCleanup para abortar:
 ```ts
 watch(userId, async (newId, _old, onCleanup) => {
   const controller = new AbortController();
@@ -143,32 +143,32 @@ watch(userId, async (newId, _old, onCleanup) => {
 });
 ```
 
-## Summary
+## Resumen
 - CRITICAL: 1
 - HIGH: 1
 - MEDIUM: 0
 
-Recommendation: FAIL: Block merge until CRITICAL issue is fixed
+Recomendación: FAIL: Bloquear fusión hasta corregir el problema CRITICAL
 ````
 
-## Approval Criteria
+## Criterios de Aprobación
 
-| Status | Condition |
+| Estado | Condición |
 |---|---|
-| PASS: Approve | No CRITICAL or HIGH issues |
-| WARNING: Warning | Only MEDIUM issues (merge with caution) |
-| FAIL: Block | CRITICAL or HIGH issues found |
+| PASS: Aprobar | Sin problemas CRITICAL o HIGH |
+| WARNING: Advertencia | Solo problemas MEDIUM (fusionar con precaución) |
+| FAIL: Bloquear | Problemas CRITICAL o HIGH encontrados |
 
-## Integration with Other Commands
+## Integración con Otros Comandos
 
-- Run your project's build command first if the build is broken
-- Run tests to ensure component tests pass
-- Run `/vue-review` before merging Vue code
-- Use `/code-review` for non-Vue-specific concerns on the same PR
+- Ejecuta primero el comando de compilación de tu proyecto si la compilación falla
+- Ejecuta pruebas para asegurar que las pruebas de componentes pasen
+- Ejecuta `/vue-review` antes de fusionar código Vue
+- Usa `/code-review` para aspectos generales no específicos de Vue en el mismo PR
 
-## Related
+## Relacionado
 
-- Agent: `agents/vue-reviewer.md`
-- Companion agent: `agents/typescript-reviewer.md` (run alongside for Vue-related TS/JS)
+- Agente: `agents/vue-reviewer.md`
+- Agente complementario: `agents/typescript-reviewer.md` (ejecutar conjuntamente para TS/JS vinculado a Vue)
 - Skills: `skills/vue-patterns/`
-- Rules: `rules/vue/`
+- Reglas: `rules/vue/`

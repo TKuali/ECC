@@ -1,133 +1,133 @@
 ---
 name: evolve
-description: Analyze instincts and suggest or generate evolved structures
+description: Analiza instintos y sugiere o genera estructuras evolucionadas
 command: true
 ---
 
-# Evolve Command
+# Comando Evolve
 
-## Implementation
+## Implementación
 
-Run the instinct CLI using the plugin root path:
+Ejecuta el CLI de instintos usando la ruta raíz del plugin:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.py" evolve [--generate]
 ```
 
-Or if `CLAUDE_PLUGIN_ROOT` is not set (manual installation):
+O si `CLAUDE_PLUGIN_ROOT` no está configurado (instalación manual):
 
 ```bash
 python3 ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.py evolve [--generate]
 ```
 
-Analyzes instincts and clusters related ones into higher-level structures:
-- **Commands**: When instincts describe user-invoked actions
-- **Skills**: When instincts describe auto-triggered behaviors
-- **Agents**: When instincts describe complex, multi-step processes
+Analiza instintos y agrupa los relacionados en estructuras de nivel superior:
+- **Comandos**: Cuando los instintos describen acciones invocadas por el usuario
+- **Habilidades (Skills)**: Cuando los instintos describen comportamientos activados automáticamente
+- **Agentes**: Cuando los instintos describen procesos complejos de múltiples pasos
 
-## Usage
+## Uso
 
 ```
-/evolve                    # Analyze all instincts and suggest evolutions
-/evolve --generate         # Also generate files under evolved/{skills,commands,agents}
+/evolve                    # Analizar todos los instintos y sugerir evoluciones
+/evolve --generate         # También generar archivos en evolved/{skills,commands,agents}
 ```
 
-## Evolution Rules
+## Reglas de Evolución
 
-### → Command (User-Invoked)
-When instincts describe actions a user would explicitly request:
-- Multiple instincts about "when user asks to..."
-- Instincts with triggers like "when creating a new X"
-- Instincts that follow a repeatable sequence
+### → Comando (Invocado por el Usuario)
+Cuando los instintos describen acciones que un usuario solicitaría explícitamente:
+- Múltiples instintos sobre "cuando el usuario pide..."
+- Instintos con disparadores como "al crear un nuevo X"
+- Instintos que siguen una secuencia repetible
 
-Example:
-- `new-table-step1`: "when adding a database table, create migration"
-- `new-table-step2`: "when adding a database table, update schema"
-- `new-table-step3`: "when adding a database table, regenerate types"
+Ejemplo:
+- `new-table-step1`: "al añadir una tabla a la base de datos, crear migración"
+- `new-table-step2`: "al añadir una tabla a la base de datos, actualizar esquema"
+- `new-table-step3`: "al añadir una tabla a la base de datos, regenerar tipos"
 
-→ Creates: **new-table** command
+→ Crea el comando: **new-table**
 
-### → Skill (Auto-Triggered)
-When instincts describe behaviors that should happen automatically:
-- Pattern-matching triggers
-- Error handling responses
-- Code style enforcement
+### → Habilidad (Activada Automáticamente)
+Cuando los instintos describen comportamientos que deberían ocurrir automáticamente:
+- Disparadores de coincidencia de patrones
+- Respuestas de manejo de errores
+- Aplicación de estilos de código
 
-Example:
-- `prefer-functional`: "when writing functions, prefer functional style"
-- `use-immutable`: "when modifying state, use immutable patterns"
-- `avoid-classes`: "when designing modules, avoid class-based design"
+Ejemplo:
+- `prefer-functional`: "al escribir funciones, preferir estilo funcional"
+- `use-immutable`: "al modificar estado, usar patrones inmutables"
+- `avoid-classes`: "al diseñar módulos, evitar diseño basado en clases"
 
-→ Creates: `functional-patterns` skill
+→ Crea la habilidad: `functional-patterns`
 
-### → Agent (Needs Depth/Isolation)
-When instincts describe complex, multi-step processes that benefit from isolation:
-- Debugging workflows
-- Refactoring sequences
-- Research tasks
+### → Agente (Requiere Profundidad/Aislamiento)
+Cuando los instintos describen procesos complejos y de múltiples pasos que se benefician del aislamiento:
+- Flujos de depuración
+- Secuencias de refactorización
+- Tareas de investigación
 
-Example:
-- `debug-step1`: "when debugging, first check logs"
-- `debug-step2`: "when debugging, isolate the failing component"
-- `debug-step3`: "when debugging, create minimal reproduction"
-- `debug-step4`: "when debugging, verify fix with test"
+Ejemplo:
+- `debug-step1`: "al depurar, primero revisar logs"
+- `debug-step2`: "al depurar, aislar el componente que falla"
+- `debug-step3`: "al depurar, crear reproducción mínima"
+- `debug-step4`: "al depurar, verificar la solución con pruebas"
 
-→ Creates: **debugger** agent
+→ Crea el agente: **debugger**
 
-## What to Do
+## Qué Hacer
 
-1. Detect current project context
-2. Read project + global instincts (project takes precedence on ID conflicts)
-3. Group instincts by trigger/domain patterns
-4. Identify:
-   - Skill candidates (trigger clusters with 2+ instincts)
-   - Command candidates (high-confidence workflow instincts)
-   - Agent candidates (larger, high-confidence clusters)
-5. Show promotion candidates (project -> global) when applicable
-6. If `--generate` is passed, write files to:
-   - Project scope: `~/.claude/homunculus/projects/<project-id>/evolved/`
-   - Global fallback: `~/.claude/homunculus/evolved/`
+1. Detectar el contexto del proyecto actual
+2. Leer los instintos del proyecto + globales (el proyecto tiene precedencia ante colisiones de ID)
+3. Agrupar instintos por patrones de disparador/dominio
+4. Identificar:
+   - Candidatos a habilidad (grupos de disparadores con 2+ instintos)
+   - Candidatos a comando (instintos de flujo de trabajo de alta confianza)
+   - Candidatos a agente (grupos más grandes y de alta confianza)
+5. Mostrar candidatos a promoción (proyecto -> global) cuando corresponda
+6. Si se pasa `--generate`, escribir archivos en:
+   - Ámbito de proyecto: `~/.claude/homunculus/projects/<project-id>/evolved/`
+   - Respaldo global: `~/.claude/homunculus/evolved/`
 
-## Output Format
+## Formato de Salida
 
 ```
 ============================================================
-  EVOLVE ANALYSIS - 12 instincts
-  Project: my-app (a1b2c3d4e5f6)
-  Project-scoped: 8 | Global: 4
+  ANÁLISIS DE EVOLUCIÓN - 12 instintos
+  Proyecto: mi-app (a1b2c3d4e5f6)
+  Ámbito de proyecto: 8 | Global: 4
 ============================================================
 
-High confidence instincts (>=80%): 5
+Instintos de alta confianza (>=80%): 5
 
-## SKILL CANDIDATES
-1. Cluster: "adding tests"
-   Instincts: 3
-   Avg confidence: 82%
-   Domains: testing
-   Scopes: project
+## CANDIDATOS A HABILIDAD
+1. Grupo: "añadir pruebas"
+   Instintos: 3
+   Confianza prom.: 82%
+   Dominios: testing
+   Ámbitos: proyecto
 
-## COMMAND CANDIDATES (2)
+## CANDIDATOS A COMANDO (2)
   /adding-tests
-    From: test-first-workflow [project]
-    Confidence: 84%
+    Desde: test-first-workflow [proyecto]
+    Confianza: 84%
 
-## AGENT CANDIDATES (1)
+## CANDIDATOS A AGENTE (1)
   adding-tests-agent
-    Covers 3 instincts
-    Avg confidence: 82%
+    Cubre 3 instintos
+    Confianza prom.: 82%
 ```
 
-## Flags
+## Banderas (Flags)
 
-- `--generate`: Generate evolved files in addition to analysis output
+- `--generate`: Genera archivos evolucionados además de la salida del análisis
 
-## Generated File Format
+## Formato de Archivos Generados
 
-### Command
+### Comando
 ```markdown
 ---
 name: new-table
-description: Create a new database table with migration, schema update, and type generation
+description: Crea una nueva tabla de base de datos con migración, actualización de esquema y generación de tipos
 command: /new-table
 evolved_from:
   - new-table-migration
@@ -135,36 +135,36 @@ evolved_from:
   - regenerate-types
 ---
 
-# New Table Command
+# Comando New Table
 
-[Generated content based on clustered instincts]
+[Contenido generado según los instintos agrupados]
 
-## Steps
+## Pasos
 1. ...
 2. ...
 ```
 
-### Skill
+### Habilidad
 ```markdown
 ---
 name: functional-patterns
-description: Enforce functional programming patterns
+description: Aplica patrones de programación funcional
 evolved_from:
   - prefer-functional
   - use-immutable
   - avoid-classes
 ---
 
-# Functional Patterns Skill
+# Habilidad Functional Patterns
 
-[Generated content based on clustered instincts]
+[Contenido generado según los instintos agrupados]
 ```
 
-### Agent
+### Agente
 ```markdown
 ---
 name: debugger
-description: Systematic debugging agent
+description: Agente sistemático de depuración
 model: sonnet
 evolved_from:
   - debug-check-logs
@@ -172,7 +172,7 @@ evolved_from:
   - debug-reproduce
 ---
 
-# Debugger Agent
+# Agente Debugger
 
-[Generated content based on clustered instincts]
+[Contenido generado según los instintos agrupados]
 ```

@@ -1,39 +1,39 @@
 ---
 name: projects
-description: List known projects and their instinct statistics
+description: Lista proyectos conocidos y sus estadísticas de instintos
 command: true
 ---
 
-# Projects Command
+# Comando Projects
 
-List project registry entries and per-project instinct/observation counts for continuous-learning-v2.
+Lista las entradas del registro de proyectos y los conteos de instintos/observaciones por proyecto para continuous-learning-v2.
 
-## Implementation
+## Implementación
 
-Run the instinct CLI using the plugin root path:
+Ejecuta el CLI de instintos usando la ruta raíz del plugin:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.py" projects
 ```
 
-Or if `CLAUDE_PLUGIN_ROOT` is not set (manual installation):
+O si `CLAUDE_PLUGIN_ROOT` no está configurado (instalación manual):
 
 ```bash
 python3 ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.py projects
 ```
 
-## Usage
+## Uso
 
 ```bash
 /projects
 ```
 
-## What to Do
+## Qué Hacer
 
-1. Read `~/.claude/homunculus/projects.json`
-2. For each project, display:
-   - Project name, id, root, remote
-   - Personal and inherited instinct counts
-   - Observation event count
-   - Last seen timestamp
-3. Also display global instinct totals
+1. Leer `~/.claude/homunculus/projects.json`
+2. Para cada proyecto, mostrar:
+   - Nombre del proyecto, id, raíz, remoto
+   - Conteos de instintos personales y heredados
+   - Conteo de eventos de observación
+   - Marca temporal de última visualización
+3. También mostrar los totales globales de instintos

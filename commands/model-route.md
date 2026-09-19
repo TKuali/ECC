@@ -1,30 +1,30 @@
 ---
-description: Recommend the best model tier for the current task based on complexity, risk, and budget.
+description: Recomienda el mejor nivel de modelo para la tarea actual según complejidad, riesgo y presupuesto.
 ---
 
-# Model Route Command
+# Comando Model Route
 
-Recommend the best model tier for the current task by complexity and budget.
+Recomienda el mejor nivel de modelo para la tarea actual según su complejidad y presupuesto.
 
-## Usage
+## Uso
 
-`/model-route [task-description] [--budget low|med|high]`
+`/model-route [descripcion-tarea] [--budget low|med|high]`
 
-## Routing Heuristic
+## Heurística de Enrutamiento
 
-- `haiku`: deterministic, low-risk mechanical changes
-- `sonnet`: default for implementation and refactors
-- `opus`: architecture, deep review, ambiguous requirements
+- `haiku`: cambios mecánicos deterministas y de bajo riesgo
+- `sonnet`: valor por defecto para implementación y refactorizaciones
+- `opus`: arquitectura, revisión profunda, requisitos ambiguos
 
-## Required Output
+## Salida Requerida
 
-- recommended model
-- confidence level
-- why this model fits
-- fallback model if first attempt fails
+- modelo recomendado
+- nivel de confianza
+- por qué encaja este modelo
+- modelo de respaldo si el primer intento falla
 
-## Arguments
+## Argumentos
 
 $ARGUMENTS:
-- `[task-description]` optional free-text
-- `--budget low|med|high` optional
+- `[descripcion-tarea]` texto libre opcional
+- `--budget low|med|high` opcional

@@ -1,57 +1,57 @@
 ---
-description: Enforce TDD workflow for React. Write React Testing Library tests first (behavior-focused, accessibility-first), then implement components. Detects Vitest or Jest and verifies coverage targets.
+description: Aplica el flujo de trabajo de TDD para React. Escribe primero las pruebas con React Testing Library (centradas en el comportamiento y con prioridad en accesibilidad) y luego implementa los componentes. Detecta Vitest o Jest y verifica los objetivos de cobertura.
 ---
 
-# React TDD Command
+# Comando TDD para React
 
-This command enforces test-driven development for React using React Testing Library plus Vitest or Jest, detected at runtime.
+Este comando aplica la metodología de desarrollo guiado por pruebas (TDD) para React utilizando React Testing Library junto con Vitest o Jest, detectados en tiempo de ejecución.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Define Component Signature**: Scaffold the component, prop type, and exports
-2. **Write Behavior Tests First**: RTL queries (role-first), `userEvent`, MSW for network — RED
-3. **Run Tests**: Verify they fail for the right reason
-4. **Implement Minimal Code**: Just enough to pass — GREEN
-5. **Refactor**: Improve while keeping tests green
-6. **Check Coverage**: Hit the targets in [rules/react/testing.md](../rules/react/testing.md)
+1. **Definir la Firma del Componente**: Estructura el componente, el tipo de props y las exportaciones
+2. **Escribir Pruebas de Comportamiento Primero**: Consultas de RTL (priorizando roles), `userEvent`, MSW para red — ROJO (RED)
+3. **Ejecutar Pruebas**: Verificar que fallen por el motivo correcto
+4. **Implementar Código Mínimo**: Lo justo y necesario para pasar — VERDE (GREEN)
+5. **Refactorizar**: Mejorar el código manteniendo las pruebas en verde
+6. **Verificar Cobertura**: Cumplir con los objetivos fijados en [rules/react/testing.md](../rules/react/testing.md)
 
-## When to Use
+## Cuándo usarlo
 
-Use `/react-test` when:
+Usa `/react-test` cuando:
 
-- Implementing a new React component or custom hook
-- Adding test coverage to an untested component
-- Fixing a bug (write failing test first that reproduces it)
-- Building forms, state machines, or accessibility-critical UI
-- Onboarding to RTL + Vitest/Jest workflow
+- Estés implementando un nuevo componente de React o un hook personalizado
+- Agregues cobertura de pruebas a un componente no testeado
+- Corrijas un error (escribe primero la prueba que falla reproduciendo el error)
+- Construyas formularios, máquinas de estado o interfaces críticas para la accesibilidad
+- Te incorpores al flujo de trabajo con RTL + Vitest/Jest
 
-## TDD Cycle
+## Ciclo TDD
 
 ```
-RED      -> Write failing test for the next behavior
-GREEN    -> Implement minimal component code to pass
-REFACTOR -> Improve component, tests stay green
-REPEAT   -> Next behavior
+ROJO (RED)      -> Escribir prueba fallida para el siguiente comportamiento
+VERDE (GREEN)   -> Implementar código mínimo del componente para pasar
+REFACTOR        -> Mejorar el componente manteniendo las pruebas en verde
+REPETIR         -> Siguiente comportamiento
 ```
 
-## Runner Detection
+## Detección del Ejecutor de Pruebas (Test Runner)
 
 ```bash
 test -f vitest.config.ts -o -f vitest.config.js -o -f vite.config.ts   # Vitest
 grep -l '"jest"' package.json                                          # Jest
 ```
 
-Prefer Vitest for new Vite-based projects; respect Jest for existing setups.
+Se prefiere Vitest para proyectos nuevos basados en Vite; se respeta Jest en configuraciones existentes.
 
-## Example Session
+## Ejemplo de Sesión
 
 ````text
-User: /react-test I need a SearchInput component with debounced search
+Usuario: /react-test Necesito un componente SearchInput con búsqueda con retardo (debounced search)
 
-Agent:
-# TDD Session: SearchInput
+Agente:
+# Sesión TDD: SearchInput
 
-## Step 1: Define Signature
+## Paso 1: Definir Firma
 
 ```tsx
 // src/components/SearchInput.tsx
@@ -66,7 +66,7 @@ export function SearchInput({ onSearch, placeholder, debounceMs }: Props) {
 }
 ```
 
-## Step 2: Write Behavior Tests (RED)
+## Paso 2: Escribir Pruebas de Comportamiento (ROJO)
 
 ```tsx
 // src/components/SearchInput.test.tsx
@@ -76,12 +76,12 @@ import userEvent from "@testing-library/user-event";
 import { SearchInput } from "./SearchInput";
 
 describe("SearchInput", () => {
-  test("renders with placeholder", () => {
+  test("se renderiza con placeholder", () => {
     render(<SearchInput onSearch={() => {}} placeholder="Search users" />);
     expect(screen.getByPlaceholderText("Search users")).toBeInTheDocument();
   });
 
-  test("calls onSearch after typing", async () => {
+  test("llama a onSearch después de escribir", async () => {
     vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const onSearch = vi.fn();
@@ -89,21 +89,21 @@ describe("SearchInput", () => {
 
     await user.type(screen.getByRole("textbox"), "alice");
 
-    expect(onSearch).not.toHaveBeenCalled();        // before debounce
+    expect(onSearch).not.toHaveBeenCalled();        // antes del debounce
     vi.advanceTimersByTime(300);
-    expect(onSearch).toHaveBeenCalledWith("alice"); // after debounce
+    expect(onSearch).toHaveBeenCalledWith("alice"); // después del debounce
 
     vi.useRealTimers();
   });
 
-  test("does not call onSearch when typing pauses then continues", async () => {
+  test("no llama a onSearch cuando la escritura se pausa y luego continúa", async () => {
     vi.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const onSearch = vi.fn();
     render(<SearchInput onSearch={onSearch} debounceMs={300} />);
 
     await user.type(screen.getByRole("textbox"), "ali");
-    vi.advanceTimersByTime(200);                    // mid-debounce
+    vi.advanceTimersByTime(200);                    // mitad del debounce
     await user.type(screen.getByRole("textbox"), "ce");
     vi.advanceTimersByTime(300);
 
@@ -113,7 +113,7 @@ describe("SearchInput", () => {
     vi.useRealTimers();
   });
 
-  test("is keyboard reachable and accessible", () => {
+  test("es accesible y navegable con el teclado", () => {
     render(<SearchInput onSearch={() => {}} />);
     const input = screen.getByRole("textbox");
     input.focus();
@@ -122,7 +122,7 @@ describe("SearchInput", () => {
 });
 ```
 
-## Step 3: Run Tests — Verify FAIL
+## Paso 3: Ejecutar Pruebas — Verificar FALLA
 
 ```bash
 $ vitest run src/components/SearchInput.test.tsx
@@ -130,9 +130,9 @@ $ vitest run src/components/SearchInput.test.tsx
 × src/components/SearchInput.test.tsx (4 tests) ✘ Error: not implemented
 ```
 
-✓ Tests fail as expected.
+✓ Las pruebas fallan como se esperaba.
 
-## Step 4: Implement Minimal Code (GREEN)
+## Paso 4: Implementar Código Mínimo (VERDE)
 
 ```tsx
 import { useEffect, useState } from "react";
@@ -156,7 +156,7 @@ export function SearchInput({ onSearch, placeholder, debounceMs = 300 }: Props) 
 }
 ```
 
-## Step 5: Run Tests — Verify PASS
+## Paso 5: Ejecutar Pruebas — Verificar ÉXITO
 
 ```bash
 $ vitest run src/components/SearchInput.test.tsx
@@ -164,7 +164,7 @@ $ vitest run src/components/SearchInput.test.tsx
 ✓ src/components/SearchInput.test.tsx (4 tests) 47ms
 ```
 
-## Step 6: Coverage
+## Paso 6: Cobertura
 
 ```bash
 $ vitest run --coverage src/components/SearchInput.test.tsx
@@ -172,23 +172,23 @@ $ vitest run --coverage src/components/SearchInput.test.tsx
 % Stmts: 100  % Branch: 100  % Funcs: 100  % Lines: 100
 ```
 
-## TDD Complete!
+## ¡TDD Completado!
 ````
 
-## Test Patterns
+## Patrones de Prueba
 
-### Behavior, not implementation
+### Comportamiento, no implementación
 
-Use `getByRole`, `getByLabelText`, `getByText`. Avoid `container.querySelector` and asserting on component state.
+Usa `getByRole`, `getByLabelText`, `getByText`. Evita `container.querySelector` y hacer aserciones sobre el estado interno del componente.
 
-### `userEvent.setup()` per test
+### `userEvent.setup()` por prueba
 
 ```tsx
 const user = userEvent.setup();
 await user.click(screen.getByRole("button", { name: /save/i }));
 ```
 
-### MSW for network
+### MSW para peticiones de red
 
 ```tsx
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
@@ -198,7 +198,7 @@ afterAll(() => server.close());
 server.use(http.post("/api/users", () => HttpResponse.json({ id: "1" }, { status: 201 })));
 ```
 
-### Custom hooks
+### Hooks personalizados
 
 ```tsx
 const { result } = renderHook(() => useCounter(0));
@@ -206,60 +206,60 @@ act(() => result.current.increment());
 expect(result.current.count).toBe(1);
 ```
 
-### Accessibility
+### Accesibilidad
 
 ```tsx
 import { axe } from "vitest-axe";
 expect(await axe(container)).toHaveNoViolations();
 ```
 
-## Coverage Targets
+## Objetivos de Cobertura
 
-| Layer | Target |
+| Capa | Objetivo |
 |---|---|
-| Pure utilities | >=90% |
-| Custom hooks | >=85% |
-| Presentational components | >=80% |
-| Container components | >=70% |
-| Pages | E2E covered separately |
+| Utilidades puras | >=90% |
+| Hooks personalizados | >=85% |
+| Componentes presentacionales | >=80% |
+| Componentes contenedores | >=70% |
+| Páginas | Cubiertas por E2E por separado |
 
-Configure in `vitest.config.ts` / `jest.config.js` to enforce thresholds in CI.
+Configura estos umbrales en `vitest.config.ts` / `jest.config.js` para exigir su cumplimiento en CI.
 
-## Anti-Patterns to Avoid
+## Antipatrones a Evitar
 
-- `container.querySelector(...)` — bypasses accessibility queries
-- Asserting on render count
-- Mocking `react` itself (`jest.mock("react", ...)`)
-- Mocking child components by default (mock only when child has heavy side effects)
-- Ignoring `act()` warnings — they signal real bugs
-- Snapshot tests of rendered components (brittle, rubber-stamped) — use Playwright/Cypress visual diff instead
+- `container.querySelector(...)` — esquiva las consultas de accesibilidad
+- Aserciones sobre el número de renderizados
+- Mockear `react` directamente (`jest.mock("react", ...)`)
+- Mockear componentes hijos por defecto (mockear solo si el hijo tiene efectos secundarios pesados)
+- Ignorar advertencias de `act()` — señalan errores reales
+- Pruebas de instantánea (snapshot) de componentes renderizados (frágiles y aprobadas sin revisar) — usa diff visual de Playwright/Cypress en su lugar
 
-## Test Commands
+## Comandos de Prueba
 
 ```bash
 # Vitest
-vitest                              # watch
-vitest run                          # one-shot
-vitest run --coverage               # with coverage
-vitest run path/to/file.test.tsx    # single file
+vitest                              # modo watch
+vitest run                          # ejecución única
+vitest run --coverage               # con cobertura
+vitest run path/to/file.test.tsx    # archivo único
 
 # Jest
 jest --watch
 jest --coverage
 jest path/to/file.test.tsx
 
-# CI mode
+# Modo CI
 CI=true vitest run --coverage
 ```
 
-## Related Commands
+## Comandos Relacionados
 
-- `/react-build` — fix build errors before running tests
-- `/react-review` — review after implementation
-- `verification-loop` skill — full verification loop
+- `/react-build` — corrige errores de compilación antes de ejecutar pruebas
+- `/react-review` — revisa el código tras la implementación
+- Skill `verification-loop` — bucle completo de verificación
 
-## Related
+## Relacionado
 
 - Skills: `skills/react-testing/`, `skills/tdd-workflow/`, `skills/accessibility/`, `skills/e2e-testing/`
-- Rules: `rules/react/testing.md`
-- Agents: `react-reviewer` (reviews test quality), `tdd-guide` (enforces TDD process)
+- Reglas: `rules/react/testing.md`
+- Agentes: `react-reviewer` (revisa calidad de pruebas), `tdd-guide` (aplica el proceso TDD)

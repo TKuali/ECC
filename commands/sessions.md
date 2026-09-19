@@ -1,29 +1,29 @@
 ---
-description: Manage Claude Code session history, aliases, and session metadata.
+description: Gestiona el historial de sesiones de Claude Code, alias y metadatos de sesión.
 ---
 
-# Sessions Command
+# Comando Sesiones (Sessions)
 
-Manage Claude Code session history - list, load, alias, and edit sessions stored in `~/.claude/session-data/` with legacy reads from `~/.claude/sessions/`.
+Gestiona el historial de sesiones de Claude Code — lista, carga, asigna alias y edita sesiones almacenadas en `~/.claude/session-data/` con lectura heredada desde `~/.claude/sessions/`.
 
-## Usage
+## Uso
 
-`/sessions [list|load|alias|info|help] [options]`
+`/sessions [list|load|alias|info|help] [opciones]`
 
-## Actions
+## Acciones
 
-### List Sessions
+### Listar Sesiones
 
-Display all sessions with metadata, filtering, and pagination.
+Muestra todas las sesiones con metadatos, filtros y paginación.
 
-Use `/sessions info` when you need operator-surface context for a swarm: branch, worktree path, and session recency.
+Usa `/sessions info` cuando necesites contexto de operador para un swarm: rama, ruta de worktree y antigüedad de la sesión.
 
 ```bash
-/sessions                              # List all sessions (default)
-/sessions list                         # Same as above
-/sessions list --limit 10              # Show 10 sessions
-/sessions list --date 2026-02-01       # Filter by date
-/sessions list --search abc            # Search by session ID
+/sessions                              # Listar todas las sesiones (por defecto)
+/sessions list                         # Igual que el anterior
+/sessions list --limit 10              # Mostrar 10 sesiones
+/sessions list --date 2026-02-01       # Filtrar por fecha
+/sessions list --search abc            # Buscar por ID de sesión
 ```
 
 **Script:**
@@ -57,15 +57,15 @@ for (const s of result.sessions) {
 "
 ```
 
-### Load Session
+### Cargar Sesión
 
-Load and display a session's content (by ID or alias).
+Carga y muestra el contenido de una sesión (por ID o por alias).
 
 ```bash
-/sessions load <id|alias>             # Load session
-/sessions load 2026-02-01             # By date (for no-id sessions)
-/sessions load a1b2c3d4               # By short ID
-/sessions load my-alias               # By alias name
+/sessions load <id|alias>             # Cargar sesión
+/sessions load 2026-02-01             # Por fecha (para sesiones sin id)
+/sessions load a1b2c3d4               # Por ID corto
+/sessions load my-alias               # Por nombre de alias
 ```
 
 **Script:**
@@ -76,7 +76,7 @@ const sm = require(_r + '/scripts/lib/session-manager');
 const aa = require(_r + '/scripts/lib/session-aliases');
 const id = process.argv[1];
 
-// First try to resolve as alias
+// Primero intenta resolver como alias
 const resolved = aa.resolveAlias(id);
 const sessionId = resolved ? resolved.sessionPath : id;
 
@@ -133,13 +133,13 @@ if (session.metadata.worktree) {
 " "$ARGUMENTS"
 ```
 
-### Create Alias
+### Crear Alias
 
-Create a memorable alias for a session.
+Crea un alias fácil de recordar para una sesión.
 
 ```bash
-/sessions alias <id> <name>           # Create alias
-/sessions alias 2026-02-01 today-work # Create alias named "today-work"
+/sessions alias <id> <nombre>           # Crear alias
+/sessions alias 2026-02-01 trabajo-hoy # Crear alias llamado "trabajo-hoy"
 ```
 
 **Script:**
@@ -157,7 +157,7 @@ if (!sessionId || !aliasName) {
   process.exit(1);
 }
 
-// Get session filename
+// Obtener nombre de archivo de la sesión
 const session = sm.getSessionById(sessionId);
 if (!session) {
   console.log('Session not found: ' + sessionId);
@@ -174,13 +174,13 @@ if (result.success) {
 " "$ARGUMENTS"
 ```
 
-### Remove Alias
+### Eliminar Alias
 
-Delete an existing alias.
+Elimina un alias existente.
 
 ```bash
-/sessions alias --remove <name>        # Remove alias
-/sessions unalias <name>               # Same as above
+/sessions alias --remove <nombre>        # Eliminar alias
+/sessions unalias <nombre>               # Igual que el anterior
 ```
 
 **Script:**
@@ -205,12 +205,12 @@ if (result.success) {
 " "$ARGUMENTS"
 ```
 
-### Session Info
+### Información de Sesión (Session Info)
 
-Show detailed information about a session.
+Muestra información detallada sobre una sesión.
 
 ```bash
-/sessions info <id|alias>              # Show session details
+/sessions info <id|alias>              # Mostrar detalles de sesión
 ```
 
 **Script:**
@@ -256,12 +256,12 @@ if (aliases.length > 0) {
 " "$ARGUMENTS"
 ```
 
-### List Aliases
+### Listar Alias
 
-Show all session aliases.
+Muestra todos los alias de sesión.
 
 ```bash
-/sessions aliases                      # List all aliases
+/sessions aliases                      # Listar todos los alias
 ```
 
 **Script:**
@@ -289,51 +289,51 @@ if (aliases.length === 0) {
 "
 ```
 
-## Operator Notes
+## Notas del Operador
 
-- Session files persist `Project`, `Branch`, and `Worktree` in the header so `/sessions info` can disambiguate parallel tmux/worktree runs.
-- For command-center style monitoring, combine `/sessions info`, `git diff --stat`, and the cost metrics emitted by `scripts/hooks/cost-tracker.js`.
+- Los archivos de sesión persisten `Project`, `Branch` y `Worktree` en el encabezado para que `/sessions info` pueda distinguir entre ejecuciones paralelas en tmux/worktrees.
+- Para una supervisión estilo centro de control, combina `/sessions info`, `git diff --stat` y las métricas de costos emitidas por `scripts/hooks/cost-tracker.js`.
 
-## Arguments
+## Argumentos
 
 $ARGUMENTS:
-- `list [options]` - List sessions
-  - `--limit <n>` - Max sessions to show (default: 50)
-  - `--date <YYYY-MM-DD>` - Filter by date
-  - `--search <pattern>` - Search in session ID
-- `load <id|alias>` - Load session content
-- `alias <id> <name>` - Create alias for session
-- `alias --remove <name>` - Remove alias
-- `unalias <name>` - Same as `--remove`
-- `info <id|alias>` - Show session statistics
-- `aliases` - List all aliases
-- `help` - Show this help
+- `list [opciones]` - Listar sesiones
+  - `--limit <n>` - Cantidad máxima de sesiones a mostrar (por defecto: 50)
+  - `--date <AAAA-MM-DD>` - Filtrar por fecha
+  - `--search <patrón>` - Buscar en el ID de la sesión
+- `load <id|alias>` - Cargar contenido de la sesión
+- `alias <id> <nombre>` - Crear alias para una sesión
+- `alias --remove <nombre>` - Eliminar alias
+- `unalias <nombre>` - Igual que `--remove`
+- `info <id|alias>` - Mostrar estadísticas de la sesión
+- `aliases` - Listar todos los alias
+- `help` - Mostrar esta ayuda
 
-## Examples
+## Ejemplos
 
 ```bash
-# List all sessions
+# Listar todas las sesiones
 /sessions list
 
-# Create an alias for today's session
-/sessions alias 2026-02-01 today
+# Crear un alias para la sesión de hoy
+/sessions alias 2026-02-01 hoy
 
-# Load session by alias
-/sessions load today
+# Cargar sesión por alias
+/sessions load hoy
 
-# Show session info
-/sessions info today
+# Mostrar información de la sesión
+/sessions info hoy
 
-# Remove alias
-/sessions alias --remove today
+# Eliminar alias
+/sessions alias --remove hoy
 
-# List all aliases
+# Listar todos los alias
 /sessions aliases
 ```
 
-## Notes
+## Notas
 
-- Sessions are stored as markdown files in `~/.claude/session-data/` with legacy reads from `~/.claude/sessions/`
-- Aliases are stored in `~/.claude/session-aliases.json`
-- Session IDs can be shortened (first 4-8 characters usually unique enough)
-- Use aliases for frequently referenced sessions
+- Las sesiones se almacenan como archivos markdown en `~/.claude/session-data/` con lectura heredada desde `~/.claude/sessions/`
+- Los alias se guardan en `~/.claude/session-aliases.json`
+- Los IDs de sesión pueden abreviarse (los primeros 4-8 caracteres suelen ser suficientes)
+- Usa alias para sesiones consultadas con frecuencia

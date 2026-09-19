@@ -1,23 +1,23 @@
 ---
-description: Publish a validated epic update back to the issue and local cache.
+description: Publica una actualización validada de la épica en el issue y en la caché local.
 ---
 
 # /epic-publish
 
-Publish a validated coordination update to GitHub.
+Publica una actualización de coordinación validada en GitHub.
 
 ```bash
 node scripts/github-coordination.js publish <issue-number> --repo <owner/repo>
 ```
 
-What this does:
+Qué hace este comando:
 
-1. Re-validates the epic before publishing.
-2. Updates the coordination block in the issue body.
-3. Appends a concise publish comment.
-4. Records the final local snapshot.
+1. Revalida la épica antes de publicar.
+2. Actualiza el bloque de coordinación en el cuerpo del issue.
+3. Añade un comentario de publicación conciso.
+4. Registra la captura instantánea local final.
 
-Compatibility aliases:
+Alias de compatibilidad:
 
 - `/pr`
 - `/prp-pr`

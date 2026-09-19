@@ -1,55 +1,55 @@
 ---
-description: Fix Go build errors, go vet warnings, and linter issues incrementally. Invokes the go-build-resolver agent for minimal, surgical fixes.
+description: Corrige incrementalmente errores de compilación de Go, advertencias de go vet y problemas de linter. Invoca al agente go-build-resolver para correcciones quirúrgicas mínimas.
 ---
 
-# Go Build and Fix
+# Compilación y Corrección de Go
 
-This command invokes the **go-build-resolver** agent to incrementally fix Go build errors with minimal changes.
+Este comando invoca al agente **go-build-resolver** para corregir incrementalmente errores de compilación de Go con cambios mínimos.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Run Diagnostics**: Execute `go build`, `go vet`, `staticcheck`
-2. **Parse Errors**: Group by file and sort by severity
-3. **Fix Incrementally**: One error at a time
-4. **Verify Each Fix**: Re-run build after each change
-5. **Report Summary**: Show what was fixed and what remains
+1. **Ejecutar diagnósticos**: Ejecuta `go build`, `go vet`, `staticcheck`
+2. **Analizar errores**: Agrupa por archivo y ordena por severidad
+3. **Corregir incrementalmente**: Un error a la vez
+4. **Verificar cada corrección**: Vuelve a compilar tras cada cambio
+5. **Reportar resumen**: Muestra lo que se corrigió y lo que queda pendiente
 
-## When to Use
+## Cuándo usarlo
 
-Use `/go-build` when:
-- `go build ./...` fails with errors
-- `go vet ./...` reports issues
-- `golangci-lint run` shows warnings
-- Module dependencies are broken
-- After pulling changes that break the build
+Usa `/go-build` cuando:
+- `go build ./...` falle con errores
+- `go vet ./...` reporte problemas
+- `golangci-lint run` muestre advertencias
+- Las dependencias de módulos estén rotas
+- Después de traer cambios (pull) que rompen la compilación
 
-## Diagnostic Commands Run
+## Comandos de diagnóstico ejecutados
 
 ```bash
-# Primary build check
+# Verificación principal de compilación
 go build ./...
 
-# Static analysis
+# Análisis estático
 go vet ./...
 
-# Extended linting (if available)
+# Linting extendido (si está disponible)
 staticcheck ./...
 golangci-lint run
 
-# Module issues
+# Problemas de módulos
 go mod verify
 go mod tidy -v
 ```
 
-## Example Session
+## Ejemplo de Sesión
 
 ```text
-User: /go-build
+Usuario: /go-build
 
-Agent:
-# Go Build Resolution
+Agente:
+# Resolución de Compilación Go
 
-## Initial Diagnostics
+## Diagnósticos Iniciales
 
 ```bash
 $ go build ./...
@@ -58,50 +58,50 @@ internal/handler/api.go:42:9: cannot use x (type string) as type int
 internal/handler/api.go:58:2: missing return at end of function
 ```
 
-Errors found: 3
+Errores encontrados: 3
 
-## Fix 1: Undefined Identifier
+## Corrección 1: Identificador no definido
 
-File: internal/service/user.go:25
+Archivo: internal/service/user.go:25
 Error: undefined: UserRepository
-Cause: Missing import
+Causa: Importación faltante
 
 ```go
-// Added import
+// Importación añadida
 import "project/internal/repository"
 
-// Changed
+// Cambiado
 var repo UserRepository
-// To
+// A
 var repo repository.UserRepository
 ```
 
 ```bash
 $ go build ./...
-# 2 errors remaining
+# 2 errores restantes
 ```
 
-## Fix 2: Type Mismatch
+## Corrección 2: Discordancia de tipos
 
-File: internal/handler/api.go:42
+Archivo: internal/handler/api.go:42
 Error: cannot use x (type string) as type int
 
 ```go
-// Changed
+// Cambiado
 count := params.Get("count")
-// To
+// A
 countStr := params.Get("count")
 count, _ := strconv.Atoi(countStr)
 ```
 
 ```bash
 $ go build ./...
-# 1 error remaining
+# 1 error restante
 ```
 
-## Fix 3: Missing Return
+## Corrección 3: Retorno faltante
 
-File: internal/handler/api.go:58
+Archivo: internal/handler/api.go:58
 Error: missing return at end of function
 
 ```go
@@ -110,74 +110,74 @@ func GetUser(id string) (*User, error) {
         return nil, ErrInvalidID
     }
     user := findUser(id)
-    // Added missing return
+    // Retorno faltante añadido
     return user, nil
 }
 ```
 
 ```bash
 $ go build ./...
-# Build successful!
+# ¡Compilación exitosa!
 ```
 
-## Final Verification
+## Verificación Final
 
 ```bash
 $ go vet ./...
-# No issues
+# Sin problemas
 
 $ go test ./...
 ok      project/internal/service   0.015s
 ok      project/internal/handler   0.023s
 ```
 
-## Summary
+## Resumen
 
-| Metric | Count |
-|--------|-------|
-| Build errors fixed | 3 |
-| Vet warnings fixed | 0 |
-| Files modified | 2 |
-| Remaining issues | 0 |
+| Métrica | Cantidad |
+|---------|----------|
+| Errores de compilación corregidos | 3 |
+| Advertencias de vet corregidas | 0 |
+| Archivos modificados | 2 |
+| Problemas restantes | 0 |
 
-Build Status: PASS: SUCCESS
+Estado de compilación: PASS: ÉXITO
 ```
 
-## Common Errors Fixed
+## Errores Comunes Corregidos
 
-| Error | Typical Fix |
-|-------|-------------|
-| `undefined: X` | Add import or fix typo |
-| `cannot use X as Y` | Type conversion or fix assignment |
-| `missing return` | Add return statement |
-| `X does not implement Y` | Add missing method |
-| `import cycle` | Restructure packages |
-| `declared but not used` | Remove or use variable |
-| `cannot find package` | `go get` or `go mod tidy` |
+| Error | Solución Típica |
+|-------|-----------------|
+| `undefined: X` | Añadir import o corregir error tipográfico |
+| `cannot use X as Y` | Conversión de tipo o corregir asignación |
+| `missing return` | Añadir sentencia return |
+| `X does not implement Y` | Añadir método faltante |
+| `import cycle` | Reestructurar paquetes |
+| `declared but not used` | Eliminar o usar la variable |
+| `cannot find package` | Ejecutar `go get` o `go mod tidy` |
 
-## Fix Strategy
+## Estrategia de Corrección
 
-1. **Build errors first** - Code must compile
-2. **Vet warnings second** - Fix suspicious constructs
-3. **Lint warnings third** - Style and best practices
-4. **One fix at a time** - Verify each change
-5. **Minimal changes** - Don't refactor, just fix
+1. **Errores de compilación primero** - El código debe compilar
+2. **Advertencias de vet segundo** - Corregir construcciones sospechosas
+3. **Advertencias de linter tercero** - Estilo y mejores prácticas
+4. **Una corrección a la vez** - Verificar cada cambio
+5. **Cambios mínimos** - No refactorizar, solo corregir
 
-## Stop Conditions
+## Condiciones de Parada
 
-The agent will stop and report if:
-- Same error persists after 3 attempts
-- Fix introduces more errors
-- Requires architectural changes
-- Missing external dependencies
+El agente se detendrá y reportará si:
+- El mismo error persiste tras 3 intentos
+- La solución introduce más errores
+- Requiere cambios arquitectónicos
+- Faltan dependencias externas
 
-## Related Commands
+## Comandos Relacionados
 
-- `/go-test` - Run tests after build succeeds
-- `/go-review` - Review code quality
-- `verification-loop` skill - Full verification loop
+- `/go-test` - Ejecuta pruebas tras compilar con éxito
+- `/go-review` - Revisa la calidad del código
+- Skill `verification-loop` - Bucle completo de verificación
 
-## Related
+## Relacionado
 
-- Agent: `agents/go-build-resolver.md`
+- Agente: `agents/go-build-resolver.md`
 - Skill: `skills/golang-patterns/`

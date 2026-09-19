@@ -1,103 +1,103 @@
 ---
-description: Run a generator/evaluator build loop for implementation tasks with bounded iterations and scoring.
+description: Ejecuta un bucle de construcción generador/evaluador para tareas de implementación con iteraciones delimitadas y puntuación.
 ---
 
-Parse the following from $ARGUMENTS:
-1. `brief` — the user's one-line description of what to build
-2. `--max-iterations N` — (optional, default 15) maximum generator-evaluator cycles
-3. `--pass-threshold N` — (optional, default 7.0) weighted score to pass
-4. `--skip-planner` — (optional) skip planner, assume spec.md already exists
-5. `--eval-mode MODE` — (optional, default "playwright") one of: playwright, screenshot, code-only
+# Construcción de Entorno Estilo GAN (GAN-Style Harness Build)
 
-## GAN-Style Harness Build
+Analiza lo siguiente a partir de $ARGUMENTS:
+1. `brief` — descripción en una línea del usuario sobre qué construir
+2. `--max-iterations N` — (opcional, por defecto 15) ciclos máximos generador-evaluador
+3. `--pass-threshold N` — (opcional, por defecto 7.0) puntuación ponderada para aprobar
+4. `--skip-planner` — (opcional) omitir el planificador, asumir que spec.md ya existe
+5. `--eval-mode MODE` — (opcional, por defecto "playwright") uno de: playwright, screenshot, code-only
 
-This command orchestrates a three-agent build loop inspired by Anthropic's March 2026 harness design paper.
+Este comando orquesta un bucle de compilación de tres agentes inspirado en el artículo de diseño de entornos de marzo de 2026 de Anthropic.
 
-### Phase 0: Setup
-1. Create `gan-harness/` directory in project root
-2. Create subdirectories: `gan-harness/feedback/`, `gan-harness/screenshots/`
-3. Initialize git if not already initialized
-4. Log start time and configuration
+### Fase 0: Configuración
+1. Crear el directorio `gan-harness/` en la raíz del proyecto
+2. Crear subdirectorios: `gan-harness/feedback/`, `gan-harness/screenshots/`
+3. Inicializar git si aún no está inicializado
+4. Registrar hora de inicio y configuración
 
-### Phase 1: Planning (Planner Agent)
-Unless `--skip-planner` is set:
-1. Launch the `gan-planner` agent via Task tool with the user's brief
-2. Wait for it to produce `gan-harness/spec.md` and `gan-harness/eval-rubric.md`
-3. Display the spec summary to the user
-4. Proceed to Phase 2
+### Fase 1: Planificación (Agente Planner)
+A menos que `--skip-planner` esté definido:
+1. Lanzar el agente `gan-planner` mediante la herramienta Task con el resumen del usuario
+2. Esperar a que genere `gan-harness/spec.md` y `gan-harness/eval-rubric.md`
+3. Mostrar el resumen de la especificación al usuario
+4. Proceder a la Fase 2
 
-### Phase 2: Generator-Evaluator Loop
+### Fase 2: Bucle Generador-Evaluador
 ```
 iteration = 1
 while iteration <= max_iterations:
 
-    # GENERATE
-    Launch gan-generator agent via Task tool:
-    - Read spec.md
-    - If iteration > 1: read feedback/feedback-{iteration-1}.md
-    - Build/improve the application
-    - Ensure dev server is running
-    - Commit changes
+    # GENERAR
+    Lanzar agente gan-generator mediante la herramienta Task:
+    - Leer spec.md
+    - Si iteration > 1: leer feedback/feedback-{iteration-1}.md
+    - Construir/mejorar la aplicación
+    - Asegurar que el servidor de desarrollo esté corriendo
+    - Confirmar cambios (commit)
 
-    # Wait for generator to finish
+    # Esperar a que el generador finalice
 
-    # EVALUATE
-    Launch gan-evaluator agent via Task tool:
-    - Read eval-rubric.md and spec.md
-    - Test the live application (mode: playwright/screenshot/code-only)
-    - Score against rubric
-    - Write feedback to feedback/feedback-{iteration}.md
+    # EVALUAR
+    Lanzar agente gan-evaluator mediante la herramienta Task:
+    - Leer eval-rubric.md y spec.md
+    - Probar la aplicación en vivo (modo: playwright/screenshot/code-only)
+    - Puntuar contra la rúbrica
+    - Escribir feedback en feedback/feedback-{iteration}.md
 
-    # Wait for evaluator to finish
+    # Esperar a que el evaluador finalice
 
-    # CHECK SCORE
-    Read feedback/feedback-{iteration}.md
-    Extract weighted total score
+    # COMPROBAR PUNTUACIÓN
+    Leer feedback/feedback-{iteration}.md
+    Extraer puntuación total ponderada
 
     if score >= pass_threshold:
-        Log "PASSED at iteration {iteration} with score {score}"
+        Registrar "APROBADO en iteración {iteration} con puntuación {score}"
         Break
 
-    if iteration >= 3 and score has not improved in last 2 iterations:
-        Log "PLATEAU detected — stopping early"
+    if iteration >= 3 y la puntuación no ha mejorado en las últimas 2 iteraciones:
+        Registrar "ESTANCAMIENTO detectado — deteniendo anticipadamente"
         Break
 
     iteration += 1
 ```
 
-### Phase 3: Summary
-1. Read all feedback files
-2. Display final scores and iteration history
-3. Show score progression: `iteration 1: 4.2 → iteration 2: 5.8 → ... → iteration N: 7.5`
-4. List any remaining issues from the final evaluation
-5. Report total time and estimated cost
+### Fase 3: Resumen
+1. Leer todos los archivos de feedback
+2. Mostrar puntuaciones finales e historial de iteraciones
+3. Mostrar progresión de puntuación: `iteración 1: 4.2 → iteración 2: 5.8 → ... → iteración N: 7.5`
+4. Listar cualquier problema restante de la evaluación final
+5. Reportar tiempo total y costo estimado
 
-### Output
+### Salida
 
 ```markdown
-## GAN Harness Build Report
+## Reporte de Construcción del Entorno GAN
 
-**Brief:** [original prompt]
-**Result:** PASS/FAIL
-**Iterations:** N / max
-**Final Score:** X.X / 10
+**Resumen:** [prompt original]
+**Resultado:** PASS/FAIL
+**Iteraciones:** N / max
+**Puntuación Final:** X.X / 10
 
-### Score Progression
-| Iter | Design | Originality | Craft | Functionality | Total |
-|------|--------|-------------|-------|---------------|-------|
+### Progresión de Puntuación
+| Iter | Diseño | Originalidad | Calidad Técnica | Funcionalidad | Total |
+|---|---|---|---|---|---|
 | 1 | ... | ... | ... | ... | X.X |
 | 2 | ... | ... | ... | ... | X.X |
 | N | ... | ... | ... | ... | X.X |
 
-### Remaining Issues
-- [Any issues from final evaluation]
+### Problemas Restantes
+- [Cualquier problema de la evaluación final]
 
-### Files Created
+### Archivos Creados
 - gan-harness/spec.md
 - gan-harness/eval-rubric.md
-- gan-harness/feedback/feedback-001.md through feedback-NNN.md
+- gan-harness/feedback/feedback-001.md hasta feedback-NNN.md
 - gan-harness/generator-state.md
 - gan-harness/build-report.md
 ```
 
-Write the full report to `gan-harness/build-report.md`.
+Escribir el informe completo en `gan-harness/build-report.md`.

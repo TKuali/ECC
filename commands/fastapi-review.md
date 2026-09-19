@@ -1,39 +1,39 @@
 ---
-description: Review a FastAPI application for architecture, async correctness, dependency injection, Pydantic schemas, security, performance, and testability.
+description: Revisa una aplicación FastAPI en cuanto a arquitectura, corrección asíncrona, inyección de dependencias, esquemas de Pydantic, seguridad, rendimiento y capacidad de prueba.
 ---
 
-# FastAPI Review
+# Revisión de FastAPI
 
-Invoke the `fastapi-reviewer` agent for a focused FastAPI review.
+Invoca al agente `fastapi-reviewer` para una revisión especializada de FastAPI.
 
-## Usage
-
-```text
-/fastapi-review [file-or-directory]
-```
-
-## Review Areas
-
-- App factory, router boundaries, middleware, and exception handlers.
-- Pydantic request and response schema separation.
-- Dependency injection for database sessions, auth, pagination, and settings.
-- Async database and external HTTP patterns.
-- CORS, auth, rate limits, logging, and secret handling.
-- OpenAPI metadata and documented response models.
-- Test client setup and dependency overrides.
-
-## Expected Output
+## Uso
 
 ```text
-[SEVERITY] Short issue title
-File: path/to/file.py:42
-Issue: What is wrong and why it matters.
-Fix: Concrete change to make.
+/fastapi-review [archivo-o-directorio]
 ```
 
-## Related
+## Áreas de Revisión
 
-- Agent: `fastapi-reviewer`
+- Fábrica de aplicaciones, límites de routers, middlewares y manejadores de excepciones.
+- Separación de esquemas de solicitud y respuesta con Pydantic.
+- Inyección de dependencias para sesiones de base de datos, autenticación, paginación y configuraciones.
+- Patrones asíncronos para bases de datos y peticiones HTTP externas.
+- CORS, autenticación, límites de tasa (rate limiting), registro de logs y manejo de secretos.
+- Metadatos de OpenAPI y modelos de respuesta documentados.
+- Configuración del cliente de pruebas y sobreescrituras de dependencias.
+
+## Salida Esperada
+
+```text
+[SEVERIDAD] Título corto del problema
+Archivo: ruta/al/archivo.py:42
+Problema: Qué está mal y por qué es importante.
+Solución: Cambio concreto a realizar.
+```
+
+## Relacionado
+
+- Agente: `fastapi-reviewer`
 - Skill: `fastapi-patterns`
-- Command: `/python-review`
+- Comando: `/python-review`
 - Skill: `security-scan`

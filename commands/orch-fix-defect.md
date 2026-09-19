@@ -1,38 +1,35 @@
 ---
-description: Orchestrate fixing a bug — reproduce it as a failing regression test, fix to green, review, gated commit. Wrapper for the orch-fix-defect skill.
+description: Orquesta la corrección de un error — reproduce el fallo como una prueba de regresión fallida, corrige hasta que pase a verde, revisa y realiza un commit controlado. Envoltorio para la skill orch-fix-defect.
 ---
 
 # /orch-fix-defect
 
-Manually launch the **orch-fix-defect** orchestrator: prove the bug with a red
-test, then fix to green.
+Inicia manualmente el orquestador **orch-fix-defect**: demuestra el error con una prueba en rojo, y luego corrige hasta que esté en verde.
 
-## Usage
-
-```
-/orch-fix-defect <what is broken>
-```
-
-Examples:
+## Uso
 
 ```
-/orch-fix-defect poller crashes on empty NWS response
-/orch-fix-defect login returns 500 when email has a plus sign
+/orch-fix-defect <qué está roto>
 ```
 
-## What It Does
+Ejemplos:
 
-Invoke the `orch-fix-defect` skill with `$ARGUMENTS` as the request. The skill
-(via the shared `orch-pipeline` engine) will:
+```
+/orch-fix-defect el poller se cae ante una respuesta vacía de NWS
+/orch-fix-defect el inicio de sesión devuelve 500 cuando el correo contiene un signo más
+```
 
-1. Classify size (default floor: small, often trivial); scope root cause with
-   `code-explorer` if unclear.
-2. **Write a new failing regression test** reproducing the bug, then fix until
-   it goes green. (Proving the bug first is what makes this a fix, not a tweak.)
-3. `code-reviewer` (+ `security-reviewer` if the defect sits in a sensitive path).
-4. Commit as a conventional `fix:` commit. → **GATE 2** (confirm before commit).
+## Qué hace este comando
 
-Use this only when behavior is **broken/wrong** — not for intentional changes
-(`/orch-change-feature`) or new capability (`/orch-add-feature`).
+Invoca la skill `orch-fix-defect` pasando `$ARGUMENTS` como la solicitud. La skill
+(a través del motor compartido `orch-pipeline`):
 
-If `$ARGUMENTS` is empty, ask the user to describe the defect.
+1. Clasificará el tamaño (base predeterminada: pequeño, a menudo trivial); delimitará la causa raíz con `code-explorer` si no queda clara.
+2. **Escribirá una nueva prueba de regresión fallida** que reproduzca el error, y luego corregirá el código hasta que pase a verde. (Demostrar el error primero es lo que convierte esto en una corrección real y no en un ajuste casual).
+3. Invocará a `code-reviewer` (+ `security-reviewer` si el defecto se encuentra en una ruta sensible).
+4. Realizará el commit en formato convencional `fix:`. → **CONTROL 2 (GATE 2)** (confirmar antes del commit).
+
+Usa este comando únicamente cuando un comportamiento esté **roto/incorrecto** — no para cambios intencionados
+de comportamiento (`/orch-change-feature`) ni para nuevas capacidades (`/orch-add-feature`).
+
+Si `$ARGUMENTS` está vacío, solicita al usuario que describa el defecto.

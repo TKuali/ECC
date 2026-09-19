@@ -1,54 +1,54 @@
 ---
-description: Fix Dart analyzer errors and Flutter build failures incrementally. Invokes the dart-build-resolver agent for minimal, surgical fixes.
+description: Corrige incrementalmente errores del analizador de Dart y fallas de compilación de Flutter. Invoca al agente dart-build-resolver para correcciones mínimas y quirúrgicas.
 ---
 
-# Flutter Build and Fix
+# Compilación y Corrección de Flutter
 
-This command invokes the **dart-build-resolver** agent to incrementally fix Dart/Flutter build errors with minimal changes.
+Este comando invoca al agente **dart-build-resolver** para corregir incrementalmente errores de compilación de Dart/Flutter con cambios mínimos.
 
-## What This Command Does
+## Qué hace este comando
 
-1. **Run Diagnostics**: Execute `flutter analyze`, `flutter pub get`
-2. **Parse Errors**: Group by file and sort by severity
-3. **Fix Incrementally**: One error at a time
-4. **Verify Each Fix**: Re-run analysis after each change
-5. **Report Summary**: Show what was fixed and what remains
+1. **Ejecutar diagnósticos**: Ejecuta `flutter analyze`, `flutter pub get`
+2. **Analizar errores**: Agrupa por archivo y ordena por severidad
+3. **Corregir incrementalmente**: Un error a la vez
+4. **Verificar cada corrección**: Vuelve a ejecutar el análisis tras cada cambio
+5. **Reportar resumen**: Muestra lo que se corrigió y lo que queda pendiente
 
-## When to Use
+## Cuándo usarlo
 
-Use `/flutter-build` when:
-- `flutter analyze` reports errors
-- `flutter build` fails for any platform
-- `dart pub get` / `flutter pub get` fails with version conflicts
-- `build_runner` fails to generate code
-- After pulling changes that break the build
+Usa `/flutter-build` cuando:
+- `flutter analyze` reporte errores
+- `flutter build` falle para cualquier plataforma
+- `dart pub get` / `flutter pub get` falle con conflictos de versión
+- `build_runner` no logre generar código
+- Después de traer cambios (pull) que rompen la compilación
 
-## Diagnostic Commands Run
+## Comandos de diagnóstico ejecutados
 
 ```bash
-# Analysis
+# Análisis
 flutter analyze 2>&1
 
-# Dependencies
+# Dependencias
 flutter pub get 2>&1
 
-# Code generation (if project uses build_runner)
+# Generación de código (si el proyecto usa build_runner)
 dart run build_runner build --delete-conflicting-outputs 2>&1
 
-# Platform builds
+# Compilaciones de plataforma
 flutter build apk 2>&1
 flutter build web 2>&1
 ```
 
-## Example Session
+## Ejemplo de Sesión
 
 ````text
-User: /flutter-build
+Usuario: /flutter-build
 
-Agent:
-# Flutter Build Resolution
+Agente:
+# Resolución de Compilación Flutter
 
-## Initial Diagnostics
+## Diagnósticos Iniciales
 
 ```
 $ flutter analyze
@@ -63,102 +63,102 @@ Analyzing project...
     Try correcting the name to the name of an existing method, or defining a method named 'add'. •
     undefined_method
 
-2 errors found.
+2 errores encontrados.
 ```
 
-## Fix 1: Null Safety
+## Corrección 1: Seguridad Nula (Null Safety)
 
-File: lib/features/user/data/user_repository_impl.dart:34
+Archivo: lib/features/user/data/user_repository_impl.dart:34
 Error: A value of type 'String?' can't be assigned to type 'String'
 
-Changed:
+Cambiado:
 ```dart
 final id = response.id;
 ```
-To:
+A:
 ```dart
 final id = response.id ?? '';
 ```
 
 ```
 $ flutter analyze
-1 error found.
+1 error encontrado.
 ```
 
-## Fix 2: Immutable List
+## Corrección 2: Lista Inmutable
 
-File: lib/features/cart/presentation/cart_page.dart:58
+Archivo: lib/features/cart/presentation/cart_page.dart:58
 Error: The method 'add' isn't defined for the type 'List<Item>'
-Cause: State holds an unmodifiable list; mutation goes through Cubit
+Causa: El estado contiene una lista no modificable; la mutación pasa por Cubit
 
-Changed:
+Cambiado:
 ```dart
 state.items.add(item);
 ```
-To:
+A:
 ```dart
 context.read<CartCubit>().addItem(item);
-// Note: Cubit exposes named methods (addItem, removeItem);
-// .add(event) is the BLoC event API — don't mix them.
+// Nota: Cubit expone métodos con nombre (addItem, removeItem);
+// .add(event) es la API de eventos de BLoC — no los mezcles.
 ```
 
 ```
 $ flutter analyze
-No issues found!
+¡No se encontraron problemas!
 ```
 
-## Final Verification
+## Verificación Final
 
 ```
 $ flutter test
-All tests passed.
+Todos los tests pasaron.
 ```
 
-## Summary
+## Resumen
 
-| Metric | Count |
-|--------|-------|
-| Analysis errors fixed | 2 |
-| Files modified | 2 |
-| Remaining issues | 0 |
+| Métrica | Cantidad |
+|---------|----------|
+| Errores de análisis corregidos | 2 |
+| Archivos modificados | 2 |
+| Problemas restantes | 0 |
 
-Build Status: PASS ✓
+Estado de compilación: PASS ✓
 ````
 
-## Common Errors Fixed
+## Errores Comunes Corregidos
 
-| Error | Typical Fix |
-|-------|-------------|
-| `A value of type 'X?' can't be assigned to 'X'` | Add `?? default` or null guard |
-| `The name 'X' isn't defined` | Add import or fix typo |
-| `Non-nullable instance field must be initialized` | Add initializer or `late` |
-| `Version solving failed` | Adjust version constraints in pubspec.yaml |
-| `Missing concrete implementation of 'X'` | Implement missing interface method |
-| `build_runner: Part of X expected` | Delete stale `.g.dart` and rebuild |
+| Error | Solución Típica |
+|-------|-----------------|
+| `A value of type 'X?' can't be assigned to 'X'` | Añadir `?? default` o protección contra nulos |
+| `The name 'X' isn't defined` | Añadir import o corregir error tipográfico |
+| `Non-nullable instance field must be initialized` | Añadir inicializador o `late` |
+| `Version solving failed` | Ajustar restricciones de versión en pubspec.yaml |
+| `Missing concrete implementation of 'X'` | Implementar el método faltante de la interfaz |
+| `build_runner: Part of X expected` | Eliminar `.g.dart` obsoleto y regenerar |
 
-## Fix Strategy
+## Estrategia de Corrección
 
-1. **Analysis errors first** — code must be error-free
-2. **Warning triage second** — fix warnings that could cause runtime bugs
-3. **pub conflicts third** — fix dependency resolution
-4. **One fix at a time** — verify each change
-5. **Minimal changes** — don't refactor, just fix
+1. **Errores de análisis primero** — el código debe estar libre de errores
+2. **Triaje de advertencias segundo** — corregir advertencias que puedan causar fallos en tiempo de ejecución
+3. **Conflictos de pub tercero** — corregir resolución de dependencias
+4. **Una corrección a la vez** — verificar cada cambio
+5. **Cambios mínimos** — no refactorizar, solo corregir
 
-## Stop Conditions
+## Condiciones de Parada
 
-The agent will stop and report if:
-- Same error persists after 3 attempts
-- Fix introduces more errors
-- Requires architectural changes
-- Package upgrade conflicts need user decision
+El agente se detendrá y reportará si:
+- El mismo error persiste tras 3 intentos
+- La solución introduce más errores
+- Requiere cambios arquitectónicos
+- Los conflictos de actualización de paquetes requieren decisión del usuario
 
-## Related Commands
+## Comandos Relacionados
 
-- `/flutter-test` — Run tests after build succeeds
-- `/flutter-review` — Review code quality
-- `verification-loop` skill — Full verification loop
+- `/flutter-test` — Ejecuta pruebas después de compilar con éxito
+- `/flutter-review` — Revisa la calidad del código
+- Skill `verification-loop` — Bucle completo de verificación
 
-## Related
+## Relacionado
 
-- Agent: `agents/dart-build-resolver.md`
+- Agente: `agents/dart-build-resolver.md`
 - Skill: `skills/flutter-dart-code-review/`

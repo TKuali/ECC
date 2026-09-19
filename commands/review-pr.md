@@ -1,37 +1,39 @@
 ---
-description: Comprehensive PR review using specialized agents
+description: Revisión exhaustiva de PR utilizando agentes especializados
 ---
 
-Run a comprehensive multi-perspective review of a pull request.
+# Revisión de PR (Review PR)
 
-## Usage
+Ejecuta una revisión exhaustiva desde múltiples perspectivas de una pull request.
 
-`/review-pr [PR-number-or-URL] [--focus=comments|tests|errors|types|code|simplify]`
+## Uso
 
-If no PR is specified, review the current branch's PR. If no focus is specified, run the full review stack.
+`/review-pr [numero-PR-o-URL] [--focus=comments|tests|errors|types|code|simplify]`
 
-## Steps
+Si no se especifica ningún PR, revisa el PR de la rama actual. Si no se especifica ningún foco, ejecuta la pila completa de revisión.
 
-1. Identify the PR:
-   - use `gh pr view` to get PR details, changed files, and diff
-2. Find project guidance:
-   - look for `CLAUDE.md`, lint config, TypeScript config, repo conventions
-3. Run specialized review agents:
+## Pasos
+
+1. Identificar el PR:
+   - usar `gh pr view` para obtener detalles del PR, archivos modificados y diff
+2. Encontrar guías del proyecto:
+   - buscar `CLAUDE.md`, configuración de linter, configuración de TypeScript y convenciones del repositorio
+3. Ejecutar agentes de revisión especializados:
    - `code-reviewer`
    - `comment-analyzer`
    - `pr-test-analyzer`
    - `silent-failure-hunter`
    - `type-design-analyzer`
    - `code-simplifier`
-4. Aggregate results:
-   - dedupe overlapping findings
-   - rank by severity
-5. Report findings grouped by severity
+4. Agregar resultados:
+   - deduplicar hallazgos superpuestos
+   - clasificar por severidad
+5. Reportar hallazgos agrupados por severidad
 
-## Confidence Rule
+## Regla de Confianza
 
-Only report issues with confidence >= 80:
+Solo reportar problemas con nivel de confianza >= 80:
 
-- Critical: bugs, security, data loss
-- Important: missing tests, quality problems, style violations
-- Advisory: suggestions only when explicitly requested
+- Crítico: errores lógicos (bugs), seguridad, pérdida de datos
+- Importante: pruebas faltantes, problemas de calidad, violaciones de estilo
+- Asesoría: sugerencias únicamente cuando se soliciten explícitamente

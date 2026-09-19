@@ -1,106 +1,106 @@
 ---
-description: Retrieve a Jira ticket, analyze requirements, update status, or add comments. Uses the jira-integration skill and MCP or REST API.
+description: Obtiene un ticket de Jira, analiza requisitos, actualiza estado o añade comentarios. Utiliza la habilidad jira-integration y MCP o API REST.
 ---
 
-# Jira Command
+# Comando Jira
 
-Interact with Jira tickets directly from your workflow — fetch tickets, analyze requirements, add comments, and transition status.
+Interactúa con tickets de Jira directamente desde tu flujo de trabajo — consulta tickets, analiza requisitos, añade comentarios y cambia el estado.
 
-## Usage
+## Uso
 
 ```
-/jira get <TICKET-KEY>          # Fetch and analyze a ticket
-/jira comment <TICKET-KEY>      # Add a progress comment
-/jira transition <TICKET-KEY>   # Change ticket status
-/jira search <JQL>              # Search issues with JQL
+/jira get <CLAVE-TICKET>          # Obtener y analizar un ticket
+/jira comment <CLAVE-TICKET>      # Añadir un comentario de progreso
+/jira transition <CLAVE-TICKET>   # Cambiar el estado del ticket
+/jira search <JQL>                # Buscar incidencias con JQL
 ```
 
-## What This Command Does
+## Qué Hace Este Comando
 
-1. **Get & Analyze** — Fetch a Jira ticket and extract requirements, acceptance criteria, test scenarios, and dependencies
-2. **Comment** — Add structured progress updates to a ticket
-3. **Transition** — Move a ticket through workflow states (To Do → In Progress → Done)
-4. **Search** — Find issues using JQL queries
+1. **Obtener y Analizar** — Consulta un ticket de Jira y extrae requisitos, criterios de aceptación, escenarios de prueba y dependencias
+2. **Comentar** — Añade actualizaciones estructuradas de progreso a un ticket
+3. **Transición** — Mueve un ticket a través de los estados del flujo de trabajo (Por hacer → En progreso → Listo)
+4. **Buscar** — Encuentra incidencias utilizando consultas JQL
 
-## How It Works
+## Cómo Funciona
 
-### `/jira get <TICKET-KEY>`
+### `/jira get <CLAVE-TICKET>`
 
-1. Fetch the ticket from Jira (via MCP `jira_get_issue` or REST API)
-2. Extract all fields: summary, description, acceptance criteria, priority, labels, linked issues
-3. Optionally fetch comments for additional context
-4. Produce a structured analysis:
+1. Consultar el ticket desde Jira (mediante MCP `jira_get_issue` o API REST)
+2. Extraer todos los campos: resumen, descripción, criterios de aceptación, prioridad, etiquetas, incidencias vinculadas
+3. Opcionalmente consultar comentarios para contexto adicional
+4. Producir un análisis estructurado:
 
 ```
 Ticket: PROJ-1234
-Summary: [title]
-Status: [status]
-Priority: [priority]
-Type: [Story/Bug/Task]
+Resumen: [título]
+Estado: [estado]
+Prioridad: [prioridad]
+Tipo: [Historia/Error/Tarea]
 
-Requirements:
-1. [extracted requirement]
-2. [extracted requirement]
+Requisitos:
+1. [requisito extraído]
+2. [requisito extraído]
 
-Acceptance Criteria:
-- [ ] [criterion from ticket]
+Criterios de Aceptación:
+- [ ] [criterio del ticket]
 
-Test Scenarios:
-- Happy Path: [description]
-- Error Case: [description]
-- Edge Case: [description]
+Escenarios de Prueba:
+- Ruta Feliz: [descripción]
+- Caso de Error: [descripción]
+- Caso Límite: [descripción]
 
-Dependencies:
-- [linked issues, APIs, services]
+Dependencias:
+- [incidencias vinculadas, APIs, servicios]
 
-Recommended Next Steps:
-- /plan to create implementation plan
-- `tdd-workflow` skill to implement with tests first
+Próximos Pasos Recomendados:
+- /plan para crear el plan de implementación
+- habilidad `tdd-workflow` para implementar con pruebas primero
 ```
 
-### `/jira comment <TICKET-KEY>`
+### `/jira comment <CLAVE-TICKET>`
 
-1. Summarize current session progress (what was built, tested, committed)
-2. Format as a structured comment
-3. Post to the Jira ticket
+1. Resumir el progreso de la sesión actual (lo construido, probado, confirmado)
+2. Formatear como un comentario estructurado
+3. Publicar en el ticket de Jira
 
-### `/jira transition <TICKET-KEY>`
+### `/jira transition <CLAVE-TICKET>`
 
-1. Fetch available transitions for the ticket
-2. Show options to user
-3. Execute the selected transition
+1. Consultar las transiciones disponibles para el ticket
+2. Mostrar opciones al usuario
+3. Ejecutar la transición seleccionada
 
 ### `/jira search <JQL>`
 
-1. Execute the JQL query against Jira
-2. Return a summary table of matching issues
+1. Ejecutar la consulta JQL contra Jira
+2. Devolver una tabla resumen de incidencias coincidentes
 
-## Prerequisites
+## Prerrequisitos
 
-This command requires Jira credentials. Choose one:
+Este comando requiere credenciales de Jira. Elige una opción:
 
-**Option A — MCP Server (recommended):**
-Add `jira` to your `mcpServers` config (see `mcp-configs/mcp-servers.json` for the template).
+**Opción A — Servidor MCP (recomendado):**
+Añade `jira` a tu configuración de `mcpServers` (ver `mcp-configs/mcp-servers.json` para la plantilla).
 
-**Option B — Environment variables:**
+**Opción B — Variables de entorno:**
 ```bash
-export JIRA_URL="https://yourorg.atlassian.net"
-export JIRA_EMAIL="your.email@example.com"
-export JIRA_API_TOKEN="your-api-token"
+export JIRA_URL="https://tuorganizacion.atlassian.net"
+export JIRA_EMAIL="tu.email@ejemplo.com"
+export JIRA_API_TOKEN="tu-api-token"
 ```
 
-If credentials are missing, stop and direct the user to set them up.
+Si faltan credenciales, detenerse e indicar al usuario cómo configurarlas.
 
-## Integration with Other Commands
+## Integración con Otros Comandos
 
-After analyzing a ticket:
-- Use `/plan` to create an implementation plan from the requirements
-- Use the `tdd-workflow` skill to implement with test-driven development
-- Use `/code-review` after implementation
-- Use `/jira comment` to post progress back to the ticket
-- Use `/jira transition` to move the ticket when work is complete
+Tras analizar un ticket:
+- Usa `/plan` para crear un plan de implementación a partir de los requisitos
+- Usa la habilidad `tdd-workflow` para implementar mediante desarrollo guiado por pruebas
+- Usa `/code-review` tras la implementación
+- Usa `/jira comment` para publicar el progreso de vuelta en el ticket
+- Usa `/jira transition` para mover el ticket al finalizar el trabajo
 
-## Related
+## Relacionado
 
-- **Skill:** `skills/jira-integration/`
-- **MCP config:** `mcp-configs/mcp-servers.json` → `jira`
+- **Habilidad:** `skills/jira-integration/`
+- **Configuración MCP:** `mcp-configs/mcp-servers.json` → `jira`

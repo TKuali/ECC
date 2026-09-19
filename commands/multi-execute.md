@@ -1,33 +1,33 @@
 ---
-description: Execute a multi-model implementation plan while preserving Claude as the only filesystem writer.
+description: Ejecuta un plan de implementación multimodelo manteniendo a Claude como el único con permisos de escritura en el sistema de archivos.
 ---
 
-# Execute - Multi-Model Collaborative Execution
+# Execute - Ejecución Colaborativa Multimodelo
 
-Multi-model collaborative execution - Get prototype from plan → Claude refactors and implements → Multi-model audit and delivery.
+Ejecución colaborativa multimodelo - Obtener prototipo a partir del plan → Claude refactoriza e implementa → Auditoría multimodelo y entrega.
 
-> **Prerequisite:** Requires the external `ccg-workflow` runtime, which is **not** part of the base ECC install. Initialize it with `npx ccg-workflow` to provision `~/.claude/bin/codeagent-wrapper` and the `~/.claude/.ccg/prompts/*` role files this command depends on. Without that runtime, this command will not run correctly.
+> **Prerrequisito:** Requiere el entorno de ejecución externo `ccg-workflow`, el cual **no** forma parte de la instalación base de ECC. Inicialízalo con `npx ccg-workflow` para aprovisionar `~/.claude/bin/codeagent-wrapper` y los archivos de rol `~/.claude/.ccg/prompts/*` de los que depende este comando. Sin ese entorno, este comando no funcionará correctamente.
 
 $ARGUMENTS
 
 ---
 
-## Core Protocols
+## Protocolos Fundamentales
 
-- **Language Protocol**: Use **English** when interacting with tools/models, communicate with user in their language
-- **Code Sovereignty**: External models have **zero filesystem write access**, all modifications by Claude
-- **Dirty Prototype Refactoring**: Treat Codex/Antigravity Unified Diff as "dirty prototype", must refactor to production-grade code
-- **Stop-Loss Mechanism**: Do not proceed to next phase until current phase output is validated
-- **Prerequisite**: Only execute after user explicitly replies "Y" to `/ccg:plan` output (if missing, must confirm first)
+- **Protocolo de Lenguaje**: Usar **inglés** al interactuar con herramientas/modelos externos, comunicarse con el usuario en su propio idioma
+- **Soberanía del Código**: Los modelos externos tienen **cero acceso de escritura en el sistema de archivos**, todas las modificaciones las realiza Claude
+- **Refactorización de Prototipo en Bruto**: Tratar el Unified Diff de Codex/Antigravity como un "prototipo borrador", obligando a refactorizarlo a código de grado de producción
+- **Mecanismo de Contención de Pérdidas (Stop-Loss)**: No avanzar a la siguiente fase hasta que la salida de la fase actual esté validada
+- **Prerrequisito**: Solo ejecutar después de que el usuario haya respondido explícitamente "S" (o "Y") a la salida de `/ccg:plan` (si falta, debe confirmarse primero)
 
 ---
 
-## Multi-Model Call Specification
+## Especificación de Llamadas Multimodelo
 
-**Call Syntax** (parallel: use `run_in_background: true`):
+**Sintaxis de Llamada** (en paralelo: usar `run_in_background: true`):
 
 ```
-# Resume session call (recommended) - Implementation Prototype
+# Llamada para reanudar sesión (recomendado) - Prototipo de Implementación
 Bash({
   command: "~/.claude/bin/codeagent-wrapper {{LITE_MODE_FLAG}}--backend <codex|antigravity> resume <SESSION_ID> - \"$PWD\" <<'EOF'
 ROLE_FILE: <role prompt path>
@@ -39,10 +39,10 @@ OUTPUT: Unified Diff Patch ONLY. Strictly prohibit any actual modifications.
 EOF",
   run_in_background: true,
   timeout: 3600000,
-  description: "Brief description"
+  description: "Breve descripción"
 })
 
-# New session call - Implementation Prototype
+# Llamada de nueva sesión - Prototipo de Implementación
 Bash({
   command: "~/.claude/bin/codeagent-wrapper {{LITE_MODE_FLAG}}--backend <codex|antigravity> - \"$PWD\" <<'EOF'
 ROLE_FILE: <role prompt path>
@@ -54,11 +54,11 @@ OUTPUT: Unified Diff Patch ONLY. Strictly prohibit any actual modifications.
 EOF",
   run_in_background: true,
   timeout: 3600000,
-  description: "Brief description"
+  description: "Breve descripción"
 })
 ```
 
-**Audit Call Syntax** (Code Review / Audit):
+**Sintaxis de Llamada para Auditoría** (Revisión de Código / Auditoría):
 
 ```
 Bash({
@@ -79,243 +79,243 @@ OUTPUT:
 EOF",
   run_in_background: true,
   timeout: 3600000,
-  description: "Brief description"
+  description: "Breve descripción"
 })
 ```
 
-**Model Parameter Notes**:
-- No extra model flag is needed for `--backend antigravity` or `--backend codex`; `codeagent-wrapper` picks each backend's default model.
+**Notas sobre Parámetros del Modelo**:
+- No se requiere ningún indicador extra de modelo para `--backend antigravity` o `--backend codex`; `codeagent-wrapper` selecciona el modelo por defecto de cada backend.
 
-**Role Prompts**:
+**Prompts de Roles**:
 
-| Phase | Codex | Antigravity |
-|-------|-------|--------|
-| Implementation | `~/.claude/.ccg/prompts/codex/architect.md` | `~/.claude/.ccg/prompts/antigravity/frontend.md` |
-| Review | `~/.claude/.ccg/prompts/codex/reviewer.md` | `~/.claude/.ccg/prompts/antigravity/reviewer.md` |
+| Fase | Codex | Antigravity |
+|------|-------|-------------|
+| Implementación | `~/.claude/.ccg/prompts/codex/architect.md` | `~/.claude/.ccg/prompts/antigravity/frontend.md` |
+| Revisión | `~/.claude/.ccg/prompts/codex/reviewer.md` | `~/.claude/.ccg/prompts/antigravity/reviewer.md` |
 
-**Session Reuse**: If `/ccg:plan` provided SESSION_ID, use `resume <SESSION_ID>` to reuse context.
+**Reutilización de Sesión**: Si `/ccg:plan` suministró SESSION_ID, usa `resume <SESSION_ID>` para reutilizar el contexto.
 
-**Wait for Background Tasks** (max timeout 600000ms = 10 minutes):
+**Espera de Tareas en Segundo Plano** (tiempo de espera máximo 600000ms = 10 minutos):
 
 ```
 TaskOutput({ task_id: "<task_id>", block: true, timeout: 600000 })
 ```
 
-**IMPORTANT**:
-- Must specify `timeout: 600000`, otherwise default 30 seconds will cause premature timeout
-- If still incomplete after 10 minutes, continue polling with `TaskOutput`, **NEVER kill the process**
-- If waiting is skipped due to timeout, **MUST call `AskUserQuestion` to ask user whether to continue waiting or kill task**
+**IMPORTANTE**:
+- Debe especificarse `timeout: 600000`, de lo contrario los 30 segundos por defecto generarán un tiempo de espera prematuro.
+- Si tras 10 minutos continúa sin completarse, sigue consultando con `TaskOutput`, **NUNCA abortes el proceso**.
+- Si la espera se omite por timeout, **DEBE llamarse a `AskUserQuestion` para consultar al usuario si seguir esperando o cancelar la tarea**.
 
 ---
 
-## Execution Workflow
+## Flujo de Trabajo de Ejecución
 
-**Execute Task**: $ARGUMENTS
+**Tarea de Ejecución**: $ARGUMENTS
 
-### Phase 0: Read Plan
+### Fase 0: Lectura del Plan
 
-`[Mode: Prepare]`
+`[Modo: Preparación]`
 
-1. **Identify Input Type**:
-   - Plan file path (e.g., `.claude/plan/xxx.md`)
-   - Direct task description
+1. **Identificar Tipo de Entrada**:
+   - Ruta del archivo de plan (ej., `.claude/plan/xxx.md`)
+   - Descripción directa de la tarea
 
-2. **Read Plan Content**:
-   - If plan file path provided, read and parse
-   - Extract: task type, implementation steps, key files, SESSION_ID
+2. **Leer Contenido del Plan**:
+   - Si se dio la ruta del archivo de plan, leerlo y analizarlo
+   - Extraer: tipo de tarea, pasos de implementación, archivos clave, SESSION_ID
 
-3. **Pre-Execution Confirmation**:
-   - If input is "direct task description" or plan missing `SESSION_ID` / key files: confirm with user first
-   - If cannot confirm user replied "Y" to plan: must confirm again before proceeding
+3. **Confirmación Previa a la Ejecución**:
+   - Si la entrada es una "descripción directa de tarea" o el plan carece de `SESSION_ID` / archivos clave: confirmar primero con el usuario
+   - Si no se puede constatar que el usuario haya respondido "S/Y" al plan: debe confirmarse nuevamente antes de continuar
 
-4. **Task Type Routing**:
+4. **Enrutamiento por Tipo de Tarea**:
 
-   | Task Type | Detection | Route |
-   |-----------|-----------|-------|
-   | **Frontend** | Pages, components, UI, styles, layout | Antigravity |
-   | **Backend** | API, interfaces, database, logic, algorithms | Codex |
-   | **Fullstack** | Contains both frontend and backend | Codex ∥ Antigravity parallel |
+   | Tipo de Tarea | Detección | Ruta |
+   |---------------|-----------|------|
+   | **Frontend** | Páginas, componentes, UI, estilos, maquetación | Antigravity |
+   | **Backend** | API, interfaces, base de datos, lógica, algoritmos | Codex |
+   | **Fullstack** | Contiene tanto frontend como backend | Codex ∥ Antigravity en paralelo |
 
 ---
 
-### Phase 1: Quick Context Retrieval
+### Fase 1: Recuperación Rápida de Contexto
 
-`[Mode: Retrieval]`
+`[Modo: Recuperación]`
 
-**If ace-tool MCP is available**, use it for quick context retrieval:
+**Si el MCP ace-tool está disponible**, utilízalo para una recuperación rápida de contexto:
 
-Based on "Key Files" list in plan, call `mcp__ace-tool__search_context`:
+Basándote en la lista de "Archivos Clave" del plan, invoca `mcp__ace-tool__search_context`:
 
 ```
 mcp__ace-tool__search_context({
-  query: "<semantic query based on plan content, including key files, modules, function names>",
+  query: "<consulta semántica basada en el contenido del plan, incluidos archivos clave, módulos y nombres de funciones>",
   project_root_path: "$PWD"
 })
 ```
 
-**Retrieval Strategy**:
-- Extract target paths from plan's "Key Files" table
-- Build semantic query covering: entry files, dependency modules, related type definitions
-- If results insufficient, add 1-2 recursive retrievals
+**Estrategia de Recuperación**:
+- Extraer rutas destino de la tabla de "Archivos Clave" del plan
+- Construir consulta semántica que abarque: archivos de entrada, módulos de dependencia y definiciones de tipos relacionadas
+- Si los resultados son insuficientes, realizar 1-2 recuperaciones recursivas adicionales
 
-**If ace-tool MCP is NOT available**, use Claude Code built-in tools as fallback:
-1. **Glob**: Find target files from plan's "Key Files" table (e.g., `Glob("src/components/**/*.tsx")`)
-2. **Grep**: Search for key symbols, function names, type definitions across the codebase
-3. **Read**: Read the discovered files to gather complete context
-4. **Task (Explore agent)**: For broader exploration, use `Task` with `subagent_type: "Explore"`
+**Si el MCP ace-tool NO está disponible**, utiliza las herramientas nativas de Claude Code:
+1. **Glob**: Localiza los archivos destino desde la tabla de "Archivos Clave" del plan (ej., `Glob("src/components/**/*.tsx")`)
+2. **Grep**: Busca símbolos clave, nombres de función y tipos en todo el código
+3. **Read**: Lee los archivos encontrados para reunir el contexto completo
+4. **Task (agente Explore)**: Para una exploración más amplia, usa `Task` con `subagent_type: "Explore"`
 
-**After Retrieval**:
-- Organize retrieved code snippets
-- Confirm complete context for implementation
-- Proceed to Phase 3
-
----
-
-### Phase 3: Prototype Acquisition
-
-`[Mode: Prototype]`
-
-**Route Based on Task Type**:
-
-#### Route A: Frontend/UI/Styles → Antigravity
-
-**Limit**: Context < 32k tokens
-
-1. Call Antigravity (use `~/.claude/.ccg/prompts/antigravity/frontend.md`)
-2. Input: Plan content + retrieved context + target files
-3. OUTPUT: `Unified Diff Patch ONLY. Strictly prohibit any actual modifications.`
-4. **Antigravity is frontend design authority, its CSS/React/Vue prototype is the final visual baseline**
-5. **WARNING**: Ignore Antigravity's backend logic suggestions
-6. If plan contains `ANTIGRAVITY_SESSION`: prefer `resume <ANTIGRAVITY_SESSION>`
-
-#### Route B: Backend/Logic/Algorithms → Codex
-
-1. Call Codex (use `~/.claude/.ccg/prompts/codex/architect.md`)
-2. Input: Plan content + retrieved context + target files
-3. OUTPUT: `Unified Diff Patch ONLY. Strictly prohibit any actual modifications.`
-4. **Codex is backend logic authority, leverage its logical reasoning and debug capabilities**
-5. If plan contains `CODEX_SESSION`: prefer `resume <CODEX_SESSION>`
-
-#### Route C: Fullstack → Parallel Calls
-
-1. **Parallel Calls** (`run_in_background: true`):
-   - Antigravity: Handle frontend part
-   - Codex: Handle backend part
-2. Wait for both models' complete results with `TaskOutput`
-3. Each uses corresponding `SESSION_ID` from plan for `resume` (create new session if missing)
-
-**Follow the `IMPORTANT` instructions in `Multi-Model Call Specification` above**
+**Tras la Recuperación**:
+- Organizar los fragmentos de código recopilados
+- Confirmar que se dispone del contexto íntegro para la implementación
+- Avanzar a la Fase 3
 
 ---
 
-### Phase 4: Code Implementation
+### Fase 3: Adquisición de Prototipo
 
-`[Mode: Implement]`
+`[Modo: Prototipo]`
 
-**Claude as Code Sovereign executes the following steps**:
+**Enrutamiento según Tipo de Tarea**:
 
-1. **Read Diff**: Parse Unified Diff Patch returned by Codex/Antigravity
+#### Ruta A: Frontend/UI/Estilos → Antigravity
 
-2. **Mental Sandbox**:
-   - Simulate applying Diff to target files
-   - Check logical consistency
-   - Identify potential conflicts or side effects
+**Límite**: Contexto < 32k tokens
 
-3. **Refactor and Clean**:
-   - Refactor "dirty prototype" to **highly readable, maintainable, enterprise-grade code**
-   - Remove redundant code
-   - Ensure compliance with project's existing code standards
-   - **Do not generate comments/docs unless necessary**, code should be self-explanatory
+1. Llamar a Antigravity (usar `~/.claude/.ccg/prompts/antigravity/frontend.md`)
+2. Entrada: Contenido del plan + contexto recuperado + archivos destino
+3. SALIDA: `Unified Diff Patch ONLY. Strictly prohibit any actual modifications.`
+4. **Antigravity es la autoridad en diseño frontend; su prototipo CSS/React/Vue constituye la línea base visual final**
+5. **ADVERTENCIA**: Ignorar sugerencias de lógica de backend emitidas por Antigravity
+6. Si el plan incluye `ANTIGRAVITY_SESSION`: preferir `resume <ANTIGRAVITY_SESSION>`
 
-4. **Minimal Scope**:
-   - Changes limited to requirement scope only
-   - **Mandatory review** for side effects
-   - Make targeted corrections
+#### Ruta B: Backend/Lógica/Algoritmos → Codex
 
-5. **Apply Changes**:
-   - Use Edit/Write tools to execute actual modifications
-   - **Only modify necessary code**, never affect user's other existing functionality
+1. Llamar a Codex (usar `~/.claude/.ccg/prompts/codex/architect.md`)
+2. Entrada: Contenido del plan + contexto recuperado + archivos destino
+3. SALIDA: `Unified Diff Patch ONLY. Strictly prohibit any actual modifications.`
+4. **Codex es la autoridad en lógica de backend; aprovecha su razonamiento lógico y capacidad de depuración**
+5. Si el plan incluye `CODEX_SESSION`: preferir `resume <CODEX_SESSION>`
 
-6. **Self-Verification** (strongly recommended):
-   - Run project's existing lint / typecheck / tests (prioritize minimal related scope)
-   - If failed: fix regressions first, then proceed to Phase 5
+#### Ruta C: Fullstack → Llamadas en Paralelo
+
+1. **Llamadas en Paralelo** (`run_in_background: true`):
+   - Antigravity: Procesa la parte de frontend
+   - Codex: Procesa la parte de backend
+2. Esperar los resultados completos de ambos modelos con `TaskOutput`
+3. Cada uno utiliza el `SESSION_ID` correspondiente del plan para ejecutar `resume` (crear nueva sesión si falta)
+
+**Sigue las instrucciones marcadas como `IMPORTANTE` en la `Especificación de Llamadas Multimodelo` anterior**
 
 ---
 
-### Phase 5: Audit and Delivery
+### Fase 4: Implementación del Código
 
-`[Mode: Audit]`
+`[Modo: Implementación]`
 
-#### 5.1 Automatic Audit
+**Claude, como Soberano del Código, ejecuta los siguientes pasos**:
 
-**After changes take effect, MUST immediately parallel call** Codex and Antigravity for Code Review:
+1. **Leer el Diff**: Analizar el parche Unified Diff devuelto por Codex/Antigravity
 
-1. **Codex Review** (`run_in_background: true`):
+2. **Entorno de Pruebas Mental**:
+   - Simular la aplicación del Diff sobre los archivos destino
+   - Comprobar la consistencia lógica
+   - Identificar posibles conflictos o efectos secundarios
+
+3. **Refactorizar y Limpiar**:
+   - Refactorizar el "prototipo en bruto" hacia **código empresarial altamente legible y mantenible**
+   - Eliminar código redundante
+   - Garantizar el cumplimiento de los estándares existentes del proyecto
+   - **No generar comentarios/documentación a menos que sea indispensable**, el código debe ser autoexplicativo
+
+4. **Alcance Mínimo**:
+   - Cambios estrictamente acotados al alcance del requisito
+   - **Revisión obligatoria** ante posibles efectos secundarios
+   - Realizar correcciones puntuales y dirigidas
+
+5. **Aplicar los Cambios**:
+   - Utilizar herramientas de edición/escritura para ejecutar las modificaciones reales
+   - **Modificar solo el código necesario**, sin afectar nunca el resto de funcionalidades existentes del usuario
+
+6. **Autoverificación** (fuertemente recomendada):
+   - Ejecutar el lint, verificación de tipos y tests existentes del proyecto (priorizando el alcance mínimo afectado)
+   - En caso de fallos: corregir regresiones antes de pasar a la Fase 5
+
+---
+
+### Fase 5: Auditoría y Entrega
+
+`[Modo: Auditoría]`
+
+#### 5.1 Auditoría Automática
+
+**Una vez aplicados los cambios, DEBE llamarse inmediatamente en paralelo** a Codex y Antigravity para la revisión de código (Code Review):
+
+1. **Revisión de Codex** (`run_in_background: true`):
    - ROLE_FILE: `~/.claude/.ccg/prompts/codex/reviewer.md`
-   - Input: Changed Diff + target files
-   - Focus: Security, performance, error handling, logic correctness
+   - Entrada: Diff de los cambios aplicados + archivos destino
+   - Enfoque: Seguridad, rendimiento, manejo de errores, corrección lógica
 
-2. **Antigravity Review** (`run_in_background: true`):
+2. **Revisión de Antigravity** (`run_in_background: true`):
    - ROLE_FILE: `~/.claude/.ccg/prompts/antigravity/reviewer.md`
-   - Input: Changed Diff + target files
-   - Focus: Accessibility, design consistency, user experience
+   - Entrada: Diff de los cambios aplicados + archivos destino
+   - Enfoque: Accesibilidad, consistencia de diseño, experiencia de usuario
 
-Wait for both models' complete review results with `TaskOutput`. Prefer reusing Phase 3 sessions (`resume <SESSION_ID>`) for context consistency.
+Espera los resultados completos de revisión con `TaskOutput`. Prefiere reutilizar las sesiones de la Fase 3 (`resume <SESSION_ID>`) para mantener la coherencia del contexto.
 
-#### 5.2 Integrate and Fix
+#### 5.2 Integrar y Corregir
 
-1. Synthesize Codex + Antigravity review feedback
-2. Weigh by trust rules: Backend follows Codex, Frontend follows Antigravity
-3. Execute necessary fixes
-4. Repeat Phase 5.1 as needed (until risk is acceptable)
+1. Sintetizar las observaciones de revisión de Codex + Antigravity
+2. Ponderar según las reglas de confianza: Backend sigue a Codex, Frontend sigue a Antigravity
+3. Ejecutar las correcciones necesarias
+4. Repetir la Fase 5.1 según sea necesario (hasta que el riesgo sea plenamente aceptable)
 
-#### 5.3 Delivery Confirmation
+#### 5.3 Confirmación de Entrega
 
-After audit passes, report to user:
+Tras superar la auditoría, reportar al usuario:
 
 ```markdown
-## Execution Complete
+## Ejecución Completada
 
-### Change Summary
-| File | Operation | Description |
-|------|-----------|-------------|
-| path/to/file.ts | Modified | Description |
+### Resumen de Cambios
+| Archivo | Operación | Descripción |
+|---------|-----------|-------------|
+| ruta/al/archivo.ts | Modificado | Descripción |
 
-### Audit Results
-- Codex: <Passed/Found N issues>
-- Antigravity: <Passed/Found N issues>
+### Resultados de la Auditoría
+- Codex: <Aprobado/Encontró N problemas>
+- Antigravity: <Aprobado/Encontró N problemas>
 
-### Recommendations
-1. [ ] <Suggested test steps>
-2. [ ] <Suggested verification steps>
+### Recomendaciones
+1. [ ] <Pasos de prueba sugeridos>
+2. [ ] <Pasos de verificación sugeridos>
 ```
 
 ---
 
-## Key Rules
+## Reglas Clave
 
-1. **Code Sovereignty** – All file modifications by Claude, external models have zero write access
-2. **Dirty Prototype Refactoring** – Codex/Antigravity output treated as draft, must refactor
-3. **Trust Rules** – Backend follows Codex, Frontend follows Antigravity
-4. **Minimal Changes** – Only modify necessary code, no side effects
-5. **Mandatory Audit** – Must perform multi-model Code Review after changes
+1. **Soberanía del Código** – Todas las modificaciones de archivos las realiza Claude; los modelos externos carecen de acceso de escritura
+2. **Refactorización de Prototipos en Bruto** – La salida de Codex/Antigravity se trata como borrador y debe refactorizarse
+3. **Reglas de Confianza** – Backend sigue a Codex, Frontend sigue a Antigravity
+4. **Cambios Mínimos** – Modificar únicamente el código necesario, sin efectos secundarios
+5. **Auditoría Obligatoria** – Siempre debe ejecutarse una revisión de código multimodelo tras los cambios
 
 ---
 
-## Usage
+## Uso
 
 ```bash
-# Execute plan file
+# Ejecutar archivo de plan
 /ccg:execute .claude/plan/feature-name.md
 
-# Execute task directly (for plans already discussed in context)
-/ccg:execute implement user authentication based on previous plan
+# Ejecutar tarea directamente (para planes ya debatidos en el contexto)
+/ccg:execute implementar autenticación de usuarios basada en el plan previo
 ```
 
 ---
 
-## Relationship with /ccg:plan
+## Relación con /ccg:plan
 
-1. `/ccg:plan` generates plan + SESSION_ID
-2. User confirms with "Y"
-3. `/ccg:execute` reads plan, reuses SESSION_ID, executes implementation
+1. `/ccg:plan` genera el plan + SESSION_ID
+2. El usuario confirma con "S" / "Y"
+3. `/ccg:execute` lee el plan, reutiliza SESSION_ID y lleva a cabo la implementación
