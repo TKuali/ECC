@@ -1056,6 +1056,60 @@ function runTests() {
     }
   })) passed++; else failed++;
 
+  if (test('isolates project hooks from an ESM project without overwriting user Claude package data', () => {
+    const homeDir = createTempDir('install-apply-claude-project-esm-home-');
+    const projectDir = createTempDir('install-apply-claude-project-esm-');
+    const claudeRoot = path.join(projectDir, '.claude');
+    const userPackagePath = path.join(claudeRoot, 'package.json');
+    const scriptsPackagePath = path.join(claudeRoot, 'scripts', 'package.json');
+    const userPackage = '{"name":"user-claude-config","type":"module"}\n';
+
+    try {
+      fs.writeFileSync(path.join(projectDir, 'package.json'), '{"type":"module"}\n');
+      fs.mkdirSync(claudeRoot, { recursive: true });
+      fs.writeFileSync(userPackagePath, userPackage);
+
+      const firstInstall = run(
+        ['--target', 'claude-project', '--profile', 'core', '--enable-hooks'],
+        { cwd: projectDir, homeDir }
+      );
+      assert.strictEqual(firstInstall.code, 0, firstInstall.stderr);
+      assert.strictEqual(fs.readFileSync(userPackagePath, 'utf8'), userPackage);
+      assert.deepStrictEqual(readJson(scriptsPackagePath), { type: 'commonjs' });
+
+      const hookResult = spawnSync(
+        process.execPath,
+        [path.join(claudeRoot, 'scripts', 'hooks', 'block-no-verify.js')],
+        {
+          input: JSON.stringify({ tool_input: { command: 'git commit --no-verify' } }),
+          encoding: 'utf8',
+          cwd: projectDir,
+        }
+      );
+      assert.strictEqual(hookResult.status, 2, hookResult.stderr);
+      assert.match(hookResult.stderr, /no-verify/i);
+
+      const secondInstall = run(
+        ['--target', 'claude-project', '--profile', 'core', '--enable-hooks'],
+        { cwd: projectDir, homeDir }
+      );
+      assert.strictEqual(secondInstall.code, 0, secondInstall.stderr);
+      assert.strictEqual(fs.readFileSync(userPackagePath, 'utf8'), userPackage);
+
+      const state = readJson(path.join(claudeRoot, 'ecc', 'install-state.json'));
+      const scriptsPackageOperations = state.operations.filter(operation => (
+        operation.destinationPath === scriptsPackagePath
+      ));
+      assert.strictEqual(scriptsPackageOperations.length, 1);
+      assert.strictEqual(scriptsPackageOperations[0].moduleId, 'hooks-runtime');
+      assert.ok(/^[a-f0-9]{64}$/i.test(scriptsPackageOperations[0].contentSha256));
+      assert.ok(!state.operations.some(operation => operation.destinationPath === userPackagePath));
+    } finally {
+      cleanup(homeDir);
+      cleanup(projectDir);
+    }
+  })) passed++; else failed++;
+
   if (test('preserves existing settings.json while disabling Claude co-author attribution', () => {
     const homeDir = createTempDir('install-apply-home-');
     const projectDir = createTempDir('install-apply-project-');
