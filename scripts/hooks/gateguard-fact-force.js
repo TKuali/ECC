@@ -1008,13 +1008,21 @@ function isChecked(key) {
 // --- Sanitize file path against injection ---
 
 function sanitizePath(filePath) {
-  // Strip control chars (including null), bidi overrides, and newlines
+  // Strip control chars (including null), bidi overrides, and newlines.
+  // The predicate covers three boundaries that previously slipped through and
+  // could leak into the deny reason string printed to terminals/logs:
+  //   * C0 controls (U+0000–U+001F) and DEL (U+007F) — existing
+  //   * C1 controls (U+0080–U+009F) including CSI (U+009B) — new
+  //   * Unicode line/paragraph separators U+2028 and U+2029 — new
   let sanitized = '';
   for (const char of String(filePath || '')) {
     const code = char.codePointAt(0);
     const isAsciiControl = code <= 0x1f || code === 0x7f;
+    const isC1Control = code >= 0x80 && code <= 0x9f;
+    const isLineOrParagraphSeparator = code === 0x2028 || code === 0x2029;
     const isBidiOverride = (code >= 0x200e && code <= 0x200f) || (code >= 0x202a && code <= 0x202e) || (code >= 0x2066 && code <= 0x2069);
-    sanitized += isAsciiControl || isBidiOverride ? ' ' : char;
+    const isHarmless = isAsciiControl || isC1Control || isLineOrParagraphSeparator || isBidiOverride;
+    sanitized += isHarmless ? ' ' : char;
   }
   return sanitized.trim().slice(0, 500);
 }

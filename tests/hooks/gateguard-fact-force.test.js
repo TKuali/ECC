@@ -3104,6 +3104,39 @@ function runTests() {
     passed++;
   else failed++;
 
+  // --- Test: sanitizePath strips C1 controls and Unicode line/paragraph separators ---
+  clearState();
+  if (
+    test('sanitizes C1 controls and Unicode line/paragraph separators in gated file paths', () => {
+      // C1 controls (U+0080-U+009F) include CSI (U+009B); previously slipped
+      // through because sanitizePath only covered C0 (U+0000-U+001F) and DEL.
+      // U+2028 (LINE SEPARATOR) and U+2029 (PARAGRAPH SEPARATOR) can rewrite
+      // terminal/log line structure the same way \n does.
+      const csi = String.fromCharCode(0x9b);
+      const ls = String.fromCharCode(0x2028);
+      const ps = String.fromCharCode(0x2029);
+      const input = {
+        tool_name: 'Edit',
+        tool_input: {
+          file_path: `/src/${csi}injected${ls}log-line${ps}evil.js`,
+          old_string: 'a',
+          new_string: 'b',
+        },
+      };
+
+      const result = runHook(input);
+      const output = parseOutput(result.stdout);
+      assert.ok(output, 'should produce JSON output');
+      const reason = output.hookSpecificOutput.permissionDecisionReason;
+      assert.ok(!reason.includes(csi), 'C1 CSI (U+009B) must not appear in denial reason');
+      assert.ok(!reason.includes(ls), 'U+2028 LINE SEPARATOR must not appear in denial reason');
+      assert.ok(!reason.includes(ps), 'U+2029 PARAGRAPH SEPARATOR must not appear in denial reason');
+      assert.ok(reason.includes('evil.js'), 'sanitized path should retain visible filename text');
+    })
+  )
+    passed++;
+  else failed++;
+
   // Cleanup only the temp directory created by this test file.
   try {
     if (fs.existsSync(stateDir)) {
