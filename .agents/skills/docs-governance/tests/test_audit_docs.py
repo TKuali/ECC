@@ -94,6 +94,14 @@ def test_artifact_scope_ignores_opaque_external_uri_schemes(project: Path) -> No
     assert result.returncode == 0, result.stdout
 
 
+def test_artifact_scope_ignores_xmpp_uri_scheme(project: Path) -> None:
+    (project / "guide.md").write_text(
+        "[room](xmpp:room@example.org)\n", encoding="utf-8"
+    )
+    result = run_audit(project, "artifacts")
+    assert result.returncode == 0, result.stdout
+
+
 def test_artifact_scope_checks_windows_drive_paths_as_local_paths(project: Path) -> None:
     (project / "guide.md").write_text(
         "[slash](C:/docs/guide.md)\n"
@@ -125,6 +133,15 @@ def test_artifact_scope_resolves_markdown_destinations_with_parentheses_and_spac
     (project / "index.md").write_text(
         "[topic](topic (draft).md)\n[guide](<guide with spaces.md>)\n",
         encoding="utf-8",
+    )
+    result = run_audit(project, "artifacts")
+    assert result.returncode == 0, result.stdout
+
+
+def test_artifact_scope_resolves_escaped_parenthesis_in_destination(project: Path) -> None:
+    (project / "topic).md").write_text("# Topic\n", encoding="utf-8")
+    (project / "index.md").write_text(
+        "[topic](topic\\).md)\n", encoding="utf-8"
     )
     result = run_audit(project, "artifacts")
     assert result.returncode == 0, result.stdout

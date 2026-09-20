@@ -34,7 +34,7 @@ ENTRY_RE = re.compile(
 CODE_PATH_RE = re.compile(r"`([^`\n]+)`")
 TEST_ID_RE = re.compile(r"\bTEST-[A-Z0-9][A-Z0-9-]*\b", re.IGNORECASE)
 EXTERNAL_URI_RE = re.compile(
-    r"^(?:[A-Za-z][A-Za-z0-9+.-]*://|(?:data|geo|irc|magnet|mailto|news|sms|tel|urn):)",
+    r"^(?:[A-Za-z][A-Za-z0-9+.-]*://|(?:data|geo|irc|magnet|mailto|news|sms|tel|urn|xmpp):)",
     re.IGNORECASE,
 )
 ADR_FILE_RE = re.compile(r"^\d{4}-[a-z0-9-]+\.md$")
@@ -174,12 +174,14 @@ def markdown_link_targets(text: str) -> list[str]:
         escaped = False
         for end in range(start, len(text)):
             character = text[end]
+            if escaped:
+                escaped = False
+                continue
+            if character == "\\":
+                escaped = True
+                continue
             if quote is not None:
-                if escaped:
-                    escaped = False
-                elif character == "\\":
-                    escaped = True
-                elif character == quote:
+                if character == quote:
                     quote = None
                 continue
             if character in {"'", '"'} and end > start and text[end - 1].isspace():
@@ -210,6 +212,7 @@ def normalize_link_target(raw: str) -> str | None:
         if title:
             target = target[: title.start()]
     target = unquote(target.split("#", 1)[0].split("?", 1)[0])
+    target = target.replace(r"\(", "(").replace(r"\)", ")")
     if not target or target.startswith("//"):
         return None
     if EXTERNAL_URI_RE.match(target):

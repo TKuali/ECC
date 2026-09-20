@@ -314,7 +314,7 @@ def main() -> int:
 
     root = args.root.resolve()
     log_path, archive_path = log_paths(root)
-    database = root / ".governance" / "project-log.sqlite"
+    database = resolve_project_path(root, ".governance/project-log.sqlite", "database")
     if not log_path.exists():
         raise SystemExit(f"Missing {log_path}")
 

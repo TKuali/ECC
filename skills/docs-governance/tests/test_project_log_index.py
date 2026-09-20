@@ -57,6 +57,24 @@ class TestProjectLogIndex:
         finally:
             connection.close()
 
+    def test_rebuild_rejects_database_path_through_governance_symlink(self) -> None:
+        (self.project / "PROJECT_LOG.md").write_text(render_log(1), encoding="utf-8")
+        outside = self.project.parent / f"{self.project.name}-outside-governance"
+        outside.mkdir()
+        sentinel = outside / "project-log.sqlite"
+        sentinel.write_text("sentinel", encoding="utf-8")
+        governance = self.project / ".governance"
+        try:
+            governance.symlink_to(outside, target_is_directory=True)
+        except OSError as exc:
+            pytest.skip(f"cannot create directory symlink: {exc}")
+
+        result = self.run_script("rebuild")
+
+        assert result.returncode != 0
+        assert "database path must stay inside the project root" in result.stderr
+        assert sentinel.read_text(encoding="utf-8") == "sentinel"
+
     def test_archive_requires_confirmation_and_preserves_every_event(self) -> None:
         log = self.project / "PROJECT_LOG.md"
         log.write_text(render_log(201), encoding="utf-8")

@@ -31,11 +31,10 @@ ENTRY_RE = re.compile(
     r"^## \[(?P<date>\d{4}-\d{2}-\d{2})\]\s+(?P<type>[^|\n]+?)\s*\|\s*(?P<summary>[^\n]+)$",
     re.MULTILINE,
 )
-MARKDOWN_LINK_START_RE = re.compile(r"\[[^\]\n]*\]\(")
 CODE_PATH_RE = re.compile(r"`([^`\n]+)`")
 TEST_ID_RE = re.compile(r"\bTEST-[A-Z0-9][A-Z0-9-]*\b", re.IGNORECASE)
 EXTERNAL_URI_RE = re.compile(
-    r"^(?:[A-Za-z][A-Za-z0-9+.-]*://|(?:data|geo|irc|magnet|mailto|news|sms|tel|urn):)",
+    r"^(?:[A-Za-z][A-Za-z0-9+.-]*://|(?:data|geo|irc|magnet|mailto|news|sms|tel|urn|xmpp):)",
     re.IGNORECASE,
 )
 ADR_FILE_RE = re.compile(r"^\d{4}-[a-z0-9-]+\.md$")
@@ -124,24 +123,65 @@ def git_show(root: Path, relative: str) -> str | None:
 
 def markdown_link_targets(text: str) -> list[str]:
     targets: list[str] = []
-    for match in MARKDOWN_LINK_START_RE.finditer(text):
-        start = match.end()
+    cursor = 0
+    while cursor < len(text):
+        opening = text.find("[", cursor)
+        if opening == -1:
+            break
+        preceding_backslashes = 0
+        for index in range(opening - 1, -1, -1):
+            if text[index] != "\\":
+                break
+            preceding_backslashes += 1
+        if preceding_backslashes % 2:
+            cursor = opening + 1
+            continue
+
+        depth = 0
+        escaped = False
+        start: int | None = None
+        for index in range(opening, len(text)):
+            character = text[index]
+            if character == "\n":
+                break
+            if escaped:
+                escaped = False
+                continue
+            if character == "\\":
+                escaped = True
+            elif character == "[":
+                depth += 1
+            elif character == "]":
+                depth -= 1
+                if depth == 0:
+                    if index + 1 < len(text) and text[index + 1] == "(":
+                        start = index + 2
+                    break
+        if start is None:
+            cursor = opening + 1
+            continue
+
         if start < len(text) and text[start] == "<":
             end = text.find(">", start + 1)
             if end != -1:
                 targets.append(text[start : end + 1])
+                cursor = end + 1
+                continue
+            cursor = start + 1
             continue
         depth = 0
         quote: str | None = None
         escaped = False
         for end in range(start, len(text)):
             character = text[end]
+            if escaped:
+                escaped = False
+                continue
+            if character == "\\":
+                escaped = True
+                continue
             if quote is not None:
-                if escaped:
-                    escaped = False
-                elif character == "\\":
-                    escaped = True
-                elif character == quote:
+                if character == quote:
                     quote = None
                 continue
             if character in {"'", '"'} and end > start and text[end - 1].isspace():
@@ -152,8 +192,11 @@ def markdown_link_targets(text: str) -> list[str]:
             elif character == ")":
                 if depth == 0:
                     targets.append(text[start:end])
+                    cursor = end + 1
                     break
                 depth -= 1
+        else:
+            cursor = start + 1
     return targets
 
 
@@ -169,6 +212,7 @@ def normalize_link_target(raw: str) -> str | None:
         if title:
             target = target[: title.start()]
     target = unquote(target.split("#", 1)[0].split("?", 1)[0])
+    target = target.replace(r"\(", "(").replace(r"\)", ")")
     if not target or target.startswith("//"):
         return None
     if EXTERNAL_URI_RE.match(target):
