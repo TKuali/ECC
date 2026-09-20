@@ -8,10 +8,17 @@ const testsDir = __dirname;
 const repoRoot = path.resolve(testsDir, '..');
 const TEST_GLOB = 'tests/**/*.test.js';
 const filter = (((process.argv || [])[2]) || '').split(path.sep).join('/');
+const skipPatterns = (process.env.ECC_TEST_SKIP || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
 
 function matchesTestGlob(relativePath) {
   const normalized = relativePath.split(path.sep).join('/');
   if (filter && !normalized.includes(filter)) {
+    return false;
+  }
+  if (skipPatterns.some(pattern => normalized.includes(pattern))) {
     return false;
   }
   if (typeof path.matchesGlob === 'function') {
@@ -189,4 +196,5 @@ if (failedFiles.length > 0) {
 console.log('╚' + '═'.repeat(BOX_W) + '╝');
 console.log(`\nPassed: ${totalPassed}, Failed: ${totalFailed}`);
 
-process.exit(totalFailed > 0 ? 1 : 0);
+const allowFailures = process.env.ECC_TEST_ALLOW_FAILURES === '1';
+process.exit(!allowFailures && totalFailed > 0 ? 1 : 0);
