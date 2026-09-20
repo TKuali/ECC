@@ -540,16 +540,25 @@ async function probeServer(serverName, resolvedConfig) {
   try {
     const src = String(resolvedConfig.source || '');
     const cwd = process.cwd();
-    const isWorkspaceSource = src === require('path').join(cwd, '.claude.json')
-      || src === require('path').join(cwd, '.claude', 'settings.json')
-      || src.startsWith(cwd + require('path').sep + '.claude' + require('path').sep);
-    if (isWorkspaceSource && !/^(1|true|yes)$/i.test(String(process.env.ECC_MCP_ALLOW_WORKSPACE_PROBE || ''))) {
-      return {
-        ok: false,
-        failureCode: null,
-        reason: 'untrusted workspace MCP config skipped (set ECC_MCP_ALLOW_WORKSPACE_PROBE=1 to probe)',
-        source: resolvedConfig.source
-      };
+    const home = require('os').homedir();
+    const pathMod = require('path');
+    // A config file in the user's home directory (~/.claude.json or
+    // ~/.claude/settings.json) is always trusted regardless of cwd.
+    const isHomeSource = src === pathMod.join(home, '.claude.json')
+      || src === pathMod.join(home, '.claude', 'settings.json')
+      || src.startsWith(pathMod.join(home, '.claude') + pathMod.sep);
+    if (!isHomeSource) {
+      const isWorkspaceSource = src === pathMod.join(cwd, '.claude.json')
+        || src === pathMod.join(cwd, '.claude', 'settings.json')
+        || src.startsWith(cwd + pathMod.sep + '.claude' + pathMod.sep);
+      if (isWorkspaceSource && !/^(1|true|yes)$/i.test(String(process.env.ECC_MCP_ALLOW_WORKSPACE_PROBE || ''))) {
+        return {
+          ok: false,
+          failureCode: null,
+          reason: 'untrusted workspace MCP config skipped (set ECC_MCP_ALLOW_WORKSPACE_PROBE=1 to probe)',
+          source: resolvedConfig.source
+        };
+      }
     }
   } catch {
     // Fail closed on path errors for workspace sources is handled below;
