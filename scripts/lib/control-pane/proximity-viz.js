@@ -27,8 +27,8 @@ function renderProximityVizHtml() {
   header { display: flex; align-items: baseline; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #1f2630; }
   header h1 { font-size: 15px; margin: 0; }
   header .sub { color: #8b949e; font-size: 12px; }
-  #wrap { display: grid; grid-template-columns: 1fr 320px; height: calc(100vh - 49px); }
-  #stage { position: relative; }
+  #wrap { display: grid; grid-template-columns: 1fr 320px; grid-template-rows: minmax(0, 1fr); height: calc(100vh - 49px); }
+  #stage { position: relative; height: 100%; min-height: 0; }
   canvas { width: 100%; height: 100%; display: block; }
   #side { border-left: 1px solid #1f2630; padding: 12px 14px; overflow-y: auto; }
   #side h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #8b949e; margin: 0 0 8px; }
