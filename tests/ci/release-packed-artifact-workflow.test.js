@@ -9,6 +9,7 @@ const workflowPaths = [
   '.github/workflows/release.yml',
   '.github/workflows/reusable-release.yml',
 ];
+const { assessExactShaGates } = require('../../scripts/ci/verify-release-gates.js');
 const lifecycleRunnerSource = load('tests/ci/packed-artifact-lifecycle.js');
 
 let passed = 0;
@@ -48,6 +49,20 @@ console.log('\n=== Testing packed-artifact release workflows ===\n');
 
 for (const workflowPath of workflowPaths) {
   const source = load(workflowPath);
+
+  test(`${workflowPath} verifies signed tags and exact-SHA CI gates before building`, () => {
+    const verify = jobBlock(source, 'verify', 'lifecycle');
+    const gateIndex = verify.indexOf('name: Verify signed tag and exact-SHA CI gates');
+    const installIndex = verify.indexOf('name: Install dependencies');
+
+    assert.ok(gateIndex >= 0, 'missing release provenance gate');
+    assert.ok(installIndex > gateIndex, 'release provenance must be verified before dependencies run');
+    assert.match(verify, /node scripts\/ci\/verify-release-gates\.js/);
+    assert.match(verify, /RELEASE_SHA(?:=|:)/);
+    assert.match(verify, /RELEASE_TAG:/);
+    assert.match(source, /actions:\s*read/);
+    assert.match(source, /checks:\s*read/);
+  });
 
   test(`${workflowPath} packs once and exports the package name and SHA-256`, () => {
     assert.strictEqual(
@@ -150,6 +165,40 @@ for (const workflowPath of workflowPaths) {
     );
   });
 }
+
+test('release gate verifier requires a signed annotated tag, CI, and CodeQL', () => {
+  const verifierPath = path.join(repoRoot, 'scripts/ci/verify-release-gates.js');
+  assert.ok(fs.existsSync(verifierPath), 'missing release gate verifier');
+  const source = load('scripts/ci/verify-release-gates.js');
+  assert.match(source, /verification\.verified/);
+  assert.match(source, /object\.type[^\n]+tag/);
+  assert.match(source, /run\.name === 'CI'/);
+  assert.match(source, /codeql/i);
+  assert.match(source, /head_sha === releaseSha/);
+});
+
+test('release gate verifier accepts only successful checks for the exact SHA', () => {
+  const releaseSha = 'a'.repeat(40);
+  const passed = assessExactShaGates(
+    [{ name: 'CI', head_sha: releaseSha, status: 'completed', conclusion: 'success' }],
+    [{ name: 'CodeQL', head_sha: releaseSha, status: 'completed', conclusion: 'success' }],
+    releaseSha
+  );
+  const wrongSha = assessExactShaGates(
+    [{ name: 'CI', head_sha: 'b'.repeat(40), status: 'completed', conclusion: 'success' }],
+    [{ name: 'CodeQL', head_sha: releaseSha, status: 'completed', conclusion: 'success' }],
+    releaseSha
+  );
+  const failedCodeql = assessExactShaGates(
+    [{ name: 'CI', head_sha: releaseSha, status: 'completed', conclusion: 'success' }],
+    [{ name: 'CodeQL', head_sha: releaseSha, status: 'completed', conclusion: 'failure' }],
+    releaseSha
+  );
+
+  assert.strictEqual(passed.state, 'passed');
+  assert.strictEqual(wrongSha.state, 'pending');
+  assert.strictEqual(failedCodeql.state, 'failed');
+});
 
 test('reusable release requires its input to resolve through the tag namespace', () => {
   const source = load('.github/workflows/reusable-release.yml');
