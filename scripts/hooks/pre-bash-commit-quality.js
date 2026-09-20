@@ -119,7 +119,7 @@ function findFileIssues(filePath) {
       }
       
       // Check for TODO/FIXME without issue reference
-      const todoMatch = line.match(/(?:\/\/|#)\s*(TODO|FIXME):?\s*(.+)/);
+    const todoMatch = line.match(/(?:\/\/|#)\s*(TODO|FIXME):?\s*(\S.*)/);
       if (todoMatch && !todoMatch[2].match(/#\d+|issue/i)) {
         issues.push({
           type: 'todo',
