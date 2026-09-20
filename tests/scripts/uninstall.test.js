@@ -138,13 +138,17 @@ function runTests() {
     const claudeRoot = path.join(projectRoot, '.claude');
     const userPackagePath = path.join(claudeRoot, 'package.json');
     const scriptsPackagePath = path.join(claudeRoot, 'scripts', 'package.json');
+    const hooksPackagePath = path.join(claudeRoot, 'scripts', 'hooks', 'package.json');
+    const libPackagePath = path.join(claudeRoot, 'scripts', 'lib', 'package.json');
     const statePath = path.join(claudeRoot, 'ecc', 'install-state.json');
     const userPackage = '{"name":"user-claude-config","type":"module"}\n';
+    const userScriptsPackage = '{"name":"user-claude-scripts","type":"module"}\n';
 
     try {
       fs.writeFileSync(path.join(projectRoot, 'package.json'), '{"type":"module"}\n');
-      fs.mkdirSync(claudeRoot, { recursive: true });
+      fs.mkdirSync(path.dirname(scriptsPackagePath), { recursive: true });
       fs.writeFileSync(userPackagePath, userPackage);
+      fs.writeFileSync(scriptsPackagePath, userScriptsPackage);
 
       execFileSync(
         'node',
@@ -161,7 +165,9 @@ function runTests() {
           timeout: CLI_TIMEOUT_MS,
         }
       );
-      assert.ok(fs.existsSync(scriptsPackagePath));
+      assert.deepStrictEqual(JSON.parse(fs.readFileSync(hooksPackagePath, 'utf8')), { type: 'commonjs' });
+      assert.deepStrictEqual(JSON.parse(fs.readFileSync(libPackagePath, 'utf8')), { type: 'commonjs' });
+      assert.strictEqual(fs.readFileSync(scriptsPackagePath, 'utf8'), userScriptsPackage);
 
       const uninstallResult = run(['--target', 'claude-project'], {
         cwd: projectRoot,
@@ -169,7 +175,9 @@ function runTests() {
       });
       assert.strictEqual(uninstallResult.code, 0, uninstallResult.stderr);
       assert.strictEqual(fs.readFileSync(userPackagePath, 'utf8'), userPackage);
-      assert.ok(!fs.existsSync(scriptsPackagePath));
+      assert.strictEqual(fs.readFileSync(scriptsPackagePath, 'utf8'), userScriptsPackage);
+      assert.ok(!fs.existsSync(hooksPackagePath));
+      assert.ok(!fs.existsSync(libPackagePath));
       assert.ok(!fs.existsSync(statePath));
     } finally {
       cleanup(homeDir);

@@ -1056,18 +1056,22 @@ function runTests() {
     }
   })) passed++; else failed++;
 
-  if (test('isolates project hooks from an ESM project without overwriting user Claude package data', () => {
+  if (test('isolates project hooks from ESM package scopes without overwriting user Claude package data', () => {
     const homeDir = createTempDir('install-apply-claude-project-esm-home-');
     const projectDir = createTempDir('install-apply-claude-project-esm-');
     const claudeRoot = path.join(projectDir, '.claude');
     const userPackagePath = path.join(claudeRoot, 'package.json');
     const scriptsPackagePath = path.join(claudeRoot, 'scripts', 'package.json');
+    const hooksPackagePath = path.join(claudeRoot, 'scripts', 'hooks', 'package.json');
+    const libPackagePath = path.join(claudeRoot, 'scripts', 'lib', 'package.json');
     const userPackage = '{"name":"user-claude-config","type":"module"}\n';
+    const userScriptsPackage = '{"name":"user-claude-scripts","type":"module"}\n';
 
     try {
       fs.writeFileSync(path.join(projectDir, 'package.json'), '{"type":"module"}\n');
-      fs.mkdirSync(claudeRoot, { recursive: true });
+      fs.mkdirSync(path.dirname(scriptsPackagePath), { recursive: true });
       fs.writeFileSync(userPackagePath, userPackage);
+      fs.writeFileSync(scriptsPackagePath, userScriptsPackage);
 
       const firstInstall = run(
         ['--target', 'claude-project', '--profile', 'core', '--enable-hooks'],
@@ -1075,7 +1079,9 @@ function runTests() {
       );
       assert.strictEqual(firstInstall.code, 0, firstInstall.stderr);
       assert.strictEqual(fs.readFileSync(userPackagePath, 'utf8'), userPackage);
-      assert.deepStrictEqual(readJson(scriptsPackagePath), { type: 'commonjs' });
+      assert.strictEqual(fs.readFileSync(scriptsPackagePath, 'utf8'), userScriptsPackage);
+      assert.deepStrictEqual(readJson(hooksPackagePath), { type: 'commonjs' });
+      assert.deepStrictEqual(readJson(libPackagePath), { type: 'commonjs' });
 
       const hookResult = spawnSync(
         process.execPath,
@@ -1095,15 +1101,23 @@ function runTests() {
       );
       assert.strictEqual(secondInstall.code, 0, secondInstall.stderr);
       assert.strictEqual(fs.readFileSync(userPackagePath, 'utf8'), userPackage);
+      assert.strictEqual(fs.readFileSync(scriptsPackagePath, 'utf8'), userScriptsPackage);
 
       const state = readJson(path.join(claudeRoot, 'ecc', 'install-state.json'));
-      const scriptsPackageOperations = state.operations.filter(operation => (
-        operation.destinationPath === scriptsPackagePath
+      const boundaryPaths = [hooksPackagePath, libPackagePath];
+      const packageBoundaryOperations = state.operations.filter(operation => (
+        boundaryPaths.includes(operation.destinationPath)
       ));
-      assert.strictEqual(scriptsPackageOperations.length, 1);
-      assert.strictEqual(scriptsPackageOperations[0].moduleId, 'hooks-runtime');
-      assert.ok(/^[a-f0-9]{64}$/i.test(scriptsPackageOperations[0].contentSha256));
+      assert.deepStrictEqual(
+        packageBoundaryOperations.map(operation => operation.destinationPath).sort(),
+        [...boundaryPaths].sort()
+      );
+      assert.ok(packageBoundaryOperations.every(operation => operation.moduleId === 'hooks-runtime'));
+      assert.ok(packageBoundaryOperations.every(operation => (
+        /^[a-f0-9]{64}$/i.test(operation.contentSha256)
+      )));
       assert.ok(!state.operations.some(operation => operation.destinationPath === userPackagePath));
+      assert.ok(!state.operations.some(operation => operation.destinationPath === scriptsPackagePath));
     } finally {
       cleanup(homeDir);
       cleanup(projectDir);

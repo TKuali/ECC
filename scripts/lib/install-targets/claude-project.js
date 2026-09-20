@@ -9,7 +9,7 @@ const {
 } = require('./helpers');
 
 const CLAUDE_ECC_NAMESPACE = 'ecc';
-const CLAUDE_PROJECT_SCRIPTS_PACKAGE = 'manifests/install-assets/claude-project-scripts-package.json';
+const CLAUDE_PROJECT_COMMONJS_PACKAGE = 'manifests/install-assets/claude-project-scripts-package.json';
 
 function getClaudeManagedDestinationPath(adapter, sourceRelativePath, input) {
   const normalizedSourcePath = normalizeRelativePath(sourceRelativePath);
@@ -100,13 +100,13 @@ module.exports = createInstallTargetAdapter({
       }
 
       return [
-        createRemappedOperation(
+        ...['hooks', 'lib'].map(directory => createRemappedOperation(
           adapter,
           module.id,
-          CLAUDE_PROJECT_SCRIPTS_PACKAGE,
-          path.join(adapter.resolveRoot(planningInput), 'scripts', 'package.json'),
+          CLAUDE_PROJECT_COMMONJS_PACKAGE,
+          path.join(adapter.resolveRoot(planningInput), 'scripts', directory, 'package.json'),
           { strategy: 'preserve-relative-path' }
-        ),
+        )),
         ...operations,
       ];
     });
