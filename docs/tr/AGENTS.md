@@ -2,7 +2,7 @@
 
 Bu, yazılım geliştirme için 71 özel agent, 297 skill, 100 command ve otomatik hook iş akışları sağlayan **üretime hazır bir AI kodlama eklentisidir**.
 
-**Sürüm:** 2.2.1
+**Sürüm:** 2.2.2
 
 ## Temel İlkeler
 
