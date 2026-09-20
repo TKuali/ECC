@@ -63,7 +63,9 @@
       "paths": [
         "commands",
         "scripts/harness-audit.js",
-        "scripts/skills-health.js"
+        "scripts/skills-health.js",
+        "scripts/ci/validate-skill-host-compat.js",
+        "scripts/ci/validate-skills.js"
       ],
       "targets": [
         "claude",
@@ -334,6 +336,7 @@
         "skills/production-audit",
         "skills/skill-comply",
         "skills/skill-scout",
+        "skills/skill-host-compat",
         "skills/skill-stocktake",
         "skills/strategic-compact",
         "skills/tdd-workflow",

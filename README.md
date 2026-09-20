@@ -912,6 +912,7 @@ ECC/
 |   |-- swift-protocol-di-testing/  # Protocol-based DI for testable Swift code
 |   |-- search-first/               # Research-before-coding workflow
 |   |-- skill-stocktake/            # Audit skills and commands for quality
+|   |-- skill-host-compat/          # Lint skills for Codex-safe frontmatter and substitutions
 |   |-- liquid-glass-design/        # iOS 26 Liquid Glass design system
 |   |-- foundation-models-on-device/ # Apple on-device LLM with FoundationModels
 |   |-- swift-concurrency-6-2/      # Swift 6.2 Approachable Concurrency
@@ -938,6 +939,7 @@ ECC/
 |   |-- go-test.md          # /go-test - Go TDD workflow
 |   |-- go-build.md         # /go-build - Fix Go build errors
 |   |-- skill-create.md     # /skill-create - Generate skills from git history
+|   |-- skill-host-compat.md # /skill-host-compat - Lint skills for Codex/Cursor copies
 |   |-- instinct-status.md  # /instinct-status - View learned instincts
 |   |-- instinct-import.md  # /instinct-import - Import instincts
 |   |-- instinct-export.md  # /instinct-export - Export instincts
