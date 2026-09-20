@@ -172,7 +172,10 @@ function renderProximityVizHtml() {
   }
 
   function poll() {
-    fetch('/api/proximity').then(function (r) { return r.json(); }).then(function (data) {
+    fetch('/api/proximity').then(function (r) {
+      if (!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    }).then(function (data) {
       applySnapshot(data && data.enabled ? data : (data || {}));
     }).catch(function () {
       document.getElementById('status').textContent = 'offline';
