@@ -7,7 +7,7 @@ const fs = require('fs');
 const testsDir = __dirname;
 const repoRoot = path.resolve(testsDir, '..');
 const TEST_GLOB = 'tests/**/*.test.js';
-const filter = (process.argv[2] || '').split(path.sep).join('/');
+const filter = (((process.argv || [])[2]) || '').split(path.sep).join('/');
 
 function matchesTestGlob(relativePath) {
   const normalized = relativePath.split(path.sep).join('/');
@@ -154,10 +154,7 @@ for (const testFile of testFiles) {
     filesFailed += 1;
     failedFiles.push(displayPath);
     totalPassed += counts.passed;
-    totalFailed += counts.definite ? counts.failed : Math.max(counts.failed, 1);
-    if (processFailed && !counts.definite) {
-      totalFailed += 1;
-    }
+    totalFailed += processFailed ? Math.max(counts.failed, 1) : counts.failed;
     console.log(`✗ ${displayPath} ${failureReason}`);
     annotateFailure(displayPath, failureReason, combined);
   } else {
