@@ -116,13 +116,13 @@ Instead of rebuilding that process in every prompt, you install it once and make
 
 ECC is MIT-licensed open source. It works best with Claude Code today, has a supported Codex sync path, and provides capability-limited adapters for Cursor, OpenCode, Gemini, Zed, GitHub Copilot, Antigravity, Qwen, and other harnesses. See the [support status matrix](#platform-support) before assuming feature parity.
 
-Access to 67 agents, 284 skills, and 94 legacy command shims, plus hooks, rules, memory, continuous learning, and AgentShield security scanning. The agents are specialized for planning, review, build repair, security, architecture, and domain work.
+Access to 67 agents, 285 skills, and 95 legacy command shims, plus hooks, rules, memory, continuous learning, and AgentShield security scanning. The agents are specialized for planning, review, build repair, security, architecture, and domain work.
 
 | Included         |       Count | What it gives you                                                                    |
 | ---------------- | ----------: | ------------------------------------------------------------------------------------ |
 | Agents           |   67 agents | Planning, review, build repair, security, architecture, and domain work              |
-| Skills           |  284 skills | TDD, research, security, docs, frontend, data, ML, operations, and more              |
-| Commands         | 94 commands | Convenient entry points while ECC moves to a skills-first surface                    |
+| Skills           |  285 skills | TDD, research, security, docs, frontend, data, ML, operations, and more              |
+| Commands         | 95 commands | Convenient entry points while ECC moves to a skills-first surface                    |
 | Hooks and memory |     Runtime | Enforcement, session summaries, continuous learning, instincts, and context controls |
 | Rules            |   Selective | Always-loaded standards you choose by language or project                            |
 | AgentShield      |    Included | Scanning for prompts, hooks, MCP config, permissions, secrets, and agent files       |
@@ -1035,6 +1035,7 @@ ECC/
 |   |-- investor-outreach/          # Personalized fundraising outreach and follow-up
 |   |-- continuous-learning/        # Legacy v1 Stop-hook pattern extraction
 |   |-- continuous-learning-v2/     # Instinct-based learning with confidence scoring
+|   |-- instinct-enforce/           # PreToolUse gate for high-confidence learned instincts
 |   |-- iterative-retrieval/        # Progressive context refinement for subagents
 |   |-- strategic-compact/          # Manual compaction suggestions (Longform Guide)
 |   |-- tdd-workflow/               # TDD methodology
@@ -1111,6 +1112,7 @@ ECC/
 |   |-- instinct-status.md  # /instinct-status - View learned instincts
 |   |-- instinct-import.md  # /instinct-import - Import instincts
 |   |-- instinct-export.md  # /instinct-export - Export instincts
+|   |-- instinct-enforce.md # /instinct-enforce - Dry-run instinct PreToolUse matches
 |   |-- evolve.md           # /evolve - Cluster instincts into skills
 |   |-- prune.md            # /prune - Delete expired pending instincts
 |   |-- pm2.md              # /pm2 - PM2 service lifecycle management
@@ -1290,6 +1292,7 @@ The instinct-based learning system automatically learns your patterns:
 /instinct-status        # Show learned instincts with confidence
 /instinct-import <file> # Import instincts from others
 /instinct-export        # Export your instincts for sharing
+/instinct-enforce       # Dry-run PreToolUse instinct matches for a sample payload
 /evolve                 # Cluster related instincts into skills
 ```
 

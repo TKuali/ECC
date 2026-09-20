@@ -156,6 +156,8 @@ function main() {
         "scripts/ito.js",
         "scripts/memory.js",
         "scripts/memory-mcp.mjs",
+        "scripts/hooks/instinct-enforce.js",
+        "scripts/lib/instinct-store.js",
         "scripts/lib/memory-vault-format.js",
         "scripts/lib/memory-vault.js",
         "scripts/discussion-audit.js",
