@@ -489,6 +489,54 @@ check('bash fence ${1} is treated as a Claude substitution', () => {
   }
 });
 
+check('POSIX VAR=$1 assignment is not a Claude substitution', () => {
+  const root = createRoot();
+  try {
+    writeSkill(
+      root,
+      'posix',
+      `${checklistBody('Posix')}\n## Code Examples\n\n\`\`\`bash\nmove_dir() {\n  SOURCE=$1\n  DEST=$2\n}\n\`\`\`\n`
+    );
+    const result = runValidator(root);
+    assert.strictEqual(result.status, 0, result.stderr);
+    assert.ok(!result.stderr.includes('ERROR:'));
+  } finally {
+    cleanup(root);
+  }
+});
+
+check('Perl/awk $1 numeric compare is not a Claude substitution', () => {
+  const root = createRoot();
+  try {
+    writeSkill(
+      root,
+      'cover',
+      `${checklistBody('Cover')}\n## Code Examples\n\n\`\`\`bash\nperl -ne 'if (/Total.*?(\\d+)/) { exit 1 if $1 < 80 }'\n\`\`\`\n`
+    );
+    const result = runValidator(root);
+    assert.strictEqual(result.status, 0, result.stderr);
+    assert.ok(!result.stderr.includes('ERROR:'));
+  } finally {
+    cleanup(root);
+  }
+});
+
+check('echo $1 in a bash fence is treated as a Claude substitution', () => {
+  const root = createRoot();
+  try {
+    writeSkill(
+      root,
+      'echoone',
+      `${checklistBody('Echo')}\n## Code Examples\n\n\`\`\`bash\necho $1\n\`\`\`\n`
+    );
+    const result = runValidator(root);
+    assert.strictEqual(result.status, 1);
+    assert.ok(result.stderr.includes('$1'));
+  } finally {
+    cleanup(root);
+  }
+});
+
 console.log(`\nPassed: ${passed}`);
 console.log(`Failed: ${failed}`);
 process.exit(failed > 0 ? 1 : 0);

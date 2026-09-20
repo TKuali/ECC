@@ -48,9 +48,9 @@ const CLAUDE_SUBSTITUTION_PATTERNS = [
   { token: '${CLAUDE_PLUGIN_ROOT}', regex: /\$\{CLAUDE_PLUGIN_ROOT\}/g },
   { token: '$CLAUDE_PLUGIN_ROOT', regex: /\$CLAUDE_PLUGIN_ROOT\b/g },
   { token: '$ARGUMENTS', regex: /\$ARGUMENTS\b|\$\{ARGUMENTS\}/g },
-  // Bare $1 is a Perl/awk capture in many examples; flag the Claude skill
-  // form ${1} and $1 used as a shell positional, not `$1 <number>`.
-  { token: '$1', regex: /\$\{1\}|(?<![\w$])\$1(?!\d)(?!\s*[<>=])/g },
+  // Claude skill form ${1}. Bare $1 is handled in findSubstitutionTokens so
+  // POSIX `VAR=$1` and Perl/awk `$1 < 80` are not treated as Claude args.
+  { token: '$1', regex: /\$\{1\}|(?<![\w$])\$1(?!\d)/g },
 ];
 
 const EXECUTABLE_FENCE_LANGS = new Set(['bash', 'sh', 'zsh']);
@@ -189,12 +189,30 @@ function precedingAllowsToken(body, fenceStart) {
   return /anti-pattern/i.test(window) || /do not/i.test(window);
 }
 
+function isPortableBareDollarOne(fenceContent, index) {
+  const before = fenceContent.slice(0, index);
+  const after = fenceContent.slice(index + 2);
+  // Perl/awk numeric compare: `$1 < 80`, `$1>=0`.
+  if (/^\s*[<>=]/.test(after)) return true;
+  // POSIX assignment of a function positional: `VAR=$1` or `VAR="$1"`.
+  if (/=\s*["']?$/.test(before)) return true;
+  return false;
+}
+
 function findSubstitutionTokens(fenceContent) {
   const found = [];
   for (const pattern of CLAUDE_SUBSTITUTION_PATTERNS) {
     pattern.regex.lastIndex = 0;
-    if (pattern.regex.test(fenceContent)) {
-      found.push(pattern.token);
+    let match = pattern.regex.exec(fenceContent);
+    while (match !== null) {
+      const skipBarePositional = pattern.token === '$1'
+        && match[0] === '$1'
+        && isPortableBareDollarOne(fenceContent, match.index);
+      if (!skipBarePositional) {
+        found.push(pattern.token);
+        break;
+      }
+      match = pattern.regex.exec(fenceContent);
     }
   }
   return found;
