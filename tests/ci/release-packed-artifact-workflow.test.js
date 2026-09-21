@@ -3,28 +3,46 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const yaml = require('js-yaml');
 
 const repoRoot = path.resolve(__dirname, '..', '..');
 const workflowPaths = [
   '.github/workflows/release.yml',
   '.github/workflows/reusable-release.yml',
 ];
-const { assessExactShaGates } = require('../../scripts/ci/verify-release-gates.js');
+const {
+  assessExactShaGates,
+  verifySignedAnnotatedTag,
+  waitForExactShaGates,
+} = require('../../scripts/ci/verify-release-gates.js');
 const lifecycleRunnerSource = load('tests/ci/packed-artifact-lifecycle.js');
 
 let passed = 0;
 let failed = 0;
+const pendingTests = [];
 
 function test(name, fn) {
   try {
-    fn();
-    console.log(`  ✓ ${name}`);
-    passed += 1;
+    const result = fn();
+    if (result && typeof result.then === 'function') {
+      pendingTests.push(result.then(() => pass(name), error => fail(name, error)));
+    } else {
+      pass(name);
+    }
   } catch (error) {
-    console.log(`  ✗ ${name}`);
-    console.log(`    Error: ${error.message}`);
-    failed += 1;
+    fail(name, error);
   }
+}
+
+function pass(name) {
+  console.log(`  ✓ ${name}`);
+  passed += 1;
+}
+
+function fail(name, error) {
+  console.log(`  ✗ ${name}`);
+  console.log(`    Error: ${error.message}`);
+  failed += 1;
 }
 
 function load(relativePath) {
@@ -52,16 +70,23 @@ for (const workflowPath of workflowPaths) {
 
   test(`${workflowPath} verifies signed tags and exact-SHA CI gates before building`, () => {
     const verify = jobBlock(source, 'verify', 'lifecycle');
+    const workflow = yaml.load(source);
+    const verifyJob = workflow.jobs.verify;
+    const gateStep = verifyJob.steps.find(
+      step => step.name === 'Verify signed tag and exact-SHA CI gates'
+    );
     const gateIndex = verify.indexOf('name: Verify signed tag and exact-SHA CI gates');
     const installIndex = verify.indexOf('name: Install dependencies');
+    const effectivePermissions = verifyJob.permissions || workflow.permissions || {};
 
     assert.ok(gateIndex >= 0, 'missing release provenance gate');
     assert.ok(installIndex > gateIndex, 'release provenance must be verified before dependencies run');
-    assert.match(verify, /node scripts\/ci\/verify-release-gates\.js/);
-    assert.match(verify, /RELEASE_SHA(?:=|:)/);
-    assert.match(verify, /RELEASE_TAG:/);
-    assert.match(source, /actions:\s*read/);
-    assert.match(source, /checks:\s*read/);
+    assert.ok(gateStep, 'missing named release provenance gate step');
+    assert.match(gateStep.run, /node scripts\/ci\/verify-release-gates\.js/);
+    assert.match(gateStep.run, /RELEASE_SHA=/);
+    assert.ok(gateStep.env?.RELEASE_TAG, 'gate step must receive RELEASE_TAG');
+    assert.strictEqual(effectivePermissions.actions, 'read');
+    assert.strictEqual(effectivePermissions.checks, 'read');
   });
 
   test(`${workflowPath} packs once and exports the package name and SHA-256`, () => {
@@ -200,6 +225,86 @@ test('release gate verifier accepts only successful checks for the exact SHA', (
   assert.strictEqual(failedCodeql.state, 'failed');
 });
 
+test('release gate verifier validates GitHub response shapes before use', async () => {
+  const inputs = {
+    repository: 'affaan-m/ECC',
+    releaseSha: 'a'.repeat(40),
+    releaseTag: 'v1.2.3',
+    token: 'test-token',
+  };
+  const malformedResponse = async () => ({
+    ok: true,
+    status: 200,
+    headers: { get: () => null },
+    json: async () => ({ object: { type: 'tag' } }),
+  });
+
+  await assert.rejects(
+    verifySignedAnnotatedTag(inputs, malformedResponse),
+    /GitHub API response validation failed/
+  );
+});
+
+test('release gate verifier evaluates checks from every GitHub result page', async () => {
+  const releaseSha = 'a'.repeat(40);
+  const inputs = {
+    repository: 'affaan-m/ECC',
+    releaseSha,
+    releaseTag: 'v1.2.3',
+    token: 'test-token',
+  };
+  const pageTwo =
+    `https://api.github.com/repos/${inputs.repository}/commits/${releaseSha}/check-runs` +
+    '?per_page=100&page=2';
+  const response = (payload, link = null) => ({
+    ok: true,
+    status: 200,
+    headers: { get: name => (name.toLowerCase() === 'link' ? link : null) },
+    json: async () => payload,
+  });
+  const fetchImpl = async url => {
+    if (url.includes('/actions/runs?')) {
+      return response({
+        workflow_runs: [
+          { id: 1, name: 'CI', head_sha: releaseSha, status: 'completed', conclusion: 'success' },
+        ],
+      });
+    }
+    if (url === pageTwo) {
+      return response({
+        check_runs: [
+          {
+            id: 2,
+            name: 'CodeQL JavaScript',
+            head_sha: releaseSha,
+            status: 'completed',
+            conclusion: 'failure',
+          },
+        ],
+      });
+    }
+    return response(
+      {
+        check_runs: [
+          {
+            id: 1,
+            name: 'CodeQL Actions',
+            head_sha: releaseSha,
+            status: 'completed',
+            conclusion: 'success',
+          },
+        ],
+      },
+      `<${pageTwo}>; rel="next"`
+    );
+  };
+
+  await assert.rejects(
+    waitForExactShaGates(inputs, fetchImpl),
+    /CodeQL JavaScript concluded failure/
+  );
+});
+
 test('reusable release requires its input to resolve through the tag namespace', () => {
   const source = load('.github/workflows/reusable-release.yml');
   const verify = jobBlock(source, 'verify', 'lifecycle');
@@ -327,6 +432,8 @@ test('packed lifecycle installs and verifies the opt-in Ito distribution surface
   assert.match(lifecycleRunnerSource, /packed Itô bridge executed a PATH collision/);
 });
 
-console.log(`\nPassed: ${passed}`);
-console.log(`Failed: ${failed}`);
-process.exit(failed > 0 ? 1 : 0);
+Promise.all(pendingTests).then(() => {
+  console.log(`\nPassed: ${passed}`);
+  console.log(`Failed: ${failed}`);
+  process.exitCode = failed > 0 ? 1 : 0;
+});
