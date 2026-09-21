@@ -1,6 +1,6 @@
 ---
 name: osint-investigation
-description: Public-source investigation methodology for competing hypotheses, conflicting records, historical claims, and visual verification. Use for OSINT cases that need deliberate falsification, source-lineage checks, and explicit evidence gaps rather than a simple factual lookup.
+description: Evidence-driven OSINT methodology for multi-step investigations and CTF challenges starting from sparse clues. Use for image/video geolocation, event and timeline reconstruction, public-account and entity verification, artifact interpretation, infrastructure research, or stalled investigations requiring competing hypotheses and deliberate falsification.
 license: CC-BY-SA-4.0
 metadata:
   origin: Adapted from shoyann/RZK-The-Hunter
@@ -8,17 +8,30 @@ metadata:
 
 # OSINT Investigation
 
-Choose the next action that could change the answer. Preserve original evidence,
+Turn sparse clues into testable explanations across images, videos, documents,
+public accounts, maps, archives, and technical records. Choose the next action
+that could change the answer. Preserve original evidence,
 test the leading explanation, and report uncertainty where verification ends.
 A plausible match is a lead until it survives comparison.
 
 ## When to Activate
 
-- Resolve conflicting claims about organizations, domains, or public records.
-- Verify public professional claims, organization accounts, or authorized exposure concerns.
-- Investigate media provenance, historical scenes, or public-scene locations.
-- Work through ambiguous artifacts, competing identities, or unproductive searches.
-- Plan scoped monitoring or review whether evidence supports an investigation's conclusion.
+- Solve multi-step OSINT CTF challenges or open-source investigations from a photo,
+  video clip, document, public profile, domain, or a few disconnected clues.
+- Determine a public scene's location, camera direction, or historical appearance:
+  distinguish the exact station, building, landmark, or street from lookalikes.
+- Reconstruct an event and its timeline: identify the gathering, city, and date
+  in footage, or verify a publicly documented professional participation claim.
+- Follow public-account and entity links across specialist platforms, official
+  sites, archives, and records; test aliases and namesakes before joining evidence.
+- Interpret supplied artifacts: partial text, metadata, QR/barcodes, layered
+  media, transport clues, or object/model identifiers; verify each extracted lead.
+- Trace media to its original context, reconcile conflicting reports, or recover
+  historical context from dated records and archived versions.
+- Investigate company/domain relationships, defensive threat indicators, or
+  authorized exposure; plan scoped monitoring from a verified baseline.
+- Unstick an investigation or a rejected CTF answer by testing alternatives,
+  revisiting neglected originals, and changing the evidence source or method.
 
 For a simple lookup, check the direct source without creating a full case.
 Scale records to the question; short cases can keep them inline. Use the host's
@@ -53,6 +66,9 @@ Choose sources by the relationship they can establish:
 
 | Investigation | Start with | Distinction to preserve |
 |---|---|---|
+| CTF/artifact chain | Exact prompt, supplied originals, embedded assets, metadata, stage dependencies | An accepted intermediate answer does not establish downstream claims |
+| Public scene/object | Original frames, map geometry, alternate views, official object/model references | Visual resemblance differs from an exact match and camera position |
+| Event/timeline | Programmes, organizer records, original footage, dated professional posts, archives | Recurring editions, attendance, publication, and capture dates are separate claims |
 | Company/organization | Jurisdiction, legal identifier, dated registries, filings, regulator records | Brand, subsidiary, parent, and namesake are different entities |
 | Domain/infrastructure | RDAP/WHOIS, DNS, certificates, routing data, archives, passive history | Shared infrastructure and privacy proxies do not establish ownership |
 | Account authenticity | Official-domain links, reciprocal links, platform records, archives | Handle/avatar similarity does not establish the same owner |
@@ -208,8 +224,12 @@ alternate reading, interpretation, and verification.
 | Media provenance | Credits, borders, earliest appearances, cropping/editing lineage |
 | Negative/relational clues | Required but absent features; impossible adjacency or ordering |
 
-Select informative families rather than requiring every row. Rank clues by
-readability, specificity, stability, independence, and falsifiability. Preserve
+For a high-confidence exact location, normally collect at least three clue
+families, with at least two independent families supporting the city or region,
+and perform at least two deliberate falsification attempts. An authoritative
+primary source resolving the exact scene and position may reduce the source
+requirement; it does not remove the requested geometry check.
+Rank clues by readability, specificity, stability, independence, and falsifiability. Preserve
 uncertain readings; weak observations must not become strong anchors.
 
 Search separate lanes where useful: text, exact-object/reverse image,
@@ -232,7 +252,8 @@ Before a definitive answer, check:
 - Exact entity, relationship, date, and requested precision are supported.
 - Material originals and signaled transformations are processed, or their impact
   is bounded so they cannot overturn the stated conclusion.
-- Support is direct; source dependence and credible alternatives were examined.
+- Support is direct and source dependence is understood; the strongest credible
+  alternative was tested enough to reject it or bound its impact.
 - A deliberate falsification attempt was performed and its outcome recorded.
 - Contradictions are resolved or explicitly limit the conclusion; required
   geometry and temporal checks are complete.
@@ -244,7 +265,8 @@ discovery leads, indirect, stale, ambiguous, or contradicted evidence. Likelihoo
 a likely candidate is not a verified exact answer while decisive evidence is unread.
 
 If challenged, record feedback and distinguish factual failure from format
-failure. Return to the last verified checkpoint, reopen affected evidence,
+failure. Assume a formatting problem only after the underlying claim passes
+the convergence checks above. Return to the last verified checkpoint, reopen affected evidence,
 change one assumption, and run the next discriminator. Unsupported feedback
 is not proof of a competing answer. Do not brute-force answer wording.
 
@@ -326,7 +348,10 @@ original inventory → geometric falsifier → independent object/viewpoint chec
 
 Adapted from [THE HUNTER by shoyann](https://github.com/shoyann/RZK-The-Hunter/tree/2ef02bcfd7f021b4b5287d0ff52f03aafa79e448)
 (source v1.4.0). Its investigation methods are consolidated here without its
-toolkit; private-person location exceptions are not carried over. Upstream credit
+toolkit. The upstream [field results](https://github.com/shoyann/RZK-The-Hunter/blob/2ef02bcfd7f021b4b5287d0ff52f03aafa79e448/README.md#field-results)
+document use in OSINT Industries and OSINT UK CTF runs; those results concern
+the original host model, Hunter, and tools, not a separate evaluation of this adaptation.
+Private-person location exceptions are not carried over. Upstream credit
 to [Awesome OSINT by jivoi and contributors](https://github.com/jivoi/awesome-osint)
 is retained. This skill and its adaptations remain **CC BY-SA 4.0**, not MIT;
 see [LICENSE.txt](LICENSE.txt). No upstream endorsement is implied.
