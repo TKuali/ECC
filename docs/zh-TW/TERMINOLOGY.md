@@ -16,7 +16,9 @@
 | Agent | Agent | 已確認 | 保留英文 |
 | Hook | Hook | 已確認 | 保留英文 |
 | Plugin | 外掛 | 已確認 | 台灣慣用 |
-| Token | Token | 已確認 | 保留英文 |
+| Token（LLM） | token | 已確認 | 模型的文字處理單位保留英文，例如「token 最佳化」 |
+| Token optimization | token 最佳化 | 已確認 | 不譯為「權杖最佳化」 |
+| Authentication token | 認證權杖 | 待確認 | 認證憑證語境可使用「權杖」，與 LLM token 區分 |
 | Skill | 技能 | 待確認 | |
 | Command | 指令 | 待確認 | |
 | Rule | 規則 | 待確認 | |
@@ -95,7 +97,8 @@
 4. **技術縮寫**：保留英文（API, CLI, IDE, MCP, TDD, E2E）
 5. **Git 術語**：大多保留英文（commit, PR, fork）
 6. **程式碼內容**：不翻譯（變數名、函式名、註解保持原樣，但說明性註解可翻譯）
-7. **首次出現**：縮寫首次出現時展開說明
+7. **token 語境**：LLM 用量、上下文與成本相關的 token 保留英文；API、JWT 等認證憑證另依語境處理，不全面取代程式碼中的 `Token` 或 `token`。
+8. **首次出現**：縮寫首次出現時展開說明
 
 ---
 
