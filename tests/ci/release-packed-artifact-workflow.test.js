@@ -19,13 +19,16 @@ const lifecycleRunnerSource = load('tests/ci/packed-artifact-lifecycle.js');
 
 let passed = 0;
 let failed = 0;
-const pendingTests = [];
+let pendingTests = [];
 
 function test(name, fn) {
   try {
     const result = fn();
     if (result && typeof result.then === 'function') {
-      pendingTests.push(result.then(() => pass(name), error => fail(name, error)));
+      pendingTests = [
+        ...pendingTests,
+        result.then(() => pass(name), error => fail(name, error)),
+      ];
     } else {
       pass(name);
     }
@@ -267,6 +270,13 @@ test('release gate verifier evaluates checks from every GitHub result page', asy
       return response({
         workflow_runs: [
           { id: 1, name: 'CI', head_sha: releaseSha, status: 'completed', conclusion: 'success' },
+          {
+            id: 3,
+            name: null,
+            head_sha: 'b'.repeat(40),
+            status: null,
+            conclusion: null,
+          },
         ],
       });
     }

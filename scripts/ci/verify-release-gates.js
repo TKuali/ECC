@@ -37,10 +37,13 @@ const tagSchema = {
     },
   },
 };
-const workflowRunsSchema = collectionSchema('workflow_runs');
+const workflowRunsSchema = collectionSchema('workflow_runs', true);
 const checkRunsSchema = collectionSchema('check_runs');
 
-function collectionSchema(property) {
+function collectionSchema(property, nullableWorkflowFields = false) {
+  const nameAndStatusSchema = nullableWorkflowFields
+    ? { anyOf: [{ type: 'string' }, { type: 'null' }] }
+    : { type: 'string' };
   return {
     type: 'object',
     required: [property],
@@ -52,9 +55,9 @@ function collectionSchema(property) {
           required: ['id', 'name', 'head_sha', 'status', 'conclusion'],
           properties: {
             id: { type: 'integer' },
-            name: { type: 'string' },
+            name: nameAndStatusSchema,
             head_sha: { type: 'string' },
-            status: { type: 'string' },
+            status: nameAndStatusSchema,
             conclusion: { anyOf: [{ type: 'string' }, { type: 'null' }] },
           },
         },
@@ -129,11 +132,11 @@ function nextPageUrl(linkHeader, repository) {
 }
 
 async function githubApiPages(path, itemsKey, inputs, fetchImpl, schema) {
-  const items = [];
+  let items = [];
   let next = path;
   while (next) {
     const page = await githubApiPage(next, inputs, fetchImpl, schema);
-    items.push(...page.payload[itemsKey]);
+    items = [...items, ...page.payload[itemsKey]];
     next = page.next;
   }
   return items;
