@@ -78,7 +78,7 @@ This document lists each slash command and the primary agent(s) or skills it inv
 
 | Skill | Purpose | Entry point |
 |-------|---------|-------------|
-| [osint-investigation](../skills/osint-investigation/SKILL.md) | Adaptive public-source investigation, catalog tool selection, visual verification, evidence tracking, and advisory trace audit | Invoke the skill directly; no dedicated command or agent is required. Optional helpers use Python 3.10+ with no third-party packages. |
+| [osint-investigation](../skills/osint-investigation/SKILL.md) | Public-source investigation methodology: competing hypotheses, falsification, visual verification, and evidence tracking | Invoke the self-contained skill directly using available host capabilities. |
 
 ## How to use this map
 

@@ -194,10 +194,9 @@ These lifecycle commands are also available through the `ecc` CLI.
 ## Docs & Research
 
 For adaptive public-source investigations, use the
-[`osint-investigation` skill](skills/osint-investigation/SKILL.md) directly. It
-includes tool selection, evidence/hypothesis tracking, visual verification,
-defensive intelligence, monitoring plans, and an advisory trajectory audit.
-There is no separate legacy command shim.
+[`osint-investigation` skill](skills/osint-investigation/SKILL.md) provides a
+self-contained methodology for competing hypotheses, deliberate falsification,
+visual verification, and evidence-based conclusions.
 
 | Command | What it does |
 |---------|-------------|

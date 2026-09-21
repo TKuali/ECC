@@ -860,7 +860,7 @@ ECC/
 |   |-- article-writing/            # Long-form writing in a supplied voice without generic AI tone
 |   |-- content-engine/             # Multi-platform social content and repurposing workflows
 |   |-- market-research/            # Source-attributed market, competitor, and investor research
-|   |-- osint-investigation/        # Adaptive OSINT, tool catalog, visual verification, evidence and trajectory audit
+|   |-- osint-investigation/        # OSINT methodology: competing hypotheses, falsification, visual and evidence verification
 |   |-- investor-materials/         # Pitch decks, one-pagers, memos, and financial models
 |   |-- investor-outreach/          # Personalized fundraising outreach and follow-up
 |   |-- continuous-learning/        # Legacy v1 Stop-hook pattern extraction
