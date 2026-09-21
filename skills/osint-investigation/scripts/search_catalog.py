@@ -3,11 +3,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
-from cataloglib import load_catalog, score_tool
-
-RISK_ORDER = {'low': 0, 'guarded': 1, 'restricted': 2}
+from cataloglib import RISK_ORDER, load_catalog, score_tool
 
 
 def clip(text: str, width: int = 88) -> str:
@@ -16,7 +15,7 @@ def clip(text: str, width: int = 88) -> str:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description='Search the structured Awesome OSINT catalog.')
+    ap = argparse.ArgumentParser(description='Search local OSINT discovery tools without network access.')
     ap.add_argument('query')
     ap.add_argument('--catalog', default=str(Path(__file__).resolve().parents[1] / 'references' / 'catalog.json'))
     ap.add_argument('--top', type=int, default=10)
@@ -25,9 +24,15 @@ def main() -> int:
     ap.add_argument('--include-restricted', action='store_true', help='Equivalent to --max-risk restricted; use only for authorized defensive triage')
     ap.add_argument('--json', action='store_true')
     args = ap.parse_args()
+    if args.top < 1:
+        ap.error('--top must be positive')
 
     max_risk = 'restricted' if args.include_restricted else args.max_risk
-    catalog = load_catalog(args.catalog)
+    try:
+        catalog = load_catalog(args.catalog)
+    except ValueError as exc:
+        print(f'Error: {exc}', file=sys.stderr)
+        return 2
     rows = []
     for tool in catalog['tools']:
         if RISK_ORDER[tool['risk_tier']] > RISK_ORDER[max_risk]: continue

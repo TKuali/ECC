@@ -39,7 +39,13 @@ def add(path: Path, args) -> None:
         'contradictions': args.contradictions, 'analyst_notes': args.notes,
         'file_sha256': sha256_file(args.file) if args.file else '',
     })
-    with path.open('a', encoding='utf-8', newline='') as f: csv.DictWriter(f, fieldnames=FIELDS).writerow(row)
+    with path.open('rb') as existing:
+        existing.seek(-1, 2)
+        needs_separator = existing.read(1) not in (b'\r', b'\n')
+    with path.open('a', encoding='utf-8', newline='') as f:
+        if needs_separator:
+            f.write('\r\n')
+        csv.DictWriter(f, fieldnames=FIELDS).writerow(row)
 
 
 def summary(path: Path) -> None:

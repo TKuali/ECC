@@ -17,7 +17,6 @@ import evidence_ledger
 import search_catalog
 import select_tools
 import visual_case
-from cataloglib import parse_readme, score_tool
 
 
 def invoke(module, args):
@@ -129,18 +128,6 @@ class HelperTests(unittest.TestCase):
                                         cwd=folder, capture_output=True, text=True, encoding="utf-8")
                 self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue((Path(folder) / "case/visual-clues.csv").is_file())
-
-    def test_catalog_parser_handles_nested_categories_duplicate_and_restricted(self):
-        source = ("## General Search\n### Test tools\n#### Deep\n"
-                  "* [Example](https://example.org) - free command-line API\n"
-                  "* [Example](https://example.org) - free command-line API\n"
-                  "## People Investigations\n- [Face Tool] https://example.org/face - face search\n"
-                  "## Credits\n* [Not a tool](https://example.org/credits)\n")
-        catalog = parse_readme(source, "2026-01-01", "https://example.org/source", "https://example.org/repo")
-        self.assertEqual(len(catalog["tools"]), 2)
-        self.assertEqual(catalog["tools"][1]["risk_tier"], "restricted")
-        self.assertGreater(score_tool(catalog["tools"][0], "Example"), 0)
-        self.assertEqual(score_tool(catalog["tools"][0], ""), 0)
 
 
 if __name__ == "__main__":

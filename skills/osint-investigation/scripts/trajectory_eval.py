@@ -109,6 +109,7 @@ def audit(trace, window=3):
     query_history = {}
     leading = {}
     contradictions = {}
+    responded_contradictions = set()
     leading_latencies = []
     response_latencies = []
     unsupported = 0
@@ -150,12 +151,21 @@ def audit(trace, window=3):
             if start is not None and status == "contradicted":
                 leading_latencies.append(index - start)
             if status in {"open", "contradicted"} and hypothesis in contradictions:
-                response_latencies.append(index - contradictions.pop(hypothesis))
-        # Verification does not silently clear a recorded unresolved contradiction.
+                if hypothesis not in responded_contradictions:
+                    response_latencies.append(index - contradictions[hypothesis])
+                    responded_contradictions.add(hypothesis)
+                # Reopening responds to a conflict; only abandoning the candidate clears it.
+                if status == "contradicted":
+                    contradictions.pop(hypothesis)
+                    responded_contradictions.discard(hypothesis)
+        # Reopening or verification does not silently resolve a recorded contradiction.
         for resolved in row.get("resolves", []):
             if resolved not in contradictions:
                 raise ValueError(f"{row['id']} resolves an unknown or already handled contradiction")
-            response_latencies.append(index - contradictions.pop(resolved))
+            if resolved not in responded_contradictions:
+                response_latencies.append(index - contradictions[resolved])
+            contradictions.pop(resolved)
+            responded_contradictions.discard(resolved)
 
         if row["kind"] == "finalize":
             needed = BASE_CHECKS | set(trace["requirements"])

@@ -1,57 +1,38 @@
 # Attribution and License
 
-The contents of this directory are an adaptation of **THE HUNTER**
-(`awesome-osint-operator`, version 1.4.0) by shoyann:
+This skill adapts **THE HUNTER** (`awesome-osint-operator`, source version 1.4.0)
+by shoyann, preserving its adaptive investigation, visual verification, evidence
+handling, and investigation-trace audit methods.
 
-- Repository: [shoyann/RZK-The-Hunter](https://github.com/shoyann/RZK-The-Hunter)
-- Adapted revision: [2ef02bcfd7f021b4b5287d0ff52f03aafa79e448](https://github.com/shoyann/RZK-The-Hunter/tree/2ef02bcfd7f021b4b5287d0ff52f03aafa79e448)
-- Source files: `SKILL.md`, `references/`, `scripts/`, `templates/`,
-  `workflows/`, `examples/`, and `tests/`.
-- Upstream license: Creative Commons Attribution-ShareAlike 4.0 International
-  ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)).
+- Source: [shoyann/RZK-The-Hunter](https://github.com/shoyann/RZK-The-Hunter)
+- Pinned revision: [2ef02bcfd7f021b4b5287d0ff52f03aafa79e448](https://github.com/shoyann/RZK-The-Hunter/tree/2ef02bcfd7f021b4b5287d0ff52f03aafa79e448)
+- Adapted material: upstream instructions, references, workflows, templates,
+  examples, Python helpers, tests, and catalog entries.
+- License: [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/).
 
-## Preserved Upstream Attribution
+THE HUNTER in turn credits **Awesome OSINT**, by jivoi and contributors,
+also under CC BY-SA 4.0: [jivoi/awesome-osint](https://github.com/jivoi/awesome-osint).
+The selected entries in `references/catalog.json` derive from that catalog via
+the pinned Hunter revision. Linked tools retain their own licenses and terms.
+Entries are discovery leads, not endorsements or claims of current availability;
+verify access, terms, privacy fit, and relevance before use.
 
-THE HUNTER credits **Awesome OSINT** by jivoi and contributors:
+## ECC Adaptation
 
-- Source: [jivoi/awesome-osint](https://github.com/jivoi/awesome-osint)
-- License: CC BY-SA 4.0.
-- Snapshot retrieved: 2026-07-13T08:03:02+00:00
-- Snapshot SHA-256: `6f5f9d78299a9c93200de96d046c2c1520bb7d22002445fb70c162ac2c9c9b13`
-
-The structured catalog and original source snapshot are included under
-`references/`. Catalog entries are discovery leads; availability, access terms,
-and factual claims must be independently verified. Linked tools retain their
-own licenses and terms. Inclusion is not endorsement.
-
-## Changes for ECC
-
-- Renamed the ECC entrypoint to `osint-investigation`; preserved the complete
-  searchable catalog, eight optional standard-library Python helpers, adaptive
-  strategy, evidence/hypothesis state, visual-clue and geometric verification,
-  workflow selection, monitoring planning, trace auditing, templates, examples,
-  and upstream tests.
-- Added ECC activation and related-skill routing, explicit host-tool and Python
-  requirements, installed-path-safe commands, and untrusted-source handling.
+- Renamed the entrypoint to `osint-investigation` and consolidated overlapping
+  instructions into references loaded only when needed.
+- Included a small, selected tool index. The optional `--catalog` input accepts
+  a compatible local catalog; the full directory, raw source snapshot, refresh
+  machinery, and standalone release metadata are not bundled.
+- Kept offline standard-library helpers for search, workflow selection, evidence
+  logging, visual candidate comparison, and advisory trajectory checks. Added
+  input validation, regression tests, and installed-path portability checks.
 - Replaced the upstream private-person location exception with official-notice
-  authenticity/status verification. Public-interest professional research,
-  account provenance, authorized exposure checks, and public-scene verification
-  remain available; private-person tracking and invasive dossiers do not.
-- Adapted package verification to ECC packaging rather than standalone release
-  branding. Added helper regression tests and portability/input validation fixes.
-- Retained upstream version 1.4.0 as the source baseline; this is not a claim of
-  an independently benchmarked ECC release or improved model solve rate.
+  authenticity/status verification. Public professional research, account
+  provenance, authorized exposure checks, and public-scene verification remain.
+- Uses ECC's existing installation, registration, and test mechanisms. The source
+  version identifies provenance, not a separate ECC release or a model benchmark.
 
 This directory, including these adaptations, remains **CC BY-SA 4.0**, not MIT.
-The full license is in [LICENSE.txt](LICENSE.txt). No endorsement by upstream
-authors is implied. This notice does not change the license of other ECC files.
-
-## Snapshot Normalization
-
-ECC strips invisible controls, decorative emoji, and trailing whitespace from
-the included upstream snapshot, then regenerates the JSON and CSV catalogs. All 1,349 tool IDs, URLs,
-categories, and risk tiers are preserved. The snapshot hash above identifies
-the normalized bytes. The original upstream bytes had SHA-256
-`5071f31d2e0fda75368b9021091b77d74a6824895ca953b5bc1cc109401a474b`.
-The retrieval date is inherited from the pinned upstream snapshot, not a claim
-that every linked service was freshly checked for this contribution.
+The full license is [LICENSE.txt](LICENSE.txt). This notice does not change the
+license of other ECC files. No endorsement by upstream authors is implied.

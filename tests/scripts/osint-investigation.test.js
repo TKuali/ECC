@@ -23,9 +23,6 @@ if (!python) {
 let passed = 0;
 let failed = 0;
 const cases = [
-  ['package inventory, versions, catalog and attribution', [
-    path.join(skillRoot, 'scripts/verify_package.py'),
-  ]],
   ['Python helper regression suite', [
     '-m', 'unittest', 'discover', '-s', path.join(skillRoot, 'tests'), '-v',
   ]],

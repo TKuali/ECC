@@ -1,43 +1,114 @@
+"""Offline tests for curated discovery and optional compatible catalogs."""
+import contextlib
+import copy
+import io
+import json
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'scripts'))
+sys.path.insert(0, str(ROOT / "scripts"))
 from cataloglib import load_catalog, score_tool
+import search_catalog
+import select_tools
+
+
+def invoke(module, args):
+    out, err = io.StringIO(), io.StringIO()
+    with patch.object(sys, "argv", [module.__name__, *map(str, args)]):
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            status = module.main()
+    return status, out.getvalue(), err.getvalue()
 
 
 class CatalogTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.catalog = load_catalog(ROOT / 'references/catalog.json')
+        cls.catalog = load_catalog(ROOT / "references/catalog.json")
 
-    def test_catalog_size(self):
-        self.assertGreater(self.catalog['stats']['tools'], 1000)
+    def test_curated_catalog_has_unique_working_records(self):
+        tools = self.catalog["tools"]
+        self.assertTrue(20 <= len(tools) <= 35)
+        self.assertEqual(len(tools), len({tool["id"] for tool in tools}))
+        self.assertTrue(all(tool["description"] and tool["domain"] for tool in tools))
 
-    def test_unique_ids(self):
-        ids = [x['id'] for x in self.catalog['tools']]
-        self.assertEqual(len(ids), len(set(ids)))
+    def test_every_workflow_stage_has_a_candidate(self):
+        self.assertEqual(set(select_tools.PROFILES), {
+            "domain", "company", "username", "people", "email", "image", "news", "threat", "monitoring"})
+        for profile in select_tools.PROFILES:
+            with self.subTest(profile=profile):
+                status, out, err = invoke(select_tools, ["--workflow", profile, "--json", "--per-stage", "1"])
+                self.assertEqual(status, 0, err)
+                self.assertTrue(all(stage["tools"] for stage in json.loads(out)), out)
 
-    def test_no_toc_items(self):
-        self.assertFalse(any(x['category'] in {'\U0001f4d6 Table of Contents', 'Table of Contents'} for x in self.catalog['tools']))
+    def test_english_and_chinese_discovery(self):
+        for query in ("domain DNS", "域名", "公司", "图片", "威胁", "监控"):
+            status, out, err = invoke(search_catalog, [query, "--json", "--top", "3"])
+            self.assertEqual(status, 0, err)
+            self.assertTrue(json.loads(out), query)
+            self.assertLessEqual(len(json.loads(out)), 3)
+        self.assertEqual(score_tool(self.catalog["tools"][0], ""), 0)
+        self.assertEqual(invoke(search_catalog, ["qzxvnonce98765"])[0], 1)
+        self.assertEqual(json.loads(invoke(search_catalog, ["qzxvnonce98765", "--json"])[1]), [])
 
-    def test_no_space_in_urls(self):
-        self.assertFalse(any(' ' in x['url'] for x in self.catalog['tools']))
+    def test_external_full_shape_risk_and_category_filters(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "catalog.json"
+            rows = []
+            for risk in ("low", "guarded", "restricted"):
+                rows.append(dict(id=risk, name="Example " + risk, url="https://example.org/" + risk,
+                                 category="General Search", description="Example source", tags=["example"], risk_tier=risk))
+            path.write_text(json.dumps({"schema_version": "1.0.0", "tools": rows, "source": {"name": "fixture"}}))
+            for flags, expected in (([], 2), (["--max-risk", "low"], 1), (["--include-restricted"], 3),
+                                    (["--category", "No Such Category"], 0)):
+                status, out, err = invoke(search_catalog, ["example", "--json", "--catalog", path, *flags])
+                self.assertEqual(status, 0, err)
+                self.assertEqual(len(json.loads(out)), expected)
 
-    def test_chinese_search(self):
-        ranked = sorted(((score_tool(x, '域名 DNS 证书历史'), x) for x in self.catalog['tools']), reverse=True, key=lambda v: v[0])
-        top_categories = {x['category'] for score, x in ranked[:20] if score > 0}
-        self.assertTrue({'Domain and IP Research', 'DNS', 'Web History and Website Capture'} & top_categories)
+    def test_malformed_external_catalog_is_rejected(self):
+        valid = {"tools": [copy.deepcopy(self.catalog["tools"][0])]}
+        bad_values = [None, [], {}, {"tools": []}, {"tools": [None]}, {"tools": "wrong"}]
+        for field, value in (("id", ""), ("name", 7), ("url", "file:///private"),
+                             ("url", "https://example.org/ bad"), ("risk_tier", "unknown"),
+                             ("tags", "wrong"), ("description", []), ("subcategory", 5)):
+            bad = copy.deepcopy(valid)
+            bad["tools"][0][field] = value
+            bad_values.append(bad)
+        duplicate = copy.deepcopy(valid)
+        duplicate["tools"].append(copy.deepcopy(duplicate["tools"][0]))
+        bad_values.append(duplicate)
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "catalog.json"
+            for bad in bad_values:
+                with self.subTest(catalog=bad):
+                    path.write_text(json.dumps(bad), encoding="utf-8")
+                    with self.assertRaises(ValueError):
+                        load_catalog(path)
+            path.write_text("not json", encoding="utf-8")
+            for module, args in ((search_catalog, ["domain"]), (select_tools, ["--workflow", "domain"])):
+                status, out, err = invoke(module, [*args, "--catalog", path])
+                self.assertEqual(status, 2)
+                self.assertFalse(out)
+                self.assertIn("catalog", err.lower())
+                self.assertNotIn("Traceback", err)
+            path.unlink()
+            with self.assertRaises(ValueError):
+                load_catalog(path)
 
-    def test_restricted_present(self):
-        self.assertTrue(any(x['risk_tier'] == 'restricted' for x in self.catalog['tools']))
+    def test_cli_works_from_unrelated_directory_and_rejects_nonpositive_limits(self):
+        with tempfile.TemporaryDirectory() as folder:
+            for script, args, invalid in (("search_catalog.py", ["域名", "--json"], ["--top", "0"]),
+                                          ("select_tools.py", ["--workflow", "image", "--json"], ["--per-stage", "-1"])):
+                command = [sys.executable, str(ROOT / "scripts" / script), *args]
+                result = subprocess.run(command, cwd=folder, capture_output=True, text=True, encoding="utf-8")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertTrue(json.loads(result.stdout))
+                self.assertEqual(subprocess.run(command + invalid, cwd=folder, capture_output=True).returncode, 2)
 
-    def test_biometric_search_is_restricted(self):
-        risky = [x for x in self.catalog['tools'] if x['risk_flags']['biometric']]
-        self.assertTrue(risky)
-        self.assertTrue(any(x['risk_tier'] == 'restricted' for x in risky))
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

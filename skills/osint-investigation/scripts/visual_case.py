@@ -22,7 +22,13 @@ FILES = {
 
 
 def init_case(case_dir: Path, force: bool = False) -> int:
+    if case_dir.is_symlink():
+        raise ValueError(f"Refusing symbolic link case directory: {case_dir}")
     case_dir.mkdir(parents=True, exist_ok=True)
+    # A linked output can redirect even --force outside the selected case directory.
+    for output_name in (*FILES, "workflow-checklist.md"):
+        if (case_dir / output_name).is_symlink():
+            raise ValueError(f"Refusing symbolic link output: {case_dir / output_name}")
     created = []
     skipped = []
     for output_name, template in FILES.items():
@@ -115,7 +121,12 @@ def score_candidates(matrix_path: Path) -> int:
             if score < -2 or score > 2:
                 raise ValueError(f"row {row_number}: match score must be between -2 and +2")
             weighted = weight * score
-            totals[candidate_id] += weighted
+            if not math.isfinite(weighted):
+                raise ValueError(f"row {row_number}: weighted score must be finite")
+            total = totals[candidate_id] + weighted
+            if not math.isfinite(total):
+                raise ValueError(f"row {row_number}: candidate total must be finite")
+            totals[candidate_id] = total
             names[candidate_id] = candidate_name
             if score > 0:
                 positive[candidate_id] += 1

@@ -104,6 +104,37 @@ class TrajectoryTests(unittest.TestCase):
             audit(trace(action(1, resolves=["H9"], progress=["confidence_changed"],
                                evidence_refs=["fixture:unrelated-record"])))
 
+    def test_reopening_does_not_erase_unresolved_contradiction(self):
+        conflict = action(1, hypothesis="H1", contradicts=["H1"],
+                          progress=["contradiction"], evidence_refs=["fixture:conflict"])
+        reopened = action(2, hypothesis="H1", hypothesis_status="open")
+        verified = action(3, hypothesis="H1", hypothesis_status="verified")
+        result = audit(trace(conflict, reopened, verified, final(4)))
+        self.assertEqual(result["metrics"]["unresolved_contradictions"], ["H1"])
+        self.assertEqual(result["metrics"]["unsupported_finalizations"], 1)
+        self.assertEqual(result["metrics"]["contradiction_response_actions"], [1])
+
+    def test_reopened_contradiction_can_be_explicitly_resolved(self):
+        conflict = action(1, hypothesis="H1", contradicts=["H1"],
+                          progress=["contradiction"], evidence_refs=["fixture:conflict"])
+        reopened = action(2, hypothesis="H1", hypothesis_status="open")
+        resolution = action(3, hypothesis="H1", hypothesis_status="verified",
+                            resolves=["H1"], progress=["confidence_changed"],
+                            evidence_refs=["fixture:correction"])
+        result = audit(trace(conflict, reopened, resolution, final(4)))
+        self.assertEqual(result["metrics"]["unresolved_contradictions"], [])
+        self.assertEqual(result["metrics"]["unsupported_finalizations"], 0)
+        self.assertEqual(result["metrics"]["contradiction_response_actions"], [1])
+
+    def test_abandoned_candidate_clears_contradiction_after_reopening(self):
+        conflict = action(1, hypothesis="H1", contradicts=["H1"],
+                          progress=["contradiction"], evidence_refs=["fixture:conflict"])
+        reopened = action(2, hypothesis="H1", hypothesis_status="open")
+        abandoned = action(3, hypothesis="H1", hypothesis_status="contradicted")
+        result = audit(trace(conflict, reopened, abandoned))
+        self.assertEqual(result["metrics"]["unresolved_contradictions"], [])
+        self.assertEqual(result["metrics"]["contradiction_response_actions"], [1])
+
     def test_historical_carrier_and_geometry_gates(self):
         for requirement in ("temporal", "carrier_complete", "geometry"):
             with self.subTest(requirement=requirement):

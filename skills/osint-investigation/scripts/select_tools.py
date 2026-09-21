@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
-from cataloglib import load_catalog, score_tool
+from cataloglib import RISK_ORDER, load_catalog, score_tool
 
 # Each stage is: title, search query, allowed categories, preferred catalog names.
 # Preferred names are anchors, not endorsements. They still require current verification.
@@ -94,20 +95,23 @@ PROFILES = {
     ],
 }
 
-RISK_ORDER = {'low': 0, 'guarded': 1, 'restricted': 2}
-
-
 def main() -> int:
     ap = argparse.ArgumentParser(
         description='Select implementation tools after choosing an evidence-changing action.',
-        epilog='Workflow bundles are suggestions, not action order. See references/adaptive-investigation-strategy.md.')
+        epilog='Workflow bundles are suggestions, not action order. See references/investigation-method.md.')
     ap.add_argument('--workflow', required=True, choices=sorted(PROFILES))
     ap.add_argument('--per-stage', type=int, default=2)
     ap.add_argument('--catalog', default=str(Path(__file__).resolve().parents[1] / 'references' / 'catalog.json'))
     ap.add_argument('--max-risk', choices=['low', 'guarded'], default='guarded')
     ap.add_argument('--json', action='store_true')
     args = ap.parse_args()
-    catalog = load_catalog(args.catalog)
+    if args.per_stage < 1:
+        ap.error('--per-stage must be positive')
+    try:
+        catalog = load_catalog(args.catalog)
+    except ValueError as exc:
+        print(f'Error: {exc}', file=sys.stderr)
+        return 2
     output = []
     used_domains = set()
     for stage, query, categories, preferred in PROFILES[args.workflow]:
