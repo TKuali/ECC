@@ -193,10 +193,10 @@ These lifecycle commands are also available through the `ecc` CLI.
 
 ## Docs & Research
 
-For adaptive public-source investigations, use the
-[`osint-investigation` skill](skills/osint-investigation/SKILL.md) provides a
-self-contained methodology for competing hypotheses, deliberate falsification,
-visual verification, and evidence-based conclusions.
+For public-source investigations starting from sparse clues, use the
+[`osint-investigation` skill](skills/osint-investigation/SKILL.md) to extract
+overlooked leads, connect fragmented evidence, and test competing explanations
+through deliberate falsification and visual verification.
 
 | Command | What it does |
 |---------|-------------|

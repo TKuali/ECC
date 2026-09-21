@@ -1,6 +1,6 @@
 ---
 name: osint-investigation
-description: Evidence-driven OSINT methodology for multi-step investigations and CTF challenges starting from sparse clues. Use for image/video geolocation, event and timeline reconstruction, public-account and entity verification, artifact interpretation, infrastructure research, or stalled investigations requiring competing hypotheses and deliberate falsification.
+description: Sparse-clue OSINT investigation methodology for extracting overlooked leads, connecting fragmented evidence, and testing explanations across sources. Use for multi-step CTF challenges, image/video geolocation, event reconstruction, public-account and entity verification, artifact interpretation, infrastructure research, or stalled investigations.
 license: CC-BY-SA-4.0
 metadata:
   origin: Adapted from shoyann/RZK-The-Hunter
@@ -8,16 +8,20 @@ metadata:
 
 # OSINT Investigation
 
-Turn sparse clues into testable explanations across images, videos, documents,
-public accounts, maps, archives, and technical records. Choose the next action
-that could change the answer. Preserve original evidence,
-test the leading explanation, and report uncertainty where verification ends.
-A plausible match is a lead until it survives comparison.
+Start with what little is available: a partial sign, a few video frames, a sparse
+public profile, or disconnected records. Extract overlooked details, turn them
+into testable leads, and follow them across images, documents, specialist platforms,
+maps, archives, and technical records. Choose the next action that could change
+the answer. Preserve originals, challenge the leading explanation, and report
+uncertainty where verification ends. A plausible match is a lead until it survives
+comparison; sparse input does not justify invented detail.
 
 ## When to Activate
 
 - Solve multi-step OSINT CTF challenges or open-source investigations from a photo,
   video clip, document, public profile, domain, or a few disconnected clues.
+- Extract useful leads when an artifact looks uninformative or ordinary searches
+  return nothing: partial text, background details, identifiers, and source context.
 - Determine a public scene's location, camera direction, or historical appearance:
   distinguish the exact station, building, landmark, or street from lookalikes.
 - Reconstruct an event and its timeline: identify the gathering, city, and date
@@ -104,6 +108,13 @@ alternate views, archives, and explicit source hints before broad searching.
 Do not abandon an unread original because a search result seems convincing.
 Keep credible alternatives, including unresolved/other; do not invent candidates
 to fill a table.
+
+With sparse input, separate what is visible from what it might mean. For each
+promising fragment, identify the source that could explain it and the observation
+that would reject that reading. A partial sign may lead to an organizer's programme;
+a model identifier to a manufacturer record. Follow the relationship each source
+can establish, verifying the connecting clue before treating the next record as
+part of the same case. An empty profile or search result does not exhaust an artifact.
 
 Each inference built on an untested anchor creates **hypothesis debt**. Test the
 anchor before expanding dependent details; repeating a claim does not repay it.
