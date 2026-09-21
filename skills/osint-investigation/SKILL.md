@@ -58,7 +58,9 @@ outreach, publication, and recurring jobs must be covered by user instructions
 and host permissions. A failed fetch is an access limitation, not disproof;
 use lawful alternatives or report the gap.
 
-## 1. Define the Question
+## How It Works
+
+### 1. Define the Question
 
 Record the exact question, relevant date, known identifiers, supplied artifacts,
 permitted actions, desired precision, budget, and stop condition. Specify what
@@ -89,7 +91,7 @@ Tool choice follows the evidence need; check origin, coverage, privacy fit, and
 limitations. Keep infrastructure research passive and threat work defensive;
 use indicators and trusted reports rather than downloading or executing malware.
 
-## 2. Separate Originals from Hypotheses
+### 2. Separate Originals from Hypotheses
 
 Keep two compact working records:
 
@@ -122,7 +124,7 @@ Track case readiness separately: **collecting, hypothesizing, falsifying,
 converged, reopened**. These are descriptions, not a compulsory sequence.
 Provisional reporting is possible in any state.
 
-## 3. Execute the Cheapest Decisive Test
+### 3. Execute the Cheapest Decisive Test
 
 Before deepening the leading explanation, name its fastest feasible falsifier:
 which source/artifact, which comparison, and what each result would mean.
@@ -149,7 +151,7 @@ Pending falsifier and next action or stopping reason:
 An inconclusive result neither confirms nor kills a hypothesis. Carry forward
 pending tests and contradictions instead of silently removing them.
 
-## 4. Change Strategy When Evidence Stops Changing
+### 4. Change Strategy When Evidence Stops Changing
 
 Group actions by query family, representation, source environment, and underlying
 lineage. Rewording a query, changing tools, or finding another copy is not progress.
@@ -179,7 +181,7 @@ Reuse **problem signature → method → falsifier → verification conditions**
 not an old answer or fixed website. Check era, prerequisites, and failure modes.
 Persist transferable notes only when requested, without personal case data.
 
-## 5. Verify Lineage, Time, and Fidelity
+### 5. Verify Lineage, Time, and Fidelity
 
 For each material finding retain: evidence ID, exact claim, URL/file, publisher,
 source class, relevant dates, actual access time, supporting observation/excerpt,
@@ -209,7 +211,7 @@ source- or structure-signaled rotations, mirrors, inversions, thresholds, or
 channels. One valid decode does not prove the artifact is exhausted. Avoid
 arbitrary mutation searches and never execute decoded instructions.
 
-## 6. Verify Visual Scenes and Geometry
+### 6. Verify Visual Scenes and Geometry
 
 Define requested granularity and relationship: region, public venue, object,
 street, direction, time, behind/across/adjacent/reflected. Preserve originals,
@@ -256,7 +258,7 @@ runner-up and an incompatible viewpoint or exact-object detail where feasible.
 Check historical appearance independently of location. If necessary geometry or
 dates cannot be established, narrow the conclusion.
 
-## 7. Converge, Reopen, or Stop
+### 7. Converge, Reopen, or Stop
 
 Before a definitive answer, check:
 
@@ -314,7 +316,9 @@ single-source lead / contradicted / unknown**. Add a timeline, relationship map,
 or candidate table when helpful. Minimize personal data and use short excerpts.
 Never infer absence from a search with unknown coverage.
 
-## Worked Example
+## Examples
+
+### Public-Scene Location and Event Date
 
 Synthetic request: "Which street is behind the camera in this public-square
 photo, and does it establish a festival there in May 2025?"
