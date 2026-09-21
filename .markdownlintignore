@@ -1,0 +1,3 @@
+# Vendored catalog source data retains upstream formatting; its normalized bytes
+# are checked by the OSINT package verifier and the Unicode safety scanner.
+skills/osint-investigation/references/source/awesome-osint-README.md

@@ -193,6 +193,12 @@ These lifecycle commands are also available through the `ecc` CLI.
 
 ## Docs & Research
 
+For adaptive public-source investigations, use the
+[`osint-investigation` skill](skills/osint-investigation/SKILL.md) directly. It
+includes tool selection, evidence/hypothesis tracking, visual verification,
+defensive intelligence, monitoring plans, and an advisory trajectory audit.
+There is no separate legacy command shim.
+
 | Command | What it does |
 |---------|-------------|
 | `/ecc-guide` | Navigate ECC's current agents, skills, commands, hooks, install profiles, and docs from the live repository surface |
